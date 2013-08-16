@@ -1,0 +1,138 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"> //</script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js">//</script>
+    <link href="select2/select2.css" rel="stylesheet"/>
+    <script src="select2/select2.js"></script>
+    <script src="test_embed_sc.js"></script>
+    <!-- Latest compiled and minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
+ 
+<!-- Latest compiled and minified JavaScript -->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/js/bootstrap.min.js"></script>
+ 
+<!-- Latest Glyphicons minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css" rel="stylesheet">
+<style>
+  .fully-expanded{
+    width: 100%;
+    display: block;
+  }
+</style>
+  </head>
+  <body>
+    <div class="container">
+    <nav class="navbar" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Embed Scene Demo</a>
+    </div>
+    </nav>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="row">
+          <div class="col-md-12">
+            <iframe src="http://10.211.55.4/embed_links/33?validationHash=wFX7GOs3y9ZJ541QzTbUjQ&width=500&height=330&fontcolor=&asset_name=true&owner_name=true&lagoa_logo=true" id="lagoaframe" width="100%" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12" style="padding-top:20px;">
+            <select id='js-tools_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-md-4">
+            <label>Scene Asset:</label>
+          </div>
+          <div class="col-md-8">
+            <select id='js-guid_select_menu' class="populate fully-expanded"></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Material:</label>
+          </div>
+          <div class="col-md-8">
+            <select id='js-material_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Project:</label>
+          </div>
+          <div class="col-md-8">
+            <select id='js-projects_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Uploaded Asset:</label>
+          </div>
+          <div class="col-md-8">
+            <select id='js-assets_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Color (r, g, b)</label>
+          </div>
+          <div class="col-md-3">
+            <input id="rgb-x-value" type="text" />
+            <input id="rgb-y-value" type="text" />
+            <input id="rgb-z-value" type="text" />
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Position (x, y, z)</label>
+          </div>
+          <div class="col-md-3">
+            <input id="position-x-value" type="text" />
+            <input id="position-y-value" type="text" />
+            <input id="position-z-value" type="text" />
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Scale (x, y, z)</label>
+          </div>
+          <div class="col-md-3">
+            <input id="scale-x-value" type="text" />
+            <input id="scale-y-value" type="text" />
+            <input id="scale-z-value" type="text" />
+          </div>
+        </div>
+        <br>
+        <div class="row">
+          <div class="col-md-4">
+            <label>Rotation (x, y, z)</label>
+          </div>
+          <div class="col-md-3">
+            <input id="rotation-x-value" type="text" />
+            <input id="rotation-y-value" type="text" />
+            <input id="rotation-z-value" type="text" />
+          </div>
+        </div>
+        <input id="update" value= "update" type="submit" />
+        </p>
+      </div>
+    </div>
+  </div>
+    
+
+</body>
+
+
+</html>
