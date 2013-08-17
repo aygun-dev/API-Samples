@@ -40,7 +40,7 @@ var objGUID = "";
 var materialName = "";
 var lagoaUrl="";
 var meshCount = 0;
-var user_id = 2;
+var user_id = 11766;
 var project_id;
 var asset_guid;
 var objData = {};
