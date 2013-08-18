@@ -40,9 +40,9 @@ var objGUID = "";
 var materialName = "";
 var lagoaUrl="";
 var meshCount = 0;
-var user_id = 11766;
-var project_id;
-var asset_guid;
+var userID;
+var projectID;
+var assetGUID;
 var objData = {};
 var sceneTimer;
 
@@ -74,7 +74,7 @@ window.addEventListener("message", function(e){
 });
 
 function onLoad() {
-  getLagoaUrl();
+  fetchAndInitUserData();
   updateGuidMenu();
   updateMaterialMenu();
   updateToolsMenu();
@@ -181,15 +181,20 @@ function updateAssetMenu(in_projectID){
 };
 
 
-// Get the url ( host + url) of our app. For Http fetch.
-function getLagoaUrl(){
+/**
+ * Get the app URL in order to fetch project and asset data.
+ * Then, query the ID of the current logged user and use it
+ * to find their associated projects. With the projectIDs, the
+ * page can load and use any asset uploaded to a particular project. 
+ */
+function fetchAndInitUserData(){
   var cb = function(in_response){
     lagoaUrl = in_response.data;
     var  userCB = function(data){
       if(data.id){
-        user_id = data.id;
+        userID = data.id;
       }
-      updateProjectsMenu(user_id);
+      updateProjectsMenu(userID);
     }
     $.get(lagoaUrl + '/users/'+'current_user.json',userCB, 'jsonp');
   };
@@ -244,11 +249,10 @@ function updatMaterialColor(){
  * Select the chosen project and update our asset list.
  */
 function pickProjectID(){
-  project_id = -1;
   $("#js-projects_select_menu option:selected").each(function (){
-    project_id = $(this).val();
+    projectID = $(this).val();
   });
-  updateAssetMenu(project_id);
+  updateAssetMenu(projectID);
 };
 
 /** 
@@ -256,13 +260,12 @@ function pickProjectID(){
  * Select the chosen asset.
  */
 function pickAsset(){
-  asset_guid = -1;
-  var asset_name  ="";
+  var assetName  ="";
   $("#js-assets_select_menu option:selected").each(function (){
-    asset_guid = $(this).val();
-    asset_name = $(this).text();
+    assetGUID = $(this).val();
+    assetName = $(this).text();
   });
-  loadAssets({name: asset_name, version_guid: asset_guid});
+  loadAssets({name: assetName, version_guid: assetGUID});
 };
 
 
@@ -382,7 +385,7 @@ $(function() {
 
   $('#js-guid_select_menu').change(pickObjGUID);
   $('#js-material_select_menu').change(pickMaterial);
-  $('#js-projects_select_menu').change(pickProjectID).change();
+  $('#js-projects_select_menu').change(pickProjectID);
   $('#js-tools_select_menu').change(pickTool);
   $('#js-assets_select_menu').change(pickAsset);
   $('#update').click(updateObject);
