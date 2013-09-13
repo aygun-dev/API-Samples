@@ -154,31 +154,17 @@
       </div>
       <div class="row">
         <div class="col-md-2">
-          <button name="js_play">Play</button>
-          <button name="js_stop">Stop</button>
+          <button name="js_play">Turn Table</button>
+          <button name="js_render">Render</button>
         </div>
         <div class="col-md-2">
+          Light
           <div id="slider"></div>
         </div>
       </div>
     </div>
 
       <script>
-
-        /*
-      function refreshSlider() {
-        var red = $( "#red" ).slider( "value" )
-      }
-      $(function() {
-        $( "#slider, #green, #blue" ).slider({
-          orientation: "horizontal",
-          range: "min",
-          max: 255,
-          value: 127,
-          slide: refreshSlider,
-          change: refreshSlider
-      });
-          */
 
           // create fancy color pickers
       $('select[name="box-picker"]').simplecolorpicker();
@@ -187,17 +173,41 @@
       $('select[name="eye-picker"]').simplecolorpicker();
       $('select[name="teeth-picker"]').simplecolorpicker();
       $('select[name="picker6"]').simplecolorpicker();
-      $('button[name="js_play"]').bind( "click", function(){ lapi.play() });
-      $('button[name="js_stop"]').bind( "click", function(){ lapi.stop() });
+      $('button[name="js_play"]').bind( "click", function(){
+        if(!lapi.isPlaying()){
+          lapi.play()
+        }else{
+          lapi.stop();
+        }
+      });
 
-        /*
+      $('button[name="js_render"]').bind( "click", function(){
+        if(!lapi.isRendering()){
+            lapi.startRender()
+        }else{
+          lapi.stopRender();
+        }
+      });
+
+      // Get a handle to the light
+
+      function refreshSlider(e, nr){
+
+        var light = lapi.getObjectByName("Sphere Light 1")[0];
+        var x = 25 * Math.sin(.2*nr.value) * (2*Math.PI);
+        var z = 25 * Math.cos(.2*nr.value) * (2*Math.PI);
+
+        light.properties.getProperty("Position").parameters.x.value = x;
+        light.properties.getProperty("Position").parameters.z.value = z;
+      }
+
       $( "#slider" ).slider( { orientation: "horizontal",
           range: "min",
-          max: 255,
-          value: 127,
-          slide: refreshSwatch,
-          change: refreshSwatch
-      });  */
+          min : -100,
+          max: 100,
+          value: 10,
+          slide: refreshSlider,
+          change: refreshSlider });
 
       </script>
 
