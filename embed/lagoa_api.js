@@ -272,6 +272,7 @@ var lapi = {};
   lapi._transient = "";
   lapi._sceneObjects = {};
   lapi._camera = "";
+  lapi._isRendering = false;
 
   // mess with time
   lapi._isPlaying = false;
@@ -415,11 +416,19 @@ var lapi = {};
       lapi._embedRPC( "ACTIVEAPP.GetScene().GetByGUID('"+in_object_guid+"').PropertySet.flatten()" , cb);
     };
 
+    lapi.isRendering = function(){
+      return this._isRendering;
+    };
+
     lapi.startRender = function(){
+      this._isRendering = true;
       lapi._embedRPC("ACTIVEAPP.StartRender()");
     };
 
-    lapi.stopRender = function(){ lapi._embedRPC("ACTIVEAPP.StopRender()"); },
+    lapi.stopRender = function(){
+      this._isRendering = false;
+      lapi._embedRPC("ACTIVEAPP.StopRender()");
+    },
     lapi.getCamera = function(){ return this._camera; },
     lapi.isPlaying = function(){ return this._isPlaying; },
     lapi.stop = function(){ this._isPlaying = false; },
