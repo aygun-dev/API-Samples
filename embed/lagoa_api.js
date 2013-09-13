@@ -279,184 +279,199 @@ var lapi = {};
   lapi._frame = 0;
 
 
-    /**
-     * Initialize routine to cache embed scene data in local variables.
-     */
-    lapi.initialize = function(){
+  /**
+   * Initialize routine to cache embed scene data in local variables.
+   */
+  lapi.initialize = function(){
 
-      var self = this;
+    var self = this;
 
-      // TODO we are very selective about our local scene representation...
-      // we should generalize this and
-      var interestingGuids = [];
+    // TODO we are very selective about our local scene representation...
+    // we should generalize this and
+    var interestingGuids = [];
 
-      var addGuidsToList = function ( in_response ) {
-        var items = in_response.data;
-        for(var i in items){
-          interestingGuids.push(items[i]);
-        }
-      };
-
-      // grab the things we are interested in
-      lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['MeshID'])", addGuidsToList);  //can choose MeshID, LightID, CameraID
-      lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['MaterialID'])", addGuidsToList );
-      lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['LightID'])", addGuidsToList );
-      lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureID'])", addGuidsToList );
-      lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureProjectionID'])", addGuidsToList );
-      lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['GroupID'])", addGuidsToList );
-      lapi._embedRPC( "ACTIVEAPP.GetCamera().guid", function(e){ self._camera = e.data; } );
-
-      // TODO WARNING big hack ahead...
-      // because of the nature of the async API, this initialization routine here is the "only chance"
-      // we have to create an accurate copy of the scene – before any changes are made.
-      setTimeout( function(){
-        for(var i =0; i<interestingGuids.length; i++){
-          self._initializeObject( interestingGuids[i] );
-        }
-      },2000);
-
-      // TODO this setTimeout would be avoidded if we had a RPC queue.
-      // run the onSceneLoaded callback
-      setTimeout( function(){
-        lapi.onSceneLoaded() }, 4000 );
-    };
-
-    lapi._initializeObject = function( in_object_guid ){
-      var self = this;
-      self._sceneObjects[ in_object_guid ] = new SceneObject( in_object_guid );
-    };
-
-    lapi.getAppliedMaterial = function( in_guid ){
-      var self = this;
-      var cb = function( in_msg ){
-        self._transient = in_msg.data;
-      };
-      lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('" + in_guid +"').PropertySet.flatten().Materials.tmaterial.value", cb);
-    };
-
-    lapi.getObjectByGuid = function(in_guid){
-      return this._sceneObjects[in_guid];
-    };
-
-    lapi.getObjectByName = function( in_name ){
-      var find = [];
-      var sceneObjs = this._sceneObjects;
-      var o;
-
-      for( var i in sceneObjs){
-        o = sceneObjs[i];
-        if( in_name === o.properties.getParameter("Name").value ){
-          find.push(o);
-        }
+    var addGuidsToList = function ( in_response ) {
+      var items = in_response.data;
+      for(var i in items){
+        interestingGuids.push(items[i]);
       }
-
-      return find;
     };
 
-    lapi.getObjectByName = function( in_name ){
-      var find = [];
-      var sceneObjs = this._sceneObjects;
-      var o;
+    // grab the things we are interested in
+    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['MeshID'])", addGuidsToList);  //can choose MeshID, LightID, CameraID
+    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['MaterialID'])", addGuidsToList );
+    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['LightID'])", addGuidsToList );
+    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureID'])", addGuidsToList );
+    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureProjectionID'])", addGuidsToList );
+    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['GroupID'])", addGuidsToList );
+    lapi._embedRPC( "ACTIVEAPP.GetCamera().guid", function(e){ self._camera = e.data; } );
 
-      for( var i in sceneObjs){
-        o = sceneObjs[i];
-        if( in_name === o.properties.getParameter("Name").value ){
-          find.push(o);
-        }
+    // TODO WARNING big hack ahead...
+    // because of the nature of the async API, this initialization routine here is the "only chance"
+    // we have to create an accurate copy of the scene – before any changes are made.
+    setTimeout( function(){
+      for(var i =0; i<interestingGuids.length; i++){
+        self._initializeObject( interestingGuids[i] );
       }
+    },2000);
 
-      return find;
+    // TODO this setTimeout would be avoidded if we had a RPC queue.
+    // run the onSceneLoaded callback
+    setTimeout( function(){
+      lapi.onSceneLoaded() }, 4000 );
+  };
+
+  lapi._initializeObject = function( in_object_guid ){
+    var self = this;
+    self._sceneObjects[ in_object_guid ] = new SceneObject( in_object_guid );
+  };
+
+  lapi.getAppliedMaterial = function( in_guid ){
+    var self = this;
+    var cb = function( in_msg ){
+      self._transient = in_msg.data;
     };
+    lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('" + in_guid +"').PropertySet.flatten().Materials.tmaterial.value", cb);
+  };
 
-    /**
-    * Assign value to object property .
-    * @in_GUID {string} The GUID of the object we want to modify.
-    * @in_property {string} The property of the object we want to modify.
-    * @in_values {object} The values we are assigning.
-    */
-    lapi.setObjectParameter = function( in_GUID, in_property, in_values ){
-      lapi._embedRPC("ACTIVEAPP.setObjectParameter('" +in_GUID + "'"
-        +",{property : '" + in_property + "', value : "
-        + JSON.stringify(in_values) + "});",function(in_response){
-      });
-    };
+  lapi.getObjectByGuid = function(in_guid){
+    return this._sceneObjects[in_guid];
+  };
 
-    lapi.desselectAll = function(){
-      lapi._embedRPC( "ACTIVEAPP.runCommand('DesselectAll'))");
-    };
+  lapi.getObjectByName = function( in_name ){
+    var find = [];
+    var sceneObjs = this._sceneObjects;
+    var o;
 
-    lapi.applyMaterialToObject = function( in_mat_guid, in_obj_guid ){
-      lapi._embedRPC( "ACTIVEAPP.ApplyMaterial( {ctxt:'" + in_obj_guid + "', material:'" + in_mat_guid + "'})" );
-    };
-
-    lapi.applyMaterialToMeshByName = function( matName, meshName ){
-
-      // this is how we get the matGuid value when embedRPC returns
-      var applyMaterial = function( in_embedRPC_message ){
-
-        console.log('embedRPC return', in_embedRPC_message);
-
-        // get the guid from the returned message
-        var matGuid = in_embedRPC_message.data.value;
-
-        // call the apply material that takes a guid and a guid.
-        lapi.applyMaterialToObject( matGuid, lapi.getObjectByName( meshName ).guid );
+    for( var i in sceneObjs){
+      o = sceneObjs[i];
+      if( in_name === o.properties.getParameter("Name").value ){
+        find.push(o);
       }
+    }
 
-      // go through the API embed call
-      lapi._embedRPC( "ACTIVEAPP.GetScene().GetObjectByName('"+matName+"').PropertySet.getParameter('guid');" ,applyMaterial);
+    return find;
+  };
 
-    };
+  lapi.getObjectByName = function( in_name ){
+    var find = [];
+    var sceneObjs = this._sceneObjects;
+    var o;
 
-    lapi.getProperties = function( in_object_guid ){
-      function cb( in_embedRPC_message ){
-        in_rtn = in_embedRPC_message.data;
+    for( var i in sceneObjs){
+      o = sceneObjs[i];
+      if( in_name === o.properties.getParameter("Name").value ){
+        find.push(o);
       }
+    }
 
-      lapi._embedRPC( "ACTIVEAPP.GetScene().GetByGUID('"+in_object_guid+"').PropertySet.flatten()" , cb);
-    };
+    return find;
+  };
 
-    lapi.isRendering = function(){
-      return this._isRendering;
-    };
+  /**
+  * Assign value to object property .
+  * @in_GUID {string} The GUID of the object we want to modify.
+  * @in_property {string} The property of the object we want to modify.
+  * @in_values {object} The values we are assigning.
+  */
+  lapi.setObjectParameter = function( in_GUID, in_property, in_values ){
+    lapi._embedRPC("ACTIVEAPP.setObjectParameter('" +in_GUID + "'"
+      +",{property : '" + in_property + "', value : "
+      + JSON.stringify(in_values) + "});",function(in_response){
+    });
+  };
 
-    lapi.startRender = function(){
-      this._isRendering = true;
-      lapi._embedRPC("ACTIVEAPP.StartRender()");
-    };
+  lapi.desselectAll = function(){
+    lapi._embedRPC( "ACTIVEAPP.runCommand('DesselectAll'))");
+  };
 
-    lapi.stopRender = function(){
-      this._isRendering = false;
-      lapi._embedRPC("ACTIVEAPP.StopRender()");
-    },
-    lapi.getCamera = function(){ return this._camera; },
-    lapi.isPlaying = function(){ return this._isPlaying; },
-    lapi.stop = function(){ this._isPlaying = false; },
-    lapi.play = function(){
+  lapi.applyMaterialToObject = function( in_mat_guid, in_obj_guid ){
+    lapi._embedRPC( "ACTIVEAPP.ApplyMaterial( {ctxt:'" + in_obj_guid + "', material:'" + in_mat_guid + "'})" );
+  };
 
-      // abort early
-      if (this.isPlaying()) return;
+  lapi.applyMaterialToMeshByName = function( matName, meshName ){
 
-      // start some variables
-      var start = null;
-      var self = this;
-      var intervalId = null;
-      self._isPlaying = true;
+    // this is how we get the matGuid value when embedRPC returns
+    var applyMaterial = function( in_embedRPC_message ){
 
-      // creat tthe play routine
-      function doStep(){
-        ++self._frame;
-        if (self.isPlaying()) {
-          self.stepCb( self._frame );
-        }
-        else{
-          clearInterval(intervalId);
-        }
+      console.log('embedRPC return', in_embedRPC_message);
+
+      // get the guid from the returned message
+      var matGuid = in_embedRPC_message.data.value;
+
+      // call the apply material that takes a guid and a guid.
+      lapi.applyMaterialToObject( matGuid, lapi.getObjectByName( meshName ).guid );
+    }
+
+    // go through the API embed call
+    lapi._embedRPC( "ACTIVEAPP.GetScene().GetObjectByName('"+matName+"').PropertySet.getParameter('guid');" ,applyMaterial);
+
+  };
+
+  lapi.getProperties = function( in_object_guid ){
+    function cb( in_embedRPC_message ){
+      in_rtn = in_embedRPC_message.data;
+    }
+
+    lapi._embedRPC( "ACTIVEAPP.GetScene().GetByGUID('"+in_object_guid+"').PropertySet.flatten()" , cb);
+  };
+
+ /**
+ * isRendering
+ * @returns {bool} rendering status
+ */
+  lapi.isRendering = function(){
+    return this._isRendering;
+  };
+
+  /**
+  * startRender in the embed
+  */
+  lapi.startRender = function(){
+    this._isRendering = true;
+    lapi._embedRPC("ACTIVEAPP.StartRender()");
+  };
+
+  /**
+   * stopRender in the embed
+   */
+  lapi.stopRender = function(){
+    this._isRendering = false;
+    lapi._embedRPC("ACTIVEAPP.StopRender()");
+  },
+
+  /**
+   * get active camera from the embed
+   * return {SceneObject} of camera
+   */
+  lapi.getCamera = function(){ return this._camera; },
+  lapi.isPlaying = function(){ return this._isPlaying; },
+  lapi.stop = function(){ this._isPlaying = false; },
+  lapi.play = function(){
+
+    // abort early
+    if (this.isPlaying()) return;
+
+    // start some variables
+    var start = null;
+    var self = this;
+    var intervalId = null;
+    self._isPlaying = true;
+
+    // creat tthe play routine
+    function doStep(){
+      ++self._frame;
+      if (self.isPlaying()) {
+        self.stepCb( self._frame );
       }
+      else{
+        clearInterval(intervalId);
+      }
+    }
 
-      // start play
-      var intervalId = setInterval(doStep, 48);
-    };
+    // start play
+    var intervalId = setInterval(doStep, 48);
+  };
 
   lapi.onSceneLoaded = function(){};
   lapi.stepCb = function(){};
