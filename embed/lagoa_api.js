@@ -1,8 +1,8 @@
 /**
- * API namespace
+ * @fileOverview API namespace
  * this object is simply an adapter layer for the Lagoa platform. It wraps application level
  * interfaces (changing parameters of objects in an embed scene).
- * TODO Add platform level functionality such as assets loading, projects and user queries, etc...
+ * @todo Add platform level functionality such as assets loading, projects and user queries, etc...
  */
 
 var lapi = {};
@@ -18,38 +18,63 @@ var lapi = {};
   };
 
   /**
-   *
-   * @param in_ctxtObject the object this parameter belongs to
-   * @param in_parentProperty the parent Property object
-   * @param in_params the input parameters takes {name, value, type}
-   * @constructor
+   * @param {SceneObject} in_ctxtObject the object this parameter belongs to
+   * @param {Property} in_parentProperty the parent Property object
+   * @param {object} in_params the input parameters takes name, value, type
+   * @constructor Parameter
    */
   var Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
-
 
     /**
      * @type {string}
      * @private
      */
     var _name  = in_params.name || "";
+
+    /**
+     *
+     * @type {*|null}
+     * @private
+     */
     var _value = in_params.value || null;
+
+    /**
+     * @type {string|null}
+     * @private
+     */
     var _type = in_params.type || null;
+
+    /**
+     * @type {Property|null}
+     * @private
+     */
     var _parent = in_parentProperty || null;
+
+    /**
+     * @type {SceneObject|null}
+     * @private
+     */
     var _contextObject = in_ctxtObject || null;
+
+    /**
+     * @type {number|null}
+     * @private
+     */
     var _id = in_params.id || null;
 
     /**
-     * name getter
-     * @returns {string} the name of the parameter
+     * the name of the parameter
+     * @type {string}
+     * @name name
+     * @memberof Parameter
      */
     this.__defineGetter__("name", function(){ return _name; });
 
     /**
-     * setter blocker
-     * @params {string} blocks member variable from changing, this routine will return an error
+     * setter blocker – blocks member variable from changing, this routine will return an error
+     * @params {string}
      */
     this.__defineSetter__("name", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
-
 
     /**
      * type getter
@@ -107,39 +132,79 @@ var lapi = {};
 
   };
 
+
+  /**
+   * @memberof Parameter
+   */
   Parameter.prototype = {
     constructor : Parameter
   };
 
   /**
-   * A object to handle and represent a Lagoa Property outside of the platform
-   * @param in_name name of the property
-   * @constructor constructor of the property
+   * A light weight Property object to represent Lagoa Property Sets outside of the embed
+   * The goal of this object is to simplify the interaction with the 3D scene by providing
+   * a mirror object that takes care of refreshing the scene inside of the embed.
+   * @param {string} in_name name of the property
+   * @constructor Property
    */
-
   var Property = function( in_name ){
 
+    /**
+     * @dict
+     * @private
+     */
     var _parameters = {};
+
+    /**
+     * @dict
+     * @private
+     */
     var _properties = {};
+
+    /**
+     * @type {string}
+     * @private
+     */
     var _name = in_name;
 
+    /**
+     * name accessor
+     * @memberof Property
+     * @type {string}
+     */
     this.__defineGetter__("name", function(){ return _name; });
+
+    /**
+     * Name setter – this member will block access to change the "name" variable.
+     * @memberof Property
+     * @param {string}
+     */
     this.__defineSetter__("name", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+
+    /**
+     * Parameters accessor
+     * @memberof Property
+     * @type {object}
+     */
     this.__defineGetter__("parameters", function(){ return _parameters; });
+
     this.__defineSetter__("parameters", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
     this.__defineGetter__("properties", function(){ return _properties; });
     this.__defineSetter__("properties", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
 
   };
 
+
   /**
-   * @type {{constructor: Function, getParameter: Function, addParameter: Function, appendProperty: Function, getProperty: Function}}
+   * @memberof Property
    */
   Property.prototype = {
+
     constructor    : Property,
 
     /**
      * Accessor to get parameters by name in the Property
+     * @function getParameter
      * @param {string} in_param_name the name of the parameter we are looking for
      * @returns {Parameter} object
      */
@@ -152,13 +217,13 @@ var lapi = {};
     addParameter   : function( in_parameter ){ this.parameters[in_parameter.name] = in_parameter; },
 
     /**
-     * Append a property under this property
-     * @param in_property
+     * Append another property under this property
+     * @param {Property} in_property
      */
     appendProperty : function( in_property ){ this.properties[in_property.name] = in_property; },
 
     /**
-     * get a property by name
+     * Get a property by name
      * @param {string} in_property_name the name of the property we are looking for
      * @returns {Property} object found with name
      */
@@ -169,7 +234,10 @@ var lapi = {};
 
   /**
    * A object to handle and represent a Lagoa SceneObject outside of the platform
-   * @param in_guid guid representing an object in the scene
+   * This object will be initialized – based on the input guid – producing a
+   * mirror object locally outside of the embed.
+   * @param {string} in_guid guid of an object in the scene
+   * @class SceneObject
    */
   var SceneObject = function( in_guid ){
     var _guid = in_guid;
@@ -177,18 +245,32 @@ var lapi = {};
 
     var self = this;
 
+    /**
+     * Get the property of the SceneObject
+     * @type {Property}
+     */
     this.__defineGetter__("properties", function(){
       return _properties;
     });
 
+    /**
+     * @method setter block access to changing the reference
+     * to the properties object represented by this SceneObject
+     */
     this.__defineSetter__("properties", function(in_val){
       console.error( CONSOLE_MSGS.IMMUTABLE );
     });
 
+    /**
+     * @member {string} guid of this object
+     */
     this.__defineGetter__("guid", function(){
       return _guid;
     });
 
+    /**
+     * @member {string} setter that blocks changing the guid of this object
+     */
     this.__defineSetter__("guid", function(in_val){
       console.error( CONSOLE_MSGS.IMMUTABLE );
     });
@@ -202,13 +284,19 @@ var lapi = {};
       }
     );
 
-
   };
 
+  /**
+   * @memberof SceneObject
+   */
   SceneObject.prototype = {
 
     constructor : SceneObject,
 
+    /**
+     * Get the material applied to this SceneObject if any.
+     * @returns {SceneObject}
+     */
     getMaterial : function(){
       var matGuid = this.properties.getProperty("Materials").getParameter("Material").value;
       return lapi.getObjectByGuid( matGuid );
@@ -217,8 +305,10 @@ var lapi = {};
   };
 
   /**
-   * @in_ctxtObject the object this pset belongs to
-   * @in_pset the propertySet object returned from an lapi._embedRPC call
+   * @in_ctxtObject {SceneObject} the object this pset belongs to
+   * @in_pset {object} the propertySet object returned from an lapi._embedRPC call
+   * @function copy a PropertySet that is returned via an embedRPC call. The returned object is
+   * parsed into a local object made out of SceneObject, Property and Parameter classes.
    */
   var pSetDeepCopy = function( in_ctxtObject, in_pset ){
 
@@ -241,18 +331,54 @@ var lapi = {};
     return rtn;
   };
 
+
+  /**
+   * @type {number}
+   * @private
+   */
   lapi._cbStack = 0;
+
+  /**
+   * @type {object}
+   * @private
+   */
   lapi._cbmap = {};
 
-  lapi.objGUID = "";
-  lapi.materialName = "";
-  lapi.lagoaUrl="http://lagoa.com";
-  lapi.meshCount = 0;
-  lapi.user_id = 24;
-  lapi.project_id;
-  lapi.asset_guid;
-  lapi.objData = {};
-  lapi.sceneTimer;
+  /**
+   * @type {string}
+   * @private
+   */
+  lapi._lagoaUrl="http://lagoa.com";
+
+  /**
+   * @type {number}
+   * @private
+   */
+  lapi._user_id = 24;
+
+  /**
+   * @type {number}
+   * @private
+   */
+  lapi._project_id;
+
+  /**
+   * @type {string}
+   * @private
+   */
+  lapi._assetGuid;
+
+  /**
+   * @type {object}
+   * @private
+   */
+  lapi._objData = {};
+
+  /**
+   * @type {{}}
+   * @private
+   */
+  lapi._sceneTimer;
 
   window.addEventListener("message", function(e){
     var retval = JSON.parse(e.data);
@@ -269,15 +395,42 @@ var lapi = {};
     }
   });
 
+  /**
+   * @type {string}
+   * @private
+   */
   lapi._transient = "";
+
+  /**
+   * @type {{}}
+   * @private
+   */
   lapi._sceneObjects = {};
+
+  /**
+   * @type {string}
+   * @private
+   */
   lapi._camera = "";
+
+  /**
+   * @type {boolean}
+   * @private
+   */
   lapi._isRendering = false;
 
-  // mess with time
+  /**
+   * Mess with time
+   * @type {boolean}
+   * @private
+   */
   lapi._isPlaying = false;
-  lapi._frame = 0;
 
+  /**
+   * @type {number}
+   * @private
+   */
+  lapi._frame = 0;
 
   /**
    * Initialize routine to cache embed scene data in local variables.
@@ -304,7 +457,9 @@ var lapi = {};
     lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureID'])", addGuidsToList );
     lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureProjectionID'])", addGuidsToList );
     lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['GroupID'])", addGuidsToList );
-    lapi._embedRPC( "ACTIVEAPP.GetCamera().guid", function(e){ self._camera = e.data; } );
+    lapi._embedRPC( "ACTIVEAPP.GetCamera().guid", function(e){
+      self._camera = e.data;
+    } );
 
     // TODO WARNING big hack ahead...
     // because of the nature of the async API, this initialization routine here is the "only chance"
