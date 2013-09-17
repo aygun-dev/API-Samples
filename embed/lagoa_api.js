@@ -153,44 +153,19 @@ var lapi = {};
      * @dict
      * @private
      */
-    var _parameters = {};
+    this._parameters = {};
 
     /**
      * @dict
      * @private
      */
-    var _properties = {};
+    this._properties = {};
 
     /**
      * @type {string}
      * @private
      */
-    var _name = in_name;
-
-    /**
-     * name accessor
-     * @memberof Property
-     * @type {string}
-     */
-    this.__defineGetter__("name", function(){ return _name; });
-
-    /**
-     * Name setter – this member will block access to change the "name" variable.
-     * @memberof Property
-     * @param {string}
-     */
-    this.__defineSetter__("name", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
-
-    /**
-     * Parameters accessor
-     * @memberof Property
-     * @type {object}
-     */
-    this.__defineGetter__("parameters", function(){ return _parameters; });
-
-    this.__defineSetter__("parameters", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
-    this.__defineGetter__("properties", function(){ return _properties; });
-    this.__defineSetter__("properties", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+    this._name = in_name;
 
   };
 
@@ -224,12 +199,64 @@ var lapi = {};
 
     /**
      * Get a property by name
-     * @param {string} in_property_name the name of the property we are looking for
-     * @returns {Property} object found with name
+     * @param {String} in_property_name the name of the property we are looking for
+     * @returns {Property|undefined} the property named with in_property_name,
+     * if none is found this returns undefined
      */
-    getProperty    : function( in_property_name ){ return this.properties[in_property_name]; }
+    getProperty    : function( in_property_name ){ return this.properties[in_property_name]; },
 
-  };
+    /**
+    * The name of this Property.
+    * trying to change this member will return an error.
+    * @type {String}
+    */
+    get name(){
+      return this._name
+    },
+
+    /**
+    * setter to block change to this variable
+    * @private
+    */
+    set name(in_val){
+      console.error( CONSOLE_MSGS.IMMUTABLE );
+    },
+
+    /**
+     * The dictionary of parameters belonging to this Property.
+     * trying to change this member will return an error.
+     * @type {Object}
+     */
+    get parameters(){
+      return this._parameters;
+    },
+
+    /**
+     * setter to block change to this variable
+     * @private
+     */
+    set parameters(in_val){
+      console.error( CONSOLE_MSGS.IMMUTABLE );
+    },
+
+    /**
+     * The dictionary of properties belonging to this Property.
+     * trying to change this member will return an error.
+     * @type {Object}
+     */
+    get properties(){
+      return this._properties;
+    },
+
+    /**
+     * setter to block change to this variable
+     * @private
+     */
+    set properties(in_val){
+      console.error( CONSOLE_MSGS.IMMUTABLE );
+    }
+
+};
 
 
   /**
@@ -333,19 +360,19 @@ var lapi = {};
 
 
   /**
-   * @type {number}
+   * @type {Number}
    * @private
    */
   lapi._cbStack = 0;
 
   /**
-   * @type {object}
+   * @type {Object}
    * @private
    */
   lapi._cbmap = {};
 
   /**
-   * @type {string}
+   * @type {String}
    * @private
    */
   lapi._lagoaUrl="http://lagoa.com";
@@ -573,7 +600,7 @@ var lapi = {};
 
  /**
  * isRendering
- * @returns {bool} rendering status
+ * @returns {Boolean} rendering status
  */
   lapi.isRendering = function(){
     return this._isRendering;
