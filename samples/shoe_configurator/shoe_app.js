@@ -100,10 +100,9 @@ $(document).ready(function() {
   var SPEED = .005;
 
   lapi.stepCb = function(dt){
-    lapi.setObjectParameter( lapi.getCamera(), "Position", {
-      x: RADIUS * Math.sin(SPEED*dt) * (2*Math.PI),
-      z: RADIUS * Math.cos(SPEED*dt) * (2*Math.PI)
-    });
+    var pos = lapi.getCamera().properties.getProperty("Position");
+    pos.parameters.x.value = RADIUS * Math.sin(SPEED*dt) * (2*Math.PI);
+    pos.parameters.z.value = RADIUS * Math.cos(SPEED*dt) * (2*Math.PI);
   }
 
 });
