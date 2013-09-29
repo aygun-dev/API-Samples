@@ -233,8 +233,10 @@
    */
   lapi.applyMaterialToObjectByGuid = function( in_materialGuid, in_meshGuid ){
 
-    var mesh = lapi.getObjectByGuid( in_meshGuid );
-    var mat = lapi.getObjectByGuid( in_materialGuid );
+    var scn = lapi.getActiveScene();
+
+    var mesh = scn.getObjectByGuid( in_meshGuid );
+    var mat = scn.getObjectByGuid( in_materialGuid );
 
     var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
     matParam.value = mat.properties.getParameter("GUID").value;
@@ -247,8 +249,11 @@
    * @param {String} in_meshName
    */
   lapi.applyMaterialToMeshByName = function( in_materialName, in_meshName ){
-    var mesh = lapi.getObjectByName( in_meshName );
-    var mat = lapi.getObjectByName( in_materialName );
+
+    var scn = lapi.getActiveScene();
+
+    var mesh = scn.getObjectByName( in_meshName )[0];
+    var mat = scn.getObjectByName( in_materialName )[0];
 
     var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
     matParam.value = mat.properties.getParameter("GUID").value;
