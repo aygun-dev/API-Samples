@@ -38,8 +38,8 @@
         -->
 
     <!-- new SHOE -->
-    <iframe src="https://lagoa.com/embed_links/317?validationHash=FFY3axZwF8tGj0cgdRvHfw&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true"
-            id="lagoaframe" width="100%" height="500" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+    <iframe src="https://lagoa.com/embed_links/485?validationHash=ebbS9UwBDQUMHG_K6ANDCw&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true"
+            id="lagoaframe" width="100%" height="600" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 
 
     <div class="container">
@@ -166,7 +166,7 @@
 
       <script>
 
-          // create fancy color pickers
+      // create fancy color pickers
       $('select[name="box-picker"]').simplecolorpicker();
       $('select[name="hair-picker"]').simplecolorpicker();
       $('select[name="eye-white-picker"]').simplecolorpicker();
@@ -190,24 +190,23 @@
       });
 
       // Get a handle to the light
-
       function refreshSlider(e, nr){
 
-        var light = lapi.getObjectByName("Sphere Light 1")[0];
-        var x = 25 * Math.sin(.2*nr.value) * (2*Math.PI);
-        var z = 25 * Math.cos(.2*nr.value) * (2*Math.PI);
+        var light = lapi.getActiveScene().getObjectByName("Sphere Light 1")[0];
+        var x = 20 * Math.sin(.2*nr.value) * (2*Math.PI);
+        var z = 20 * Math.cos(.2*nr.value) * (2*Math.PI);
 
         light.properties.getProperty("Position").parameters.x.value = x;
         light.properties.getProperty("Position").parameters.z.value = z;
       }
 
       $( "#slider" ).slider( { orientation: "horizontal",
-          range: "min",
-          min : 0,
-          max: 32,
-          value: 0.1,
-          slide: refreshSlider,
-          change: refreshSlider });
+      range: "min",
+      min : 0,
+      max: 32,
+      value: 0.1,
+      slide: refreshSlider,
+      change: refreshSlider });
 
       </script>
 

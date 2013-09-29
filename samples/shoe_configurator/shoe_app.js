@@ -57,7 +57,7 @@ $(document).ready(function() {
             // this will return an array with all objects that have the part name, in Lagoa multiple parts
             // can have the same name – no "name uniqueness" only object GUID uniqueness is guaranteed.
             // we will make an assumption that we are only interested in the first one, therefore the array [0]
-            var obj = lapi.getObjectByName(in_part_list[i])[0];
+            var obj = lapi.getActiveScene().getObjectByName(in_part_list[i])[0];
             var mat = obj.getMaterial();
 
             // we are interested in changing the reflectance property
@@ -84,13 +84,25 @@ $(document).ready(function() {
       // provoke a change to update Lagoa to match the UI
       uiElement.change();
 
-      lapi.setObjectParameter( lapi.getCamera(), "Lens", { dofradius: 0 });
-      lapi.setObjectParameter( lapi.getCamera(), "Resolution", { width : 640 });
+      var scn = lapi.getActiveScene();
+
+      var cam = scn.getCameras()[0];
+
+      cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
+      cam.getProperty("Resolution").getParameter("Width").value = 720;
 
       lapi.desselectAll();
 
-      //lapi.play();
-      setTimeout( function(){ lapi.startRender()}, 2000 );
+      setTimeout( function(){
+
+        // now we will set all the GL meshes to not visible
+        var meshes = scn.getMeshes();
+        for( var m in meshes ){
+          meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
+        }
+        lapi.startRender()
+
+      }, 2000 );
     }
   }
 
@@ -100,7 +112,8 @@ $(document).ready(function() {
   var SPEED = .005;
 
   lapi.stepCb = function(dt){
-    var pos = lapi.getCamera().properties.getProperty("Position");
+    var cam = lapi.getCamera();
+    var pos = cam.properties.getProperty("Position");
     pos.parameters.x.value = RADIUS * Math.sin(SPEED*dt) * (2*Math.PI);
     pos.parameters.z.value = RADIUS * Math.cos(SPEED*dt) * (2*Math.PI);
   }
