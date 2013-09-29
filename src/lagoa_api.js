@@ -346,6 +346,22 @@
     }
   };
 
+  lapi.moveTool = function(){
+    lapi._embedRPC("ACTIVEAPP.Tools.setActiveTool('MoveTool');")
+  };
+
+  lapi.scaleTool = function(){
+    lapi._embedRPC("ACTIVEAPP.Tools.setActiveTool('ScaleTool');")
+  };
+
+  lapi.orbitTool = function(){
+    lapi._embedRPC("ACTIVEAPP.Tools.setActiveTool('OrbitTool');")
+  };
+
+  lapi.panTool = function(){
+    lapi._embedRPC("ACTIVEAPP.Tools.setActiveTool('PanTool');")
+  };
+
   /**
    * method for on Scene Loaded event
    * @virtual
