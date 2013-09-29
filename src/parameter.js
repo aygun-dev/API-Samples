@@ -1,4 +1,5 @@
 /**
+ * @ignore
  * @fileOverview declares the parameter api class.
  */
 
@@ -59,7 +60,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker – blocks member variable from changing, this routine will return an error
    * @params {string}
    */
-  this.__defineSetter__("name", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("name", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * type getter
@@ -71,7 +72,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker
    * @params {string} blocks member variable from changing, this routine will return an error
    */
-  this.__defineSetter__("type", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("type", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * parent getter
@@ -83,7 +84,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker
    * @params {string} blocks member variable from changing, this routine will return an error
    */
-  this.__defineSetter__("parent", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("parent", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * value getter
@@ -101,7 +102,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker
    * @params {string} blocks member variable from changing, this routine will return an error
    */
-  this.__defineSetter__("id", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("id", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * parent setter

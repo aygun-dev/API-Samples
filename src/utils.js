@@ -1,4 +1,5 @@
 /**
+ * @ignore
  * @fileOverview Declares the utils namespace
  */
 
@@ -6,6 +7,17 @@
  * @namespace lapi.utils
  */
 lapi.utils = {
+
+  objToArray : function(in_Obj){
+
+    var rtn = [];
+
+    for(var i in in_Obj){
+      rtn.push(in_Obj[i]);
+    }
+
+    return rtn;
+  },
 
   /**
    * RGB to HEX color conversion

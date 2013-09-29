@@ -13,7 +13,7 @@
 		"footer"          : "",
 		"copyright"       : "Copyright © 2011-2013 Lagoa built by TeamUp Technologies Inc.",
 		"navType"         : "vertical",
-		"theme"           : "cerulean",
+		"theme"           : "flatly",
 		"linenums"        : true,
 		"collapseSymbols" : true,
 		"inverseNav"      : true

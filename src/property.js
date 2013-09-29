@@ -1,10 +1,12 @@
 /**
+ * @ignore
  * @fileOverview declares the Property api class.
  */
 
 /** A light weight Property object to represent Lagoa Property Sets outside of the embed
  * The goal of this object is to simplify the interaction with the 3D scene by providing
  * a mirror object that takes care of refreshing the scene inside of the embed.
+ * @ignore
  * @param {string} in_name name of the property
  * @constructor Property
  */
@@ -80,7 +82,7 @@ lapi.Property.prototype = {
    * @private
    */
   set name(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   },
 
   /**
@@ -97,7 +99,7 @@ lapi.Property.prototype = {
    * @private
    */
   set parameters(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   },
 
   /**
@@ -114,6 +116,6 @@ lapi.Property.prototype = {
    * @private
    */
   set properties(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   }
 };

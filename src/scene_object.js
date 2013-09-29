@@ -1,4 +1,5 @@
 /**
+ * @ignore
  * @fileOverview Implements the SceneObject api class.
  */
 
@@ -26,7 +27,7 @@ lapi.SceneObject = function( in_guid ){
    * to the properties object represented by this SceneObject
    */
   this.__defineSetter__("properties", function(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   });
 
   /**
@@ -40,16 +41,18 @@ lapi.SceneObject = function( in_guid ){
    * @member {string} setter that blocks changing the guid of this object
    */
   this.__defineSetter__("guid", function(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   });
-
 
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
+  console.warn("Building PSet of " + in_guid );
   lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
     function(in_embedRPC_message){
-      var pSet = in_embedRPC_message.data;
-      _properties = _self._pSetDeepCopy( _self, pSet );
+      if( !(in_embedRPC_message.error === "EXECERR") ){
+        var pSet = in_embedRPC_message.data;
+        _properties = _self._pSetDeepCopy( _self, pSet );
+      }
     }
   );
 
@@ -68,7 +71,16 @@ lapi.SceneObject.prototype = {
    */
   getMaterial : function(){
     var matGuid = this.properties.getProperty("Materials").getParameter("Material").value;
-    return lapi.getObjectByGuid( matGuid );
+    return lapi.getActiveScene().getObjectByGuid( matGuid );
+  },
+
+  /**
+   * a shortcut to get a property under properties
+   * @param in_propName
+   * @returns {*|Property|undefined}
+   */
+  getProperty : function( in_propName ){
+    return this.properties.getProperty( in_propName );
   },
 
   /**

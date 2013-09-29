@@ -1,5 +1,5 @@
 /**
- * @fileOverview Declares the API namespace and base object
+ * @fileOverview Declares the API namespace
  * the lapi object is simply an adapter layer for the Lagoa platform. It simply wraps application level
  * interfaces (changing parameters of objects in an embed scene).
  * @todo Add platform level functionality such as assets loading, projects and user queries, etc...
@@ -9,15 +9,37 @@
  * @namespace lapi
  */
 var lapi = {};
+/**
+ * @ignore
+ * @fileOverview implements lapi interfaces to lagoa
+ * the lapi object is simply an adapter layer for the Lagoa platform. It is a wrapper of application level
+ * API's (for example changing parameters of objects in an embed scene).
+ * @todo Add platform level functionality such as assets loading, projects and user queries, etc...
+ */
 
 (function(){
 
   /**
+   * Constants
+   * @namespace
+   */
+  lapi.CONSTANTS = {};
+  /**
    * Enum for standard console msgs.
    * @enum {string}
    */
-  lapi.CONSOLE_MSGS = {
+  lapi.CONSTANTS.CONSOLE_MSGS = {
     IMMUTABLE : "cannot change this"
+  };
+
+  lapi.CONSTANTS.SCENE = {
+    LIGHT : "LightID",
+    CAMERA : "CameraID",
+    MESH : "MeshID",
+    MATERIAL : "MaterialID",
+    TEXTURE : "TextureID",
+    GROUP : "GroupID",
+    PROJECTION : "TextureProjectionID"
   };
 
   /**
@@ -68,6 +90,10 @@ var lapi = {};
    */
   lapi._sceneTimer;
 
+  /**
+   * Implements the MPI interface to receive messages back from the lagoa embed
+   * @private
+   */
   window.addEventListener("message", function(e){
     var retval = JSON.parse(e.data);
     if(retval.channel == 'rpcend') {
@@ -84,16 +110,10 @@ var lapi = {};
   });
 
   /**
-   * @type {{}}
-   * @private
-   */
-  lapi._sceneObjects = {};
-
-  /**
    * @type {string}
    * @private
    */
-  lapi._camera = null;
+  lapi._activeCamera = null;
 
   /**
    * @type {boolean}
@@ -109,108 +129,82 @@ var lapi = {};
   lapi._isPlaying = false;
 
   /**
+   * internal object to store the Time interval callback
+   * @type {null}
+   * @private
+   */
+  lapi._timeIntervalId = null;
+
+  /**
    * @type {number}
    * @private
    */
   lapi._frame = 0;
 
   /**
-   * Initialize routine to cache embed scene data in local variables.
+   * RPC call for SC to execute.
+   * @message {string} instructions we want to execute
+   * @callback {function} Optional callback. It will use whatever the RPC call returns. Note, that RPC
+   * return value is a stringified object we parse. It's not returning a proxy or the actual object.
+   * Interactions with the scene will happen only through embedRPC calls.
    */
-  lapi.initialize = function(){
-
-    var self = this;
-
-    // TODO we are very selective about our local scene representation...
-    // we should generalize this and
-    var interestingGuids = [];
-
-    var addGuidsToList = function ( in_response ) {
-      var items = in_response.data;
-      for(var i in items){
-        interestingGuids.push(items[i]);
-      }
-    };
-
-    // grab the things we are interested in
-    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['MeshID'])", addGuidsToList);  //can choose MeshID, LightID, CameraID
-    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['MaterialID'])", addGuidsToList );
-    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['LightID'])", addGuidsToList );
-    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureID'])", addGuidsToList );
-    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['TextureProjectionID'])", addGuidsToList );
-    lapi._embedRPC( "Object.keys(ACTIVEAPP.GetClassedItems()['GroupID'])", addGuidsToList );
-    lapi._embedRPC( "ACTIVEAPP.GetCamera().guid", function(e){
-      self._camera = self._initializeObject( e.data );
-    } );
-
-    // TODO WARNING big hack ahead...
-    // because of the nature of the async API, this initialization routine here is the "only chance"
-    // we have to create an accurate copy of the scene – before any changes are made.
-    setTimeout( function(){
-      for(var i =0; i<interestingGuids.length; i++){
-        self._initializeObject( interestingGuids[i] );
-      }
-    },2000);
-
-    // TODO this setTimeout would be avoidded if we had a RPC queue.
-    // run the onSceneLoaded callback
-    setTimeout( function(){
-      lapi.onSceneLoaded() }, 4000 );
+  lapi._embedRPC = function(message, callback){
+    var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
+    var iframe = document.getElementById('lagoaframe');
+    if(callback){
+      lapi._cbmap[randName] = callback;
+    }
+    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
+    console.warn("API: "+ message);
   };
 
   /**
-   * Build a shallow local representation of an object in the embeded scene with the same guid.
-   * This is done using the SceneObject type – this local object can then be used to access properties
-   * and call standard methods that are then pushed to the embed
-   * @param in_object_guid
-   * @returns {lapi.SceneObject}
+   * Active scene loaded in the embed
+   * @type {{}}
    * @private
    */
-  lapi._initializeObject = function( in_object_guid ){
-    var self = this;
-    var obj = new lapi.SceneObject( in_object_guid );
-    self._sceneObjects[ in_object_guid ] = obj;
+  lapi._activeScene = null;
 
-    return obj;
+  /**
+   * accessor to return the current loaded scene
+   * @returns {Scene}
+   */
+  lapi.getActiveScene = function(){
+    return lapi._activeScene;
   };
 
   /**
-   * Get an object via it's guid
-   * @param in_guid
-   * @returns {String}
+   * Initialize routine to cache embed scene data in local variables.
    */
-  lapi.getObjectByGuid = function(in_guid){
-    return this._sceneObjects[in_guid];
-  };
+  lapi._initialize = function(){
 
-  lapi.getObjectByName = function( in_name ){
-    var find = [];
-    var sceneObjs = this._sceneObjects;
-    var o;
+    var self = this;
 
-    for( var i in sceneObjs){
-      o = sceneObjs[i];
-      if( in_name === o.properties.getParameter("Name").value ){
-        find.push(o);
-      }
-    }
+    // grab the things we are interested in.
+    // we assume there are CameraID, MeshID, MaterialID, GroupID, TextureID, etc, kind of objects....
+    lapi._embedRPC( "var classedItems = ACTIVEAPP.GetClassedItems();" +
+      "var sceneKeys = {};" +
+      "for( var i in classedItems ){ " +
+      " sceneKeys[i] = Object.keys( classedItems[i] );" +
+      "};" +
+      "sceneKeys;",
+      function(e){
 
-    return find;
-  };
+        // the classed item includes the scene itself... we handle this specially because
+        // it can cause problems.
+        var sceneGuid = e.data["SceneID"][0];
+        var classedItems = e.data;
 
-  lapi.getObjectByName = function( in_name ){
-    var find = [];
-    var sceneObjs = this._sceneObjects;
-    var o;
+        // delete the scene guid because this can cause trouble...
+        delete classedItems["SceneID"];
+        self._activeScene = new lapi.Scene( sceneGuid, classedItems );
 
-    for( var i in sceneObjs){
-      o = sceneObjs[i];
-      if( in_name === o.properties.getParameter("Name").value ){
-        find.push(o);
-      }
-    }
+        var cams = self._activeScene.getCameras();
+        self._activeCamera = cams[0];
 
-    return find;
+        // give it sometime to call the event...
+        setTimeout( lapi.onSceneLoaded, 3000 );
+    });
   };
 
   /**
@@ -245,49 +239,32 @@ var lapi = {};
 
   /**
    * apply a material to an object by using their guid's
-   * @param {String} in_mat_guid
-   * @param {String} in_obj_guid
+   * @param {String} in_materialGuid
+   * @param {String} in_meshGuid
    */
-  lapi.applyMaterialToObject = function( in_mat_guid, in_obj_guid ){
-    lapi._embedRPC( "ACTIVEAPP.ApplyMaterial( {ctxt:'" + in_obj_guid + "', material:'" + in_mat_guid + "'})" );
+  lapi.applyMaterialToObjectByGuid = function( in_materialGuid, in_meshGuid ){
+
+    var mesh = lapi.getObjectByGuid( in_meshGuid );
+    var mat = lapi.getObjectByGuid( in_materialGuid );
+
+    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
+    matParam.value = mat.properties.getParameter("GUID").value;
   };
 
   /**
    * Apply a material to a mesh by using their names
    * @example lapi.applyMaterialToMeshByName( "Glossy Diffuse", "Sphere" );
-   * @param {String} matName
-   * @param {String} meshName
+   * @param {String} in_materialName
+   * @param {String} in_meshName
    */
-  lapi.applyMaterialToMeshByName = function( matName, meshName ){
+  lapi.applyMaterialToMeshByName = function( in_materialName, in_meshName ){
+    var mesh = lapi.getObjectByName( in_meshName );
+    var mat = lapi.getObjectByName( in_materialName );
 
-    // this is how we get the matGuid value when embedRPC returns
-    var applyMaterial = function( in_embedRPC_message ){
-
-      console.log('embedRPC return', in_embedRPC_message);
-
-      // get the guid from the returned message
-      var matGuid = in_embedRPC_message.data.value;
-
-      // call the apply material that takes a guid and a guid.
-      lapi.applyMaterialToObject( matGuid, lapi.getObjectByName( meshName ).guid );
-    }
-
-    // go through the API embed call
-    lapi._embedRPC( "ACTIVEAPP.GetScene().GetObjectByName('"+matName+"').PropertySet.getParameter('guid');" ,applyMaterial);
-
+    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
+    matParam.value = mat.properties.getParameter("GUID").value;
   };
 
-  /**
-   * Get PropertySet of an object
-   * @param {String} in_object_guid
-   */
-  lapi.getProperties = function( in_object_guid ){
-    function cb( in_embedRPC_message ){
-      in_rtn = in_embedRPC_message.data;
-    }
-
-    lapi._embedRPC( "ACTIVEAPP.GetScene().GetByGUID('"+in_object_guid+"').PropertySet.flatten()" , cb);
-  };
 
  /**
  * isRendering
@@ -311,15 +288,33 @@ var lapi = {};
   lapi.stopRender = function(){
     this._isRendering = false;
     lapi._embedRPC("ACTIVEAPP.StopRender()");
-  },
+  };
 
   /**
-   * get active camera from the embed
-   * return {SceneObject} of camera
+   * Get active camera
+   * return {SceneObject} camera
    */
-  lapi.getCamera = function(){ return this._camera; },
-  lapi.isPlaying = function(){ return this._isPlaying; },
-  lapi.stop = function(){ this._isPlaying = false; },
+  lapi.getCamera = function(){
+    return this._activeCamera;
+  };
+
+  /**
+   * isPlaying test to know if we are in changing time
+   * @return {Boolean} playing status
+   */
+  lapi.isPlaying = function(){ return this._isPlaying; };
+
+  /**
+   * @function stop playing the timeline
+   */
+  lapi.stop = function(){
+    this._isPlaying = false;
+    this._frame = 0;
+  };
+
+  /**
+   * @function start playing the timeline
+   */
   lapi.play = function(){
 
     // abort early
@@ -328,7 +323,7 @@ var lapi = {};
     // start some variables
     var start = null;
     var self = this;
-    var intervalId = null;
+    self._timeIntervalId = null;
     self._isPlaying = true;
 
     // creat tthe play routine
@@ -338,7 +333,7 @@ var lapi = {};
         self.stepCb( self._frame );
       }
       else{
-        clearInterval(intervalId);
+        clearInterval(self._timeIntervalId);
       }
     }
 
@@ -346,36 +341,45 @@ var lapi = {};
     var intervalId = setInterval(doStep, 48);
   };
 
-  lapi.onSceneLoaded = function(){};
-  lapi.stepCb = function(){};
+  lapi.nextFrame = function(){
+    ++this._frame;
+    this.stepCb( this._frame );
+  };
 
   /**
-   * RPC call for SC to execute.
-   * @message {string} instructions we want to execute
-   * @callback {function} Optional callback. It will use whatever the RPC call returns. Note, that RPC
-   * return value is a stringified object we parse. It's not returning a proxy or the actual object.
-   * Interactions with the scene will happen only through embedRPC calls.
+   * @function pause the timeline
    */
-  lapi._embedRPC = function(message, callback){
-    var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
-    var iframe = document.getElementById('lagoaframe');
-    if(callback){
-      lapi._cbmap[randName] = callback;
-//      lapi._cbStack++;    // the messages are emitted here, we want to keep a count
+  lapi.pause = function(){
+    // abort early
+    if (this.isPlaying()){
+      clearInterval(this._timeIntervalId);
+      this._timeIntervalId = null;
     }
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
-    console.warn("API: "+ message);
   };
+
+  /**
+   * method for on Scene Loaded event
+   * @virtual
+   * @callback called when scene finishes loading – no geometry data is guaranteed to have loaded
+   */
+  lapi.onSceneLoaded = function(){};
+
+  /**
+   * method for stepping to the next frame
+   * @virtual
+   * @callback called when the animation has to step a frame
+   */
+  lapi.stepCb = function(){};
 
   // Make sure that the whole scene is loaded! Only then can you  set the first object selection.
   // This happens because we want the user to have a reference object to guide them.
   $(function() {
     function checkLoaded(){
-//      console.warn("waiting for scene to load...");
+      console.warn("waiting for scene to load...");
       lapi._embedRPC("ACTIVEAPP.getSceneLoaded();", function(in_response) {
         if (in_response.data === true){
           clearInterval(timer);
-          lapi.initialize();
+          lapi._initialize();
         }
       });
     }
@@ -384,12 +388,14 @@ var lapi = {};
 
 })();
 /**
+ * @ignore
  * @fileOverview declares the Property api class.
  */
 
 /** A light weight Property object to represent Lagoa Property Sets outside of the embed
  * The goal of this object is to simplify the interaction with the 3D scene by providing
  * a mirror object that takes care of refreshing the scene inside of the embed.
+ * @ignore
  * @param {string} in_name name of the property
  * @constructor Property
  */
@@ -465,7 +471,7 @@ lapi.Property.prototype = {
    * @private
    */
   set name(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   },
 
   /**
@@ -482,7 +488,7 @@ lapi.Property.prototype = {
    * @private
    */
   set parameters(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   },
 
   /**
@@ -499,11 +505,12 @@ lapi.Property.prototype = {
    * @private
    */
   set properties(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   }
 };
 
 /**
+ * @ignore
  * @fileOverview declares the parameter api class.
  */
 
@@ -564,7 +571,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker – blocks member variable from changing, this routine will return an error
    * @params {string}
    */
-  this.__defineSetter__("name", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("name", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * type getter
@@ -576,7 +583,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker
    * @params {string} blocks member variable from changing, this routine will return an error
    */
-  this.__defineSetter__("type", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("type", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * parent getter
@@ -588,7 +595,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker
    * @params {string} blocks member variable from changing, this routine will return an error
    */
-  this.__defineSetter__("parent", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("parent", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * value getter
@@ -606,7 +613,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    * setter blocker
    * @params {string} blocks member variable from changing, this routine will return an error
    */
-  this.__defineSetter__("id", function(in_val){ console.error( CONSOLE_MSGS.IMMUTABLE ); });
+  this.__defineSetter__("id", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
   /**
    * parent setter
@@ -631,6 +638,7 @@ lapi.Parameter.prototype = {
 };
 
 /**
+ * @ignore
  * @fileOverview Implements the SceneObject api class.
  */
 
@@ -658,7 +666,7 @@ lapi.SceneObject = function( in_guid ){
    * to the properties object represented by this SceneObject
    */
   this.__defineSetter__("properties", function(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   });
 
   /**
@@ -672,16 +680,18 @@ lapi.SceneObject = function( in_guid ){
    * @member {string} setter that blocks changing the guid of this object
    */
   this.__defineSetter__("guid", function(in_val){
-    console.error( CONSOLE_MSGS.IMMUTABLE );
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   });
-
 
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
+  console.warn("Building PSet of " + in_guid );
   lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
     function(in_embedRPC_message){
-      var pSet = in_embedRPC_message.data;
-      _properties = _self._pSetDeepCopy( _self, pSet );
+      if( !(in_embedRPC_message.error === "EXECERR") ){
+        var pSet = in_embedRPC_message.data;
+        _properties = _self._pSetDeepCopy( _self, pSet );
+      }
     }
   );
 
@@ -700,7 +710,16 @@ lapi.SceneObject.prototype = {
    */
   getMaterial : function(){
     var matGuid = this.properties.getProperty("Materials").getParameter("Material").value;
-    return lapi.getObjectByGuid( matGuid );
+    return lapi.getActiveScene().getObjectByGuid( matGuid );
+  },
+
+  /**
+   * a shortcut to get a property under properties
+   * @param in_propName
+   * @returns {*|Property|undefined}
+   */
+  getProperty : function( in_propName ){
+    return this.properties.getProperty( in_propName );
   },
 
   /**
@@ -734,6 +753,7 @@ lapi.SceneObject.prototype = {
 };
 
 /**
+ * @ignore
  * @fileOverview Declares the utils namespace
  */
 
@@ -741,6 +761,17 @@ lapi.SceneObject.prototype = {
  * @namespace lapi.utils
  */
 lapi.utils = {
+
+  objToArray : function(in_Obj){
+
+    var rtn = [];
+
+    for(var i in in_Obj){
+      rtn.push(in_Obj[i]);
+    }
+
+    return rtn;
+  },
 
   /**
    * RGB to HEX color conversion
@@ -779,3 +810,95 @@ lapi.utils = {
   }
 };
 
+/**
+ * @ignore
+ * @fileOverview declares the Scene api class.
+ */
+
+/** flat Scene representation organized by object kind (Light, Material, Mesh, etc...)
+ * @param {object} in_guidList is expected to be { classID : [ Array ] }
+ * @constructor Scene
+ */
+lapi.Scene = function( in_sceneGuid, in_guidList ){
+
+  // this is just so we keep track of the guid of the scene here.
+  this._guid = in_sceneGuid;
+
+  // organize by class
+  this._classedItems = {};
+
+  // the guid list for search
+  this._guidItems = {};
+
+
+  for( var i in in_guidList ){
+
+    var tmpGuid;
+
+    var classID = in_guidList[i];
+
+    // create a hash of the classed type
+    var initClass = this._classedItems[i] = {};
+
+    // build the shallow SceneObject in place
+    for( var j in classID){
+      tmpGuid = classID[j];
+      this._guidItems[tmpGuid] = initClass[tmpGuid] = new lapi.SceneObject( tmpGuid );
+    }
+  }
+};
+
+/**
+ * @memberof Scene
+ */
+lapi.Scene.prototype = {
+  constructor    : lapi.Scene,
+
+  /**
+   * Get an object via it's guid
+   * @param in_guid
+   * @returns {String}
+   */
+  getObjectByGuid : function( in_guid ){
+    return this._guidItems[ in_guid ];
+  },
+
+  getObjectByName : function( in_name ){
+    var find = [];
+    var sceneObjs = this._guidItems;
+    var o;
+
+    for( var i in sceneObjs){
+      o = sceneObjs[i];
+      if( in_name === o.properties.getParameter("Name").value ){
+        find.push(o);
+      }
+    }
+    return find;
+  },
+
+  getLights : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.LIGHT ] );
+  },
+
+  getCameras : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.CAMERA ]);
+  },
+
+  getMeshes : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.MESH ]);
+  },
+
+  getMaterials : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.MATERIAL ]);
+  },
+
+  getTextures : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.TEXTURE ]);
+  },
+
+  getGroups : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.GROUP ]);
+  }
+
+};
