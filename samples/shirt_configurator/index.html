@@ -2,319 +2,242 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <title>Lagoa Shirt Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toy Configurator</title>
 
-    <!-- simple color picker -->
-      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.js"></script>
-      <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-      <script src="assets/jquery.simplecolorpicker.js"></script>
+    <!-- Loading Bootstrap -->
+    <link href="../assets/Flat-UI-master/bootstrap/css/bootstrap.css" rel="stylesheet">
 
-      <link rel="stylesheet" type="text/css" href="assets/jquery.simplecolorpicker.css"/>
-      <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <!-- Loading Flat UI -->
+    <link href="../assets/Flat-UI-master/css/flat-ui.css" rel="stylesheet">
 
-    <!-- raphael -->
-    <script src="assets/raphael.js"></script>
-    <script src="assets/colorpicker.js"></script>
-    <script src="assets/colorwheel.js"></script>
+    <link rel="shortcut icon" href="../assets/Flat-UI-master/images/favicon.ico">
 
-    <!-- LAGOA API -->
-    <script src="../../build/lapi.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+    <script src="../assets/Flat-UI-master/js/html5shiv.js"></script>
+    <![endif]-->
 
-    <!-- Bootstrap -->
-    <!-- Latest compiled and minified CSS -->
-    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Load JS here for greater good =============================-->
+  <script src="../assets/Flat-UI-master/js/jquery-1.8.3.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/bootstrap.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/bootstrap-select.js"></script>
+  <script src="../assets/Flat-UI-master/js/bootstrap-switch.js"></script>
+  <script src="../assets/Flat-UI-master/js/flatui-checkbox.js"></script>
+  <script src="../assets/Flat-UI-master/js/flatui-radio.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.tagsinput.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.placeholder.js"></script>
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/js/bootstrap.min.js"></script>
 
-    <!-- Latest Glyphicons minified CSS -->
-    <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css" rel="stylesheet">
+  <!-- Bootstrap -->
+  <!-- Latest compiled and minified CSS -->
+  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
 
-    <style media="screen">
-      body {
-        background: whitesmoke;
-        color: black;
-        /*font: 1.5em "Segoe UI", "Helvetica Neue", Helvetica, "Arial Unicode", Arial, sans-serif;*/
-        margin: 0;
-        /*height: 100%;*/
-      }
-      .fillVertical{
-        height: 100%;
-      }
-      .appBox{
-        position : absolute;
-        bottom : 0px;
-        top : 0px;
-        left : 0px;
-        right : 0px;
-      }
-      #lagoaframe {
-        /*float : right;*/
-        /*width : 100%;*/
-        height: 100%;
-      }
-      #content {
-        /*width: 640px;*/
-        /*height: 480px;*/
-        /*position: relative;*/
-      }
-      #slider{
-        width: 50px;
-        /*border: 2px dashed red;*/
-        /*box-shadow: 10px 10px 10px rgba(0,0,0,1);*/
-      }
-      /*#copy a {*/
-        /*color: #666;*/
-        /*text-decoration: none;*/
-      /*}*/
-      #picker2 {
-        width: 300px;
-        position: absolute;
-        top: 250px;
-        left: 50%;
-        margin-left: -150px;
-      }
-      #output {
-        display:none;
-        background: #eee;
-        position: absolute;
-        font-size: 30px;
-        bottom: 10px;
-        left: 20px;
-        font-family: monospace;
-      }
-      #copy {
-        display:none;
-        position: absolute;
-        right: 10px;
-        bottom: 10px;
-        margin: 0;
-        font-size: .6em;
-        color: #666;
-      }
-      #values {
-        display:none;
-        position: absolute;
-        left: 20px;
-        top: 363px;
-        font-size: .7em;
-      }
-      button{
-        width:100px;
-        height:50px;
-      }
-      div{
-        /*border : 1px solid red;*/
-      }
-    </style>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/js/bootstrap.min.js"></script>
+
+  <!-- Latest Glyphicons minified CSS -->
+  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css" rel="stylesheet">
+
+  <!-- LAGOA API -->
+  <script src="../../build/lapi.js"></script>
+
+  <style media="screen">
+    body {
+      background: whitesmoke;
+    }
+
+    #patterns img{
+      width : 50px;
+      height: 50px;
+      margin: 2px;
+      border-radius: 8px;
+    }
+
+    #patterns img:hover{
+      /*width: 100px;*/
+      /*height: 100px;*/
+      outline : 4px solid #ffff00;
+      border-radius: 8px;
+    }
+
+    .fillVertical{
+      height:100%;
+    }
+    .fillVertical iframe{
+      float : right;
+      width : 650px;
+      height: 100%;
+    }
+  </style>
+
   </head>
 
-  <body>
-    <div class="container appBox">
-      <div class="row">
-        <div class="col-md-4">
-          <h1>Buttons</h1>
-          <div class="row">
-            <div class="col-md-12">
-              Pattern
-            </div>
-            <div class="col-md-12">
-            Color
-            </div>
-            <div class="col-md-12">
-            Logo
-            </div>
+<body>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-3">
+        <h1>Customizer</h1>
+        <div class="row">
+          <div class="col-md-12">
+            <p>Pattern</p>
+            <div id="patterns"></div>
+          </div>
+          <br>
+          <div class="col-md-12">
+            <p>Color</p>
+          </div>
+          <br>
+          <div class="col-md-12">
+            <p>Logo</p>
+          </div>
+          <br>
+          <div class="col-md-12">
+            <a href="#fakelink" class="btn btn-block btn-lg btn-primary js-orbit">Orbit</a>
+          </div>
+          <br>
+          <div class="col-md-12">
+            <a href="#fakelink" class="btn btn-block btn-lg btn-primary js-pan">Pan</a>
+          </div>
+          <br>
+          <div class="col-md-12">
+            <p>Zoom</p>
+            <div id="slider"></div>
           </div>
         </div>
-        <div class="col-md-8 fillVertical">
-          <!-- LAGOA frame -->
-          <iframe src="https://lagoa.com/embed_links/496?validationHash=WBKWMLHp2WNaPBFDUmQhsw&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="100%" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-
-            <!--<div id="content">-->
-              <!--<table id="values">-->
-                <!--<tr>-->
-                  <!--<th>R</th>-->
-                  <!--<td id="vr"></td>-->
-                  <!--<th>H</th>-->
-                  <!--<td id="vh"></td>-->
-                  <!--<th>H</th>-->
-                  <!--<td id="vh2"></td>-->
-                <!--</tr>-->
-                <!--<tr>-->
-                  <!--<th>G</th>-->
-                  <!--<td id="vg"></td>-->
-                  <!--<th>S</th>-->
-                  <!--<td id="vs"></td>-->
-                  <!--<th>S</th>-->
-                  <!--<td id="vs2"></td>-->
-                <!--</tr>-->
-                <!--<tr>-->
-                  <!--<th>B</th>-->
-                  <!--<td id="vb"></td>-->
-                  <!--<th>B</th>-->
-                  <!--<td id="vv"></td>-->
-                  <!--<th>L</th>-->
-                  <!--<td id="vl"></td>-->
-                <!--</tr>-->
-              <!--</table>-->
-              <!--<input type="text" id="output" value="#eeeeee">-->
-              <!--<p id="copy">-->
-                <!--Powered by <a href="http://raphaeljs.com/">Raphaël</a>-->
-              <!--</p>-->
-            <!--</div>-->
-            <!--<div id="picker2"></div>-->
-            <!--<button name="js_orbit">Orbit</button>-->
-            <!--<button name="js_pan">Pan</button>-->
-            <!--<button name="js_move">Move</button>-->
-            <!--<button name="js_scale">Scale</button>-->
-            <!--<div id="slider"></div>-->
-          <!--</div>-->
-        </div>
+      </div>
+      <div class="col-md-9 fillVertical">
+        <iframe src="https://lagoa.com/embed_links/505?validationHash=vL9zieLiPDJlsDr6UDz0LQ&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
       </div>
     </div>
+  </div>
 
-    <script>
-      // some constants
-      var ONE_OVER_255 = 1/255;
+  <script>
+    // some constants
+    var ONE_OVER_255 = 1/255;
+    var EXPORT_TAG = "export";
 
-      // add some buttons
-      $('button[name="js_orbit"]').bind( "click", function(){
-        lapi.orbitTool();
-      });
+    // add some buttons
+    $('.js-orbit').bind( "click", function(){
+      lapi.orbitTool();
+    });
 
-      $('button[name="js_pan"]').bind( "click", function(){
-        lapi.panTool();
-      });
 
-      $('button[name="js_move"]').bind( "click", function(){
-        lapi.moveTool();
-      });
+    $('.js-pan').bind( "click", function(){
+      lapi.panTool();
+    });
 
-      $('button[name="js_scale"]').bind( "click", function(){
-        lapi.scaleTool();
-      });
+    /*
+    $('button[name="js-move"]').bind( "click", function(){
+      lapi.moveTool();
+    });
 
-      // lens zoom slider
-      function refreshSlider(e, nr){
-        var cam = lapi.getCamera();
-        cam.properties.getProperty("Lens").parameters.Zoom.value = nr.value;
+    $('button[name="js-scale"]').bind( "click", function(){
+      lapi.scaleTool();
+    });
+    */
+
+    function setOnClickPattern( in_htmlElement, in_parameter, in_clickValue ){
+      $(in_htmlElement).click(function(e){
+        in_parameter.value = in_clickValue;
+      })
+    }
+
+    function addPatterns(){
+      // our patterns
+      var scn = lapi.getActiveScene()
+      var textures = scn.getTextures();
+
+      // scrape all textures that start with "EXPORT_TAG".
+      var tmpTexture = null;
+      var textureName = "";
+      var isExport = false;
+
+      // expose all textures
+      for( var i=0 ;i<textures.length; ++i){
+        tmpTexture = textures[i];
+        textureName = tmpTexture.properties.parameters.Name.value;
+        isExport = textureName.indexOf(EXPORT_TAG);
+        if(isExport >= 0){
+
+          // create the HTML element
+          var imgUrl = tmpTexture.getProperty("url").parameters.URL.value;
+          var img = $(document.createElement('img'));
+
+          // grab the parameter that the element will handle
+          var mat = lapi.getActiveScene().getObjectByName("shirt_material_1")[0];
+          var param = mat.getProperty("color").parameters.Texture;
+
+          // assign the callback
+          setOnClickPattern( img, param, tmpTexture.properties.parameters.GUID.value );
+
+          img.attr('src', imgUrl );
+          img.appendTo('#patterns');
+        }
       }
 
-      $( "#slider" ).slider( { orientation: "vertical",
-      range: "min",
-      min : 33,
-      max: 100,
-      value: 0.1,
-      slide: refreshSlider,
-      change: refreshSlider });
+    }
 
-      // Color picker
-      /*Raphael(function () {
-        var out = document.getElementById("output"),
-          vr = document.getElementById("vr"),
-          vg = document.getElementById("vg"),
-          vb = document.getElementById("vb"),
-          vh = document.getElementById("vh"),
-          vh2 = document.getElementById("vh2"),
-          vs = document.getElementById("vs"),
-          vs2 = document.getElementById("vs2"),
-          vv = document.getElementById("vv"),
-          vl = document.getElementById("vl"),
+    // lens zoom slider
+    function refreshSlider(e, nr){
+      var cam = lapi.getCamera();
+      cam.properties.getProperty("Lens").parameters.Zoom.value = nr.value;
+    }
 
-        // this is where colorpicker created
-          cp = Raphael.colorpicker(40, 20, 300, "#eee"),
-          cp2 = Raphael.colorwheel(360, 20, 300, "#eee"),
+    $( "#slider" ).slider( { orientation: "horizontal",
+    range: "min",
+    min : 15,
+    max: 100,
+    value: 15,
+    slide: refreshSlider,
+    change: refreshSlider });
 
-          clr = Raphael.color("#eee");
-        vr.innerHTML = clr.r;
-        vg.innerHTML = clr.g;
-        vb.innerHTML = clr.b;
-        vh.innerHTML = vh2.innerHTML = Math.round(clr.h * 360) + "°";
-        vs.innerHTML = vs2.innerHTML = Math.round(clr.s * 100) + "%";
-        vv.innerHTML = Math.round(clr.v * 100) + "%";
-        vl.innerHTML = Math.round(clr.l * 100) + "%";
-        out.onkeyup = function () {
-          cp.color(this.value);
-          cp2.color(this.value);
-        };
-        // assigning onchange event handler
-        var onchange = function (item) {
-          return function (clr) {
-            out.value = clr.replace(/^#(.)\1(.)\2(.)\3$/, "#$1$2$3");
-            item.color(clr);
-            out.style.background = clr;
-            out.style.color = Raphael.rgb2hsb(clr).b < .5 ? "#fff" : "#000";
-            clr = Raphael.color(clr);
-            vr.innerHTML = clr.r;
-            vg.innerHTML = clr.g;
-            vb.innerHTML = clr.b;
-            vh.innerHTML = vh2.innerHTML = Math.round(clr.h * 360) + "°";
-            vs.innerHTML = vs2.innerHTML = Math.round(clr.s * 100) + "%";
-            vv.innerHTML = Math.round(clr.v * 100) + "%";
-            vl.innerHTML = Math.round(clr.l * 100) + "%";
+    $(document).ready(function() {
 
-            var obj = lapi.getActiveScene().getObjectByName("Interior Shirt 2 - Glossy Diffuse BRDF 2")[0];
+      // called once the scene is fully loaded – warning: geometry might not be present!
+      lapi.onSceneLoaded = function(){
 
-            if(obj){
+        // set some defaults
+        var scn = lapi.getActiveScene();
+        var cam = scn.getCameras()[0];
+        cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
+        cam.getProperty("Resolution").getParameter("Width").value = 720;
 
-              // we are interested in changing the reflectance property
-              var reflectance = obj.properties.getProperty("reflectance");
+        // make sure nothing is selected
+        lapi.desselectAll();
 
-              // pow 2 is just for gamma correction
-              reflectance.parameters.Red.value   = Math.pow( clr.r * ONE_OVER_255, 2 );
-              reflectance.parameters.Green.value = Math.pow( clr.g * ONE_OVER_255, 2 );
-              reflectance.parameters.Blue.value  = Math.pow( clr.b * ONE_OVER_255, 2 );
-            }
-          };
-        };
-        cp.onchange = onchange(cp2);
-        cp2.onchange = onchange(cp);
-        // that’s it. Too easy
-      });   */
+        // build our app UI
+        addPatterns();
 
+        // start rendering and hide meshes
+        setTimeout( function(){
+          // now we will set all the GL meshes to not visible
+          var meshes = scn.getMeshes();
+          for( var m in meshes ){
+            meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
+          }
 
-      $(document).ready(function() {
+          // start rendering
+          lapi.startRender()
 
-        // called once the scene is fully loaded – warning: geometry might not be present!
-        lapi.onSceneLoaded = function(){
+        }, 2000 );
+      };
 
-          // set some defaults
-          var scn = lapi.getActiveScene();
-          var cam = scn.getCameras()[0];
-          cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
-          cam.getProperty("Resolution").getParameter("Width").value = 720;
+      var RADIUS = 5;
+      var SPEED = .005;
 
-          // make sure nothing is selected
-          lapi.desselectAll();
+      lapi.stepCb = function(dt){
+        var cam = lapi.getCamera();
+        var pos = cam.properties.getProperty("Position");
+        pos.parameters.x.value = RADIUS * Math.sin(SPEED*dt) * (2*Math.PI);
+        pos.parameters.z.value = RADIUS * Math.cos(SPEED*dt) * (2*Math.PI);
+      }
 
-          // start rendering and hide meshes
-          setTimeout( function(){
-            // now we will set all the GL meshes to not visible
-            var meshes = scn.getMeshes();
-            for( var m in meshes ){
-              meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
-            }
+    });
 
-            // start rendering
-            lapi.startRender()
-
-          }, 2000 );
-        };
-
-        var RADIUS = 5;
-        var SPEED = .005;
-
-        lapi.stepCb = function(dt){
-          var cam = lapi.getCamera();
-          var pos = cam.properties.getProperty("Position");
-          pos.parameters.x.value = RADIUS * Math.sin(SPEED*dt) * (2*Math.PI);
-          pos.parameters.z.value = RADIUS * Math.cos(SPEED*dt) * (2*Math.PI);
-        }
-
-      });
-
-    </script>
+  </script>
 
   </body>
 </html>
