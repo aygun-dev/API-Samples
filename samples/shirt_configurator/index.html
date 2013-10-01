@@ -131,7 +131,7 @@
         </div>
       </div>
       <div class="col-md-9 fillVertical">
-        <iframe src="https://lagoa.com/embed_links/519?validationHash=mptUt8UvBmcSxbfdXcb-0Q&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+        <iframe src="https://lagoa.com/embed_links/541?validationHash=r7Q6e0Ut46I58WjdluHqTw&width=500&height=330&fontcolor=&auto_load_scene=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
     </div>
   </div>
 
@@ -281,9 +281,12 @@
     });
 
 
-    function setOnClickPattern( in_htmlElement, in_parameter, in_clickValue ){
+    function setOnClickPattern( in_htmlElement, in_clickValue ){
       $(in_htmlElement).click(function(e){
-        in_parameter.value = in_clickValue;
+        // grab the parameter that the element will handle
+        var mat = exportMeshes[currentMesh].getMaterial();
+        var param = mat.getProperty("color").parameters.Texture;
+        param.value = in_clickValue;
       })
     }
 
@@ -308,12 +311,8 @@
           var imgUrl = tmpTexture.getProperty("url").parameters.URL.value;
           var img = $(document.createElement('img'));
 
-          // grab the parameter that the element will handle
-          var mat = lapi.getActiveScene().getObjectByName("shirt_material_1")[0];
-          var param = mat.getProperty("color").parameters.Texture;
-
           // assign the callback
-          setOnClickPattern( img, param, tmpTexture.properties.parameters.GUID.value );
+          setOnClickPattern( img, tmpTexture.properties.parameters.GUID.value );
 
           img.attr('src', imgUrl );
           img.appendTo('#patterns');
@@ -378,11 +377,11 @@
         cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
         cam.getProperty("Resolution").getParameter("Width").value = RENDER_WIDTH;
 
-        // build our app UI
-        addPatterns();
-
         // get all shirts
         getAllExportMeshes(scn);
+
+        // build our app UI
+        addPatterns();
 
         // we will keep track of camera for animation
         camPos = cam.getProperty("Position").parameters;
