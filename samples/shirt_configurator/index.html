@@ -30,8 +30,12 @@
   <script src="../assets/Flat-UI-master/js/jquery.tagsinput.js"></script>
   <script src="../assets/Flat-UI-master/js/jquery.placeholder.js"></script>
 
+  <!-- color picker -->
+  <link rel="stylesheet" type="text/css" href="../assets/jquery.simplecolorpicker.css"/>
+  <script src="../assets/jquery.simplecolorpicker.js"></script>
 
-  <!-- Bootstrap -->
+
+    <!-- Bootstrap -->
   <!-- Latest compiled and minified CSS -->
   <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
 
@@ -88,29 +92,46 @@
           <br>
           <div class="col-md-12">
             <p>Color</p>
+            <select name="color-picker1">
+              <option value="#7bd148">Green</option>
+              <option value="#5484ed">Bold blue</option>
+              <option value="#222222">Black</option>
+              <option value="#46d6db">Turquoise</option>
+              <option value="#7ae7bf">Light green</option>
+              <option value="#51b749">Bold green</option>
+              <option value="#fbd75b">Yellow</option>
+              <option value="#ffb878">Orange</option>
+              <option value="#dc2127">Bold red</option>
+              <option value="#dbadff">Purple</option>
+              <option value="#e1e1e1">Gray</option>
+            </select>
           </div>
           <br>
           <div class="col-md-12">
-            <p>Logo</p>
+            <a href="#" class="btn btn-block btn-lg btn-default js-orbit">Orbit</a>
           </div>
           <br>
           <div class="col-md-12">
-            <a href="#fakelink" class="btn btn-block btn-lg btn-primary js-orbit">Orbit</a>
+            <a href="#" class="btn btn-block btn-lg btn-default js-pan">Pan</a>
           </div>
           <br>
-          <div class="col-md-12">
-            <a href="#fakelink" class="btn btn-block btn-lg btn-primary js-pan">Pan</a>
+          <div class="row">
+            <div class="col-md-6">
+              <a href="#" class="btn btn-lg btn-block btn-primary js-prev">Prev</a>
+            </div>
+            <div class="col-md-6">
+              <a href="#" class="btn btn-lg btn-block btn-primary js-next">Next</a>
+            </div>
           </div>
-          <br>
           <div class="col-md-12">
+            <br>
             <p>Zoom</p>
             <div id="slider"></div>
           </div>
         </div>
       </div>
       <div class="col-md-9 fillVertical">
-        <iframe src="https://lagoa.com/embed_links/505?validationHash=vL9zieLiPDJlsDr6UDz0LQ&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-      </div>
+        <iframe src="https://lagoa.com/embed_links/519?validationHash=mptUt8UvBmcSxbfdXcb-0Q&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
     </div>
   </div>
 
@@ -118,6 +139,127 @@
     // some constants
     var ONE_OVER_255 = 1/255;
     var EXPORT_TAG = "export";
+
+    var FPS = 10;
+    var ANIM_MAX_FRAMES = 30;
+    var RENDER_WIDTH = 512;
+
+    var exportMeshes = [];  //lapi.SceneObject array
+    var currentMesh = 0;    // keep track of the object we are looking at.
+
+    // TODO COG to the property set... here we just account for offset
+    var offset = { x: -45, y: -9, z: 0 };
+
+    var cam, camPos, targetPos;
+
+    // linear interpolation for the animation stuff
+    function lerp( a, b, d ){
+      return a + d * (b - a);
+    }
+
+    // setup the camera animation and play
+    function playCameraInterpolation( aCamVector, bCamVector, aTargetVector, bTargetVector ){
+
+      // set the res to very low
+//      cam.getProperty("Resolution").getParameter("Width").value = 512;
+
+      // animation length in frames
+      var currFrame = 0;
+
+      // setup our frame update routine
+      lapi.stepCb = function( e ){
+
+        currFrame++;
+
+        var dt = currFrame/ANIM_MAX_FRAMES;
+
+        // we are only inrerested in X changes...
+        camPos.x.value = lerp(aCamVector.x, bCamVector.x, dt);
+        targetPos.x.value = lerp(aTargetVector.x, bCamVector.x, dt);
+
+        console.log("interpolating", lerp(aCamVector.x, bCamVector.x, dt), "frame", currFrame, dt);
+
+        if(camPos.x.value === bCamVector.x || currFrame >= ANIM_MAX_FRAMES ){
+//          cam.getProperty("Resolution").getParameter("Width").value = 512;
+          lapi.stop();
+          console.log("stop");
+        }
+      };
+
+      // play the animation
+      lapi.play(FPS);
+    }
+
+    var nextMesh = function(){
+
+      if( currentMesh < exportMeshes.length-1 ){
+        ++currentMesh;
+
+        // get a vector to camera's actual position
+        var currentCameraPos = { x : camPos.x.value, y : camPos.y.value, z : camPos.z.value };
+        var currentTargetPos = { x : targetPos.x.value, y : targetPos.y.value, z : targetPos.z.value };
+
+        var posParams = exportMeshes[currentMesh].getProperty("Position").parameters;
+        var newCamPos = { x : posParams.x.value-offset.x,
+                          y : posParams.y.value-offset.y,
+                          z : posParams.z.value-offset.z };
+
+
+        console.log( currentCameraPos, newCamPos );
+
+        playCameraInterpolation( currentCameraPos, newCamPos,
+                                 currentTargetPos, newCamPos );
+      }
+      console.log("next", currentMesh);
+    }
+
+    function prevMesh(){
+      if( currentMesh >= 1 ){
+        --currentMesh;
+
+        // get a vector to camera's actual position
+        var currentCameraPos = { x : camPos.x.value, y : camPos.y.value, z : camPos.z.value };
+        var currentTargetPos = { x : targetPos.x.value, y : targetPos.y.value, z : targetPos.z.value };
+
+        var posParams = exportMeshes[currentMesh].getProperty("Position").parameters;
+        var newCamPos = { x : posParams.x.value-offset.x,
+          y : posParams.y.value-offset.y,
+          z : posParams.z.value-offset.z };
+
+
+        console.log( currentCameraPos, newCamPos );
+
+        playCameraInterpolation( currentCameraPos, newCamPos,
+          currentTargetPos, newCamPos );
+      }
+      console.log("prev", currentMesh);
+    }
+
+    // setup some UI stuff
+    var cPicker = $('select[name="color-picker1"]').simplecolorpicker();
+
+    var uiElement = $('select[name="color-picker1"]');
+    uiElement.change(function(){
+
+      console.log("Color change");
+
+      // read the color form the UI element
+      var color = lapi.utils.hexToRGB( cPicker.val() );
+
+      // this will return an array with all objects that have the part name, in Lagoa multiple parts
+      // can have the same name – no "name uniqueness" only object GUID uniqueness is guaranteed.
+      // we will make an assumption that we are only interested in the first one, therefore the array [0]
+      var mat = exportMeshes[currentMesh].getMaterial();
+
+      // we are interested in changing the reflectance property
+      // for Velvet shader the color is called "color..."
+      var reflectance = mat.properties.getProperty("color");
+
+      // pow 2 is just for gamma correction
+      reflectance.parameters.Red.value   = Math.pow( color.r * ONE_OVER_255, 2 );
+      reflectance.parameters.Green.value = Math.pow( color.g * ONE_OVER_255, 2 );
+      reflectance.parameters.Blue.value  = Math.pow( color.b * ONE_OVER_255, 2 );
+    });
 
     // add some buttons
     $('.js-orbit').bind( "click", function(){
@@ -129,15 +271,15 @@
       lapi.panTool();
     });
 
-    /*
-    $('button[name="js-move"]').bind( "click", function(){
-      lapi.moveTool();
+
+    $('.js-next').bind( "click", function(){
+      nextMesh();
     });
 
-    $('button[name="js-scale"]').bind( "click", function(){
-      lapi.scaleTool();
+    $('.js-prev').bind( "click", function(){
+      prevMesh()
     });
-    */
+
 
     function setOnClickPattern( in_htmlElement, in_parameter, in_clickValue ){
       $(in_htmlElement).click(function(e){
@@ -180,6 +322,37 @@
 
     }
 
+    function getAllExportMeshes(in_scene){
+
+      var meshes = in_scene.getMeshes();
+      var meshName = "";
+      var count = meshes.length;
+
+      // loop in reverse
+      for (var i = count - 1; i >= 0; i--){
+        meshName = meshes[i].properties.getParameter("Name").value;
+        console.log(meshName);
+        if(meshName.indexOf(EXPORT_TAG)>=0){
+          exportMeshes.push(meshes[i]);
+        }
+      }
+    }
+
+    // start rendering and hide meshes
+    function beginRendering(in_scn){
+
+      // this timeout just prevents us from racing... avoid a bug. Just trust me.
+      setTimeout( function(){
+        // now we will set all the GL meshes to not visible
+        var meshes = in_scn.getMeshes();
+        for( var m in meshes ){
+          meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
+        }
+        // start rendering
+        lapi.startRender()
+      }, 2000 );
+    }
+
     // lens zoom slider
     function refreshSlider(e, nr){
       var cam = lapi.getCamera();
@@ -201,39 +374,25 @@
 
         // set some defaults
         var scn = lapi.getActiveScene();
-        var cam = scn.getCameras()[0];
+        cam = scn.getCameras()[0];
         cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
-        cam.getProperty("Resolution").getParameter("Width").value = 720;
-
-        // make sure nothing is selected
-        lapi.desselectAll();
+        cam.getProperty("Resolution").getParameter("Width").value = RENDER_WIDTH;
 
         // build our app UI
         addPatterns();
 
-        // start rendering and hide meshes
-        setTimeout( function(){
-          // now we will set all the GL meshes to not visible
-          var meshes = scn.getMeshes();
-          for( var m in meshes ){
-            meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
-          }
+        // get all shirts
+        getAllExportMeshes(scn);
 
-          // start rendering
-          lapi.startRender()
+        // we will keep track of camera for animation
+        camPos = cam.getProperty("Position").parameters;
+        targetPos = cam.getProperty("TargetPosition").parameters;
 
-        }, 2000 );
+        beginRendering(scn);
+
+        // make sure nothing is selected
+        lapi.desselectAll();
       };
-
-      var RADIUS = 5;
-      var SPEED = .005;
-
-      lapi.stepCb = function(dt){
-        var cam = lapi.getCamera();
-        var pos = cam.properties.getProperty("Position");
-        pos.parameters.x.value = RADIUS * Math.sin(SPEED*dt) * (2*Math.PI);
-        pos.parameters.z.value = RADIUS * Math.cos(SPEED*dt) * (2*Math.PI);
-      }
 
     });
 

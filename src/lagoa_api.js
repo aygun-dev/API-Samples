@@ -309,7 +309,9 @@
   /**
    * @function start playing the timeline
    */
-  lapi.play = function(){
+  lapi.play = function(in_fps){
+
+    in_fps = Math.round(1000/in_fps) || Math.round(1000/30) ; // ~30fps is the default
 
     // abort early
     if (this.isPlaying()) return;
@@ -332,7 +334,7 @@
     }
 
     // start play
-    var intervalId = setInterval(doStep, 48);
+    var intervalId = setInterval(doStep, in_fps);
   };
 
   lapi.nextFrame = function(){
