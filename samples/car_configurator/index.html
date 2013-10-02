@@ -85,7 +85,7 @@
 
 <body>
 <div class="bs-header fillHeader" id="content">
-  <iframe src="https://lagoa.com/embed_links/559?validationHash=jmQW-gIaUeXakbc4Jox_Lw&width=500&height=330&fontcolor=&auto_load_scene=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+  <iframe src="https://lagoa.com/embed_links/568?validationHash=tdVVl2qL7L4sxq-AJt9dVw&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 </div>
   <div class="container">
     <div class="row">
@@ -103,6 +103,7 @@
         <div class="col-md-12">
           <p>Light</p>
           <div id="intensity-slider"></div>
+          <div id="intensity-slider2"></div>
           <div id="patterns"></div>
         </div>
       </div>
@@ -110,17 +111,23 @@
         <!--<p>Pattern</p>-->
         <!--<div id="patterns"></div>-->
         <!--<div class="col-md-12">-->
-        <p>Color</p>
-        <select name="color-picker1">
-          <option value="#7bd148">Green</option>
-          <option value="#5484ed">Bold blue</option>
-          <option value="#222222">Black</option>
-          <option value="#46d6db">Turquoise</option>
-          <option value="#51b749">Bold green</option>
-          <option value="#ffb878">Orange</option>
-          <option value="#dc2127">Bold red</option>
-          <option value="#e1e1e1">Gray</option>
-        </select>
+        <p>Paint</p>
+          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-black" style="background-color:black;"></a></div>
+          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-gray" style="background-color:darkgray;"></a></div>
+          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-red" style="background-color:darkred;"></a></div>
+          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-white" style="background-color:lightgray;"></a></div>
+          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-blue" style="background-color:lightblue;"></a></div>
+
+        <!--<select name="color-picker1">-->
+          <!--<option value="#7bd148">Green</option>-->
+          <!--<option value="#5484ed">Bold blue</option>-->
+          <!--<option value="#222222">Black</option>-->
+          <!--<option value="#46d6db">Turquoise</option>-->
+          <!--<option value="#51b749">Bold green</option>-->
+          <!--<option value="#ffb878">Orange</option>-->
+          <!--<option value="#dc2127">Bold red</option>-->
+          <!--<option value="#e1e1e1">Gray</option>-->
+        <!--</select>-->
       </div>
     </div>
   </div>
@@ -129,12 +136,14 @@
   <script>
     // some constants
     var DOME_LIGHT_NAME = "Dome light 1";
+    var SPHERE_LIGHT_NAME = "Sphere Light 1";
+
     var ONE_OVER_255 = 1/255;
     var EXPORT_TAG = "export";
 
     var FPS = 10;
     var ANIM_MAX_FRAMES = 30;
-    var RENDER_WIDTH = 1280;
+    var RENDER_WIDTH = 960;
 
     var exportMeshes = [];  //lapi.SceneObject array
     var currentMesh = 0;    // keep track of the object we are looking at.
@@ -253,7 +262,31 @@
       reflectance.parameters.Blue.value  = Math.pow( color.b * ONE_OVER_255, 2 );
     });
 
-    // add some buttons
+    // hook the buttons
+    $('.js-color-black').bind( "click", function(){
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - BLACK", "BodyWork");
+    });
+
+    $('.js-lightBool').bind( "change", function(){
+      console.log("changed");
+    });
+
+    $('.js-color-white').bind( "click", function(){
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - WHITE", "BodyWork");
+    });
+
+    $('.js-color-white').bind( "click", function(){
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - BLUE", "BodyWork");
+    });
+
+    $('.js-color-red').bind( "click", function(){
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - RED", "BodyWork");
+    });
+
+    $('.js-color-gray').bind( "click", function(){
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - GRAY", "BodyWork");
+    });
+
     $('.js-orbit').bind( "click", function(){
       lapi.orbitTool();
     });
@@ -364,11 +397,32 @@
 
     }
 
+    function refreshIntensitySlider2(e, nr){
+      var obj = lapi.getActiveScene().getObjectByName(SPHERE_LIGHT_NAME)[0];
+
+      var val = nr.value;
+
+      var params = { r : val,
+                    g : val,
+                    b : val };
+
+      lapi.setObjectParameter( obj.properties.parameters.GUID.value, "Color", params );
+
+    }
+
     // lens zoom slider
     function refreshSlider(e, nr){
       var cam = lapi.getCamera();
       cam.properties.getProperty("Lens").parameters.Zoom.value = nr.value;
     }
+
+    $( "#intensity-slider2" ).slider( { orientation: "horizontal",
+      range: "min",
+      min : 0,
+      max: 100,
+      value: 0,
+      slide: refreshIntensitySlider2,
+      change: refreshIntensitySlider2 });
 
     $( "#intensity-slider" ).slider( { orientation: "horizontal",
       range: "min",
