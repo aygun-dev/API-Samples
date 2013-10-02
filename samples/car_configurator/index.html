@@ -98,6 +98,10 @@
           <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-orbit">Orbit</a></div>
           <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-pan">Pan</a></div>
         </div>
+        <div class="row">
+          <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-view-0">0</a></div>
+          <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-view-1">1</a></div>
+        </div>
       </div>
       <div class="col-md-4">
         <div class="col-md-12">
@@ -150,6 +154,14 @@
 
     // TODO COG to the property set... here we just account for offset
     var offset = { x: -45, y: -9, z: 0 };
+
+    views = [];
+
+    views[0] = { camera : { x : -325, y: 80, z: 250 },
+                 target : { x : 25, y: 31, z: 24 }};
+
+    views[1] = { camera : { x : 154, y: 90, z: 90},
+                 target : { x : 122, y: 57, z: -14}};
 
     var cam, camPos, targetPos;
 
@@ -267,9 +279,30 @@
       lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - BLACK", "BodyWork");
     });
 
-    $('.js-lightBool').bind( "change", function(){
-      console.log("changed");
+    $('.js-view-0').bind( "click", function(){
+      var cam = lapi.getCamera();
+
+      cam.properties.getProperty("Position").parameters.x.value = views[0].camera.x;
+      cam.properties.getProperty("Position").parameters.y.value = views[0].camera.y;
+      cam.properties.getProperty("Position").parameters.z.value = views[0].camera.z;
+
+      cam.properties.getProperty("TargetPosition").parameters.x.value = views[0].target.x;
+      cam.properties.getProperty("TargetPosition").parameters.y.value = views[0].target.y;
+      cam.properties.getProperty("TargetPosition").parameters.z.value = views[0].target.z;
     });
+
+    $('.js-view-1').bind( "click", function(){
+      var cam = lapi.getCamera();
+
+      cam.properties.getProperty("Position").parameters.x.value = views[1].camera.x;
+      cam.properties.getProperty("Position").parameters.y.value = views[1].camera.y;
+      cam.properties.getProperty("Position").parameters.z.value = views[1].camera.z;
+
+      cam.properties.getProperty("TargetPosition").parameters.x.value = views[1].target.x;
+      cam.properties.getProperty("TargetPosition").parameters.y.value = views[1].target.y;
+      cam.properties.getProperty("TargetPosition").parameters.z.value = views[1].target.z;
+    });
+
 
     $('.js-color-white').bind( "click", function(){
       lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - WHITE", "BodyWork");
