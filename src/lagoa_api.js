@@ -144,7 +144,7 @@
       lapi._cbmap[randName] = callback;
     }
     iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
-    console.warn("API: "+ message);
+//    console.warn("API: "+ message);
   };
 
   /**
@@ -387,7 +387,7 @@
   // This happens because we want the user to have a reference object to guide them.
   $(function() {
     function checkLoaded(){
-      console.warn("waiting for scene to load...");
+//      console.warn("waiting for scene to load...");
       lapi._embedRPC("ACTIVEAPP.getSceneLoaded();", function(in_response) {
         if (in_response.data === true){
           clearInterval(timer);
