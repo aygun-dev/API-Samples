@@ -96,7 +96,7 @@ lapi.SceneObject.prototype = {
 
     var diveIn = function( in_prop, in_rtn ){
       for( var i in in_prop ){
-        if( in_prop[i] instanceof Object ){                                                // it is a parameter
+        if( in_prop[i].id && in_prop[i].type ){  // if it has an ID and a TYPE then it is a parameter object...
           in_rtn.addParameter( new lapi.Parameter( in_ctxtObject, in_rtn, in_prop[i] ));
         }else{
           var newProp = new lapi.Property(i);
