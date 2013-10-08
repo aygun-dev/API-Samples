@@ -39,7 +39,8 @@ var lapi = {};
     MATERIAL : "MaterialID",
     TEXTURE : "TextureID",
     GROUP : "GroupID",
-    PROJECTION : "TextureProjectionID"
+    PROJECTION : "TextureProjectionID",
+    STATES : "StateID"
   };
 
   /**
@@ -155,7 +156,7 @@ var lapi = {};
       lapi._cbmap[randName] = callback;
     }
     iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
-    console.warn("API: "+ message);
+//    console.warn("API: "+ message);
   };
 
   /**
@@ -398,7 +399,7 @@ var lapi = {};
   // This happens because we want the user to have a reference object to guide them.
   $(function() {
     function checkLoaded(){
-      console.warn("waiting for scene to load...");
+//      console.warn("waiting for scene to load...");
       lapi._embedRPC("ACTIVEAPP.getSceneLoaded();", function(in_response) {
         if (in_response.data === true){
           clearInterval(timer);
@@ -758,7 +759,7 @@ lapi.SceneObject.prototype = {
 
     var diveIn = function( in_prop, in_rtn ){
       for( var i in in_prop ){
-        if(in_prop[i].name){                                                // it is a parameter
+        if( in_prop[i] instanceof Object ){                                                // it is a parameter
           in_rtn.addParameter( new lapi.Parameter( in_ctxtObject, in_rtn, in_prop[i] ));
         }else{
           var newProp = new lapi.Property(i);
@@ -922,6 +923,10 @@ lapi.Scene.prototype = {
 
   getGroups : function(){
     return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.GROUP ]);
+  },
+
+  getStates : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.STATES ]);
   }
 
 };

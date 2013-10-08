@@ -87,6 +87,10 @@ lapi.Scene.prototype = {
 
   getGroups : function(){
     return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.GROUP ]);
+  },
+
+  getStates : function(){
+    return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.STATES ]);
   }
 
 };

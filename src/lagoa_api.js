@@ -28,7 +28,8 @@
     MATERIAL : "MaterialID",
     TEXTURE : "TextureID",
     GROUP : "GroupID",
-    PROJECTION : "TextureProjectionID"
+    PROJECTION : "TextureProjectionID",
+    STATES : "StateID"
   };
 
   /**
