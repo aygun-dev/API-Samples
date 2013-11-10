@@ -293,8 +293,8 @@ var lapi = {};
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameterByName("tmaterial");
-    matParam.value = mat.properties.getParameterByName("guid").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameter("tmaterial");
+    matParam.value = mat.properties.getParameter("guid").value;
   };
 
   /**
@@ -345,6 +345,32 @@ var lapi = {};
    */
   lapi.getCamera = function(){
     return this._activeCamera;
+  };
+
+  /**
+   * Set the camera resolution parameters to in_Params.width and in_Params.height, if either is missing
+   * the current value is preserved.
+   * @param in_Params {Object} containing two members, width{Number} and height{Number}
+   * TODO move this routine into a specialized camera class
+   */
+  lapi.setCameraResolution = function( in_Params ){
+
+    // get the camera and the resolution property
+    var cam = lapi.getCamera();
+    var camGuid = cam.properties.getParameter("guid").value;
+
+    var resProp = cam.getProperty("Resolution");
+
+    // validate we have some decent parameters to work with or default to what is already set to
+    in_Params.width  = "width"  in in_Params ? in_Params.width  : resProp.parameters.width.value;
+    in_Params.height = "height" in in_Params ? in_Params.height : resProp.parameters.height.value;
+
+    // set once
+    lapi.setObjectParameter(
+      camGuid, 'Resolution',
+      { width  : in_Params.width,
+        height : in_Params.height }
+    );
   };
 
   /**

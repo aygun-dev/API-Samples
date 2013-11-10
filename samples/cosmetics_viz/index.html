@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Lagoa – cosmetics viz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Loading Bootstrap -->
+  <link href="../assets/Flat-UI-master/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+  <!-- Loading Flat UI -->
+  <link href="../assets/Flat-UI-master/css/flat-ui.css" rel="stylesheet">
+
+  <link rel="shortcut icon" href="../assets/Flat-UI-master/images/favicon.ico">
+
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+  <!--[if lt IE 9]>
+  <script src="../assets/Flat-UI-master/js/html5shiv.js"></script>
+  <![endif]-->
+
+  <!-- Load JS here for greater good =============================-->
+  <script src="../assets/Flat-UI-master/js/jquery-1.8.3.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery-ui-1.10.3.custom.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.ui.touch-punch.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/bootstrap.min.js"></script>
+  <script src="../assets/Flat-UI-master/js/bootstrap-select.js"></script>
+  <script src="../assets/Flat-UI-master/js/bootstrap-switch.js"></script>
+  <script src="../assets/Flat-UI-master/js/flatui-checkbox.js"></script>
+  <script src="../assets/Flat-UI-master/js/flatui-radio.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.tagsinput.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.placeholder.js"></script>
+  <script src="../assets/Flat-UI-master/js/jquery.stacktable.js"></script>
+
+  <!-- color picker -->
+  <link href="../assets/jquery-colorpickersliders/jquery.colorpickersliders.css" rel="stylesheet" type="text/css"
+        media="all">
+  <link href="../assets/jquery-colorpickersliders/demo.css" rel="stylesheet" type="text/css" media="all">
+  <script src="../assets/tinycolor.js"></script>
+  <script src="../assets/jquery-colorpickersliders/jquery.colorpickersliders.js"></script>
+
+  <!-- LAGOA API -->
+  <script src="../../build/lapi.js"></script>
+
+  <style media="screen">
+    body {
+      background: white;
+      padding: 0;
+    }
+
+    #patterns img {
+      width: 75px;
+      height: 75px;
+      margin: 2px;
+      border-radius: 8px;
+    }
+
+    #patterns img:hover {
+      /*width: 100px;*/
+      /*height: 100px;*/
+      outline: 4px solid #ffff00;
+      border-radius: 8px;
+    }
+
+    .fillVertical {
+      height: 100%;
+    }
+
+    .fillVertical iframe {
+      float: right;
+      width: 600px;
+      height: 100%;
+    }
+  </style>
+
+</head>
+
+<body>
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="row">
+        <div class="col-md-12">
+          <h3>Cosmetics Configurator</h3>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <h4>Hair Colours</h4>
+          <div class="row">
+            <div class="col-md-12">
+              <select name="hair-selector-js" class="select-block" style="display: none;"></select>
+              <div class="row">
+                <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-short-hair">Short Hair</a></div>
+                <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-pony-tail">Pony Tail</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-md-12">
+          <h4>Lipstick (Lch)</h4>
+          <div class="row">
+            <div class="col-md-4">Glossiness</div>
+            <div class="col-md-6"><div id="slider-lipstick_finish-js"></div></div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">L<input type="text" class="L-input-js color-field form-control"></div>
+            <div class="col-md-4">a<input type="text" class="a-input-js color-field form-control"></div>
+            <div class="col-md-4">b<input type="text" class="b-input-js color-field form-control"></div>
+          </div>
+          <br/>
+          <div class="row">
+            <div class="col-md-12">
+              <span class="cielch-picker1"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-md-12">
+          <h4>Views</h4>
+
+          <div class="col-md-4"><a href="#" class="btn btn-block btn-lg btn-default js-view-1">A</a></div>
+          <div class="col-md-4"><a href="#" class="btn btn-block btn-lg btn-default js-view-2">B</a></div>
+          <div class="col-md-4"><a href="#" class="btn btn-block btn-lg btn-default js-view-3">C</a></div>
+        </div>
+      </div>
+      <div class="row">
+        <br>
+        <div class="col-md-12">
+          <div id="slider-zoom-js"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="fillVertical">
+        <iframe
+            src="https://lagoa.com/embed_links/807?validationHash=iyKIfajcJhGnkeIesmsPSQ&width=500&height=330&auto_load_scene=true"
+            id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen
+            allowFullScreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="cosmetics_viz.js"></script>
+
+</body>
+</html>

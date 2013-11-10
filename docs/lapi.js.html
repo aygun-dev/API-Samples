@@ -280,6 +280,15 @@ var lapi = {};
   lapi._frame = 0;
 
   /**
+   * Pass messgage to SC
+   * @in_message {object} message we will stringify and send to SC
+   */
+  lapi._messageIframe = function(in_message){
+    var iframe = document.getElementById('lagoaframe');
+    iframe.contentWindow.postMessage(JSON.stringify(in_message), '*');
+  };
+
+  /**
    * RPC call for SC to execute.
    * @message {string} instructions we want to execute
    * @callback {function} Optional callback. It will use whatever the RPC call returns. Note, that RPC
@@ -288,86 +297,10 @@ var lapi = {};
    */
   lapi._embedRPC = function(message, callback){
     var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
-    var iframe = document.getElementById('lagoaframe');
     if(callback){
       lapi._cbmap[randName] = callback;
     }
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
-//    console.warn("API: "+ message);
-  };
-
-  /**
-   * RPC call for SC to execute. It will bind our callbacks to a specific object's modifications.
-   * @in_GUID {string} The GUID of the object whose property we want to track.
-   * @in_property {string} The property of the object we want to track.
-   * @callback {function} Optional callback. It will use a stringified property object or
-   * a paramater. Note : property objects is made of key-value entries, where the key is a 
-   * parameter name and value is a strigified parameter.
-   */
-  lapi.objectPropertyBind = function(in_guid,in_property, callback){
-    var eventName = in_guid + ':' + in_property;
-    var initialBind = false;
-    if(!lapi._eventCbMap[eventName]){
-      var scn = lapi.getActiveScene();
-      var obj = scn.getObjectByGuid( in_guid );
-      initialBind = true;
-      var cb;
-      if(obj.properties.getParameter(in_property)){
-        cb = function(data){
-          obj.properties.getParameter(in_property).value = data.value;
-        };
-      }else{
-        var property = obj.properties.getProperty(in_property);
-        cb = function(data){
-          property._remoteUpdate = true;
-          for( var i in data){
-            property.getParameter(i).value = data[i].value;
-          }
-          property._remoteUpdate = false;
-        };
-      }
-      lapi._eventCbMap[eventName] = [cb];
-    }
-    if(callback){
-      lapi._eventCbMap[eventName].push(callback);
-    }
-    if(initialBind){
-      var iframe = document.getElementById('lagoaframe');
-      iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName}), '*');
-    }
-  };
-
-  /**
-   * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
-   * @in_GUID {string} The GUID of the object whose property we want to track.
-   * @in_property {string} The property of the object we want to track.
-   */
-  lapi.objectPropertyUnbind = function(in_guid,in_property){
-    var eventName = in_guid + ':' + in_property;
-    if(!lapi._eventCbMap[eventName]){
-      return;
-    }
-    delete lapi._eventCbMap[eventName];
-    var iframe = document.getElementById('lagoaframe');
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName, unbind : true}), '*');
-  };
-
-
-  /**
-   * This will unbind a callback from specific object's modifications.
-   * @in_GUID {string} The GUID of the object whose property we want to track.
-   * @in_property {string} The property of the object we want to track.
-   * @in_callback {function}  The callback we want to unbind.
-   */
-  lapi.objectPropertyUnbindCb = function(in_guid,in_property, in_callback){
-    var eventName = in_guid + ':' + in_property;
-    if(!lapi._eventCbMap[eventName]){
-      return;
-    }
-    var index = lapi._eventCbMap[eventName].indexOf(in_callback);
-    if (index > -1) {
-      lapi._eventCbMap[eventName].splice(index, 1);
-    }
+    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message});
   };
 
   /**
@@ -485,8 +418,8 @@ var lapi = {};
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameterByName("Material");
-    matParam.value = mat.properties.getParameterByName("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameter("tmaterial");
+    matParam.value = mat.properties.getParameter("guid").value;
   };
 
   /**
@@ -537,6 +470,32 @@ var lapi = {};
    */
   lapi.getCamera = function(){
     return this._activeCamera;
+  };
+
+  /**
+   * Set the camera resolution parameters to in_Params.width and in_Params.height, if either is missing
+   * the current value is preserved.
+   * @param in_Params {Object} containing two members, width{Number} and height{Number}
+   * TODO move this routine into a specialized camera class
+   */
+  lapi.setCameraResolution = function( in_Params ){
+
+    // get the camera and the resolution property
+    var cam = lapi.getCamera();
+    var camGuid = cam.properties.getParameter("guid").value;
+
+    var resProp = cam.getProperty("Resolution");
+
+    // validate we have some decent parameters to work with or default to what is already set to
+    in_Params.width  = "width"  in in_Params ? in_Params.width  : resProp.parameters.width.value;
+    in_Params.height = "height" in in_Params ? in_Params.height : resProp.parameters.height.value;
+
+    // set once
+    lapi.setObjectParameter(
+      camGuid, 'Resolution',
+      { width  : in_Params.width,
+        height : in_Params.height }
+    );
   };
 
   /**
@@ -684,12 +643,6 @@ lapi.Property = function( in_name ){
    * @private
    */
   this._name = in_name;
-
-  /**
-   * @type {boolean}
-   * @private
-   */
-  this._remoteUpdate = false;
 
 };
 
@@ -900,7 +853,6 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     _value = in_val;
     var paramList = {};
     paramList[ this.id ] = this.value;
-    if(this.parent._remoteUpdate) return;
     var parentPropName = this.parent.name;
     lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
   })
@@ -912,7 +864,15 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
  * @memberof Parameter
  */
 lapi.Parameter.prototype = {
-  constructor : lapi.Parameter
+  constructor : lapi.Parameter,
+
+  /**
+   * Set the value of this parameter without updating the back-end
+   * @private
+   */
+  _setValueMuted : function(in_val){
+    this._value = in_val;
+  }
 };
 
 /**
@@ -924,9 +884,11 @@ lapi.Parameter.prototype = {
  * This object will be initialized – based on the input guid – producing a
  * mirror object locally outside of the embed.
  * @param {string} in_guid guid of an object in the scene
+ * @param {function} in_cb (optional) callback is called when object is done initializing.
+ * The callback expects an SceneObject.
  * @class SceneObject
  */
-lapi.SceneObject = function( in_guid ){
+lapi.SceneObject = function( in_guid, in_cb){
   var _guid = in_guid;
   var _properties = {};
   var _self = this;
@@ -964,11 +926,16 @@ lapi.SceneObject = function( in_guid ){
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
   console.warn("Building PSet of " + in_guid );
-  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
+  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
+    + "});",
     function(in_embedRPC_message){
       if( !(in_embedRPC_message.error === "EXECERR") ){
         var pSet = in_embedRPC_message.data;
         _properties = _self._pSetDeepCopy( _self, pSet );
+        if(in_cb){
+          in_cb(_self);
+        }
       }
     }
   );
@@ -1001,6 +968,76 @@ lapi.SceneObject.prototype = {
   },
 
   /**
+   * RPC call for SC to execute. It will bind our callbacks to the object's modifications.
+   * As a bonus, we will now automatically track the values of the property parameters and update our object
+   * accordingly. This way, the user won't be responsible for the updating/tracking!
+   * @in_propName {string} The property of the object we want to track.
+   * @callback {function} Optional callback. It will use a stringified property object or
+   * a paramater. Note : property objects is made of key-value entries, where the key is a
+   * parameter id and value is a strigified parameter. The exception being if a property is
+   * a single parameter. Then, it's just the parameter object itself.  
+   */
+  bindProperty : function( in_propName, callback){
+    var eventName = this.guid + ':' + in_propName;
+    var initialBind = false;
+    if(!lapi._eventCbMap[eventName]){
+      initialBind = true;
+      var cb;
+      var property = this.getProperty(in_propName);
+      if(property){
+        cb = function(data){
+          for( var i in data){
+            property.getParameter(i)._setValueMuted(data[i].value);
+          }
+        };
+      }else {
+        property = this.properties.getParameter(in_propName);
+        cb = function(data){
+          property._setValueMuted(data.value);
+        };
+
+      }
+      lapi._eventCbMap[eventName] = [cb];
+    }
+    if(callback){
+      lapi._eventCbMap[eventName].push(callback);
+    }
+    if(initialBind){
+      lapi._messageIframe({channel : 'embedrpc', id: eventName});
+    }
+  },
+
+  /**
+   * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
+   * This also means we are no longer tracking the object values.
+   * @in_propName {string} The property of the object we want to track.
+   */
+  unbindProperty : function( in_propName){
+    var eventName = this.guid + ':' + in_propName;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    delete lapi._eventCbMap[eventName];
+    lapi._messageIframe({channel : 'embedrpc', id: eventName, unbind : true});
+  },
+
+  /**
+   * This will unbind a specific callback from the object's property modifications.
+   * @in_propName {string} The property of the object we want to track.
+   * @callback {function}  The callback we want to unbind.
+   */
+  unbindPropertyCb : function( in_propName, callback){
+    var eventName = this.guid + ':' + in_propName;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    var index = lapi._eventCbMap[eventName].indexOf(callback);
+    if (index > -1) {
+      lapi._eventCbMap[eventName].splice(index, 1);
+    }
+  },
+
+  /**
    * copy a PropertySet that is returned via an embedRPC call. The returned object is
    * parsed into a local object made out of SceneObject, Property and Parameter classes.
    * @in_ctxtObject {SceneObject} the object this pset belongs to
@@ -1026,6 +1063,26 @@ lapi.SceneObject.prototype = {
     diveIn(in_pset, rtn);
 
     return rtn;
+  },
+
+  /**
+   * This is an asynnchrnous function!
+   * Compute the BoundingBox of an object in world space. In other words, take into
+   * account the translation,rotation and scale components.
+   * @in_cb {function} function that expects an object  {min : {x : v, y : v, z :v}, max :{...}}
+   * the 'v' is a stand-in for numerical values.
+   */
+  computeTransformedAABB : function(in_cb){
+    var bb = this.properties.getProperty("BoundingBoxMin");
+    if(!bb){
+      console.warn('object has no bounding box');
+      return;
+    }
+    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + this.guid +"');"
+      + "var bbox = ACTIVEAPP.boundingBoxForEntity(obj);"
+      + "bbox.transformAndAxisAlign(obj.matrix);",function(in_response){
+        in_cb(in_response.data);
+      });
   }
 
 };
@@ -1193,6 +1250,45 @@ lapi.Scene.prototype = {
 
   addAssets : function(in_assetArray){
     lapi._loadAssets(in_assetArray);
+  },
+
+  addObject : function(in_tuid,in_guid,in_cb){
+    var initClass = this._classedItems[in_tuid];
+    if(!initClass){
+      initClass = this._classedItems[in_tuid] = {};
+    }
+    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid,in_cb);
+    ++this._objectCount;
+  },
+
+  /**
+   * Add a new material to scene.
+   * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
+   * @param {function} in_cb  optional callback that expects a material SceneObject as an argument. The object is the one we just added
+   * to the scene through addNewMaterial().
+   */
+  addNewMaterial : function(in_materialType,in_cb){
+    var self = this;
+    lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
+    + in_materialType + "'});"
+    + "mat.guid;",function(in_response){
+      self.addObject('MaterialID',in_response.data,in_cb);
+    });
+  },
+
+  /**
+   * Add a new light to scene.
+   * @param {string} in_lightType  The type of light the user wants to add : 'DomeLight','SunSkyLight' etc.
+   * @param {function} in_cb  optional callback that expects a light SceneObject as an argument. The object is the 
+   * one we just added to the scene through addNewLight().
+   */
+  addNewLight : function(in_lightType,in_cb){
+    var self = this;
+    lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
+    + in_lightType + "'});"
+    + "light.guid;",function(in_response){
+      self.addObject('LightID',in_response.data,in_cb);
+    });
   }
 
 };
@@ -1217,7 +1313,7 @@ lapi.Scene.prototype = {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a>
-		on Thu Dec 19 2013 13:38:09 GMT-0500 (EST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Fri Jan 31 2014 23:16:57 GMT-0600 (CST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
