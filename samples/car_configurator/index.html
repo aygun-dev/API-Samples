@@ -79,6 +79,7 @@
       width : 100%;
       height: 100%;
     }
+
   </style>
 
   </head>
@@ -91,23 +92,24 @@
     <div class="row">
       <div class="col-md-3">
         <div class="row">
-          <div class="col-md-12"><p>Zoom</p></div>
+          <div class="col-md-12"><p>View control</p></div>
           <div id="slider"></div>
         </div>
         <div class="row">
-          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-orbit">Rotate tool</a></div>
-          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-pan">Pan tool</a></div>
+          <div class="col-md-4"><a class="btn btn-block btn-lg btn-primary js-view-0">A</a></div>
+          <div class="col-md-4"><a class="btn btn-block btn-lg btn-primary js-view-1">B</a></div>
+          <div class="col-md-4"><a class="btn btn-block btn-lg btn-primary js-view-2">C</a></div>
         </div>
+        <br/>
         <div class="row">
-          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-view-0">View Outside</a></div>
-          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-view-1">View Inside</a></div>
+          <div class="col-md-6"><a class="btn btn-block btn-sm btn-default js-orbit">Rotate tool</a></div>
+          <div class="col-md-6"><a class="btn btn-block btn-sm btn-default js-pan">Pan tool</a></div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="col-md-12">
           <p>Light</p>
           <div id="intensity-slider"></div>
-          <div id="intensity-slider2"></div>
           <div id="patterns"></div>
         </div>
       </div>
@@ -155,19 +157,48 @@
     // TODO COG to the property set... here we just account for offset
     var offset = { x: -45, y: -9, z: 0 };
 
-    views = [];
 
-    views[0] = { camera : { x : 167, y: 60, z: 274 },
-                 target : { x : -2, y: 8, z: 8 }};
+    // hard coded view presets
+    var camPresets = [
 
-    views[1] = { camera : { x : 0, y: 26, z: -10},
-                 target : { x : 0, y: 24, z: 0}};
+      { Position : { x : -143.6, y : 23.9, z: 307.7 },
+        TargetPosition : { x : 0.93, y : 12.43, z : 14.6 },
+        Lens   : { zoom : 100, focallength: 70, dofradius : 0.12, bladecnt : 5 }
+      },
+
+      { Position : { x : -66.8, y : 25.5, z: 88},
+        TargetPosition : { x : -2, y : 1, z : 9.5 },
+        Lens   : { zoom : 50, focallength: 25, dofradius :0, bladecnt : 5 }
+      },
+
+      { Position : { x : -59, y : 32, z: -114.0 },
+        TargetPosition : { x : -9, y : 6.5, z : 58.7 },
+        Lens   : { zoom : 50, focallength: 25, dofradius : 0.7, bladecnt : 5 }
+      }
+
+    ];
+
 
     var cam, camPos, targetPos;
 
     // linear interpolation for the animation stuff
     function lerp( a, b, d ){
       return a + d * (b - a);
+    }
+
+    function setCamera( in_camPreset ){
+
+      console.log( "setCamera()", in_camPreset );
+
+      var cam = lapi.getCamera();
+      var camGuid = cam.properties.parameters.GUID.value;
+
+      for( var prop in in_camPreset ){
+        lapi.setObjectParameter( camGuid, prop, in_camPreset[prop] );
+      }
+
+      // also update the HTML elements.
+      // updateCameraUIControls( in_camPreset );
     }
 
     // setup the camera animation and play
@@ -285,35 +316,22 @@
     });
 
     $('.js-view-0').bind( "click", function(){
-      var cam = lapi.getCamera();
 
-      // change the zoom
-      cam.properties.getProperty("Lens").parameters.Zoom.value = 13.3;
+      setCamera(camPresets[0]);
 
-      cam.properties.getProperty("Position").parameters.x.value = views[0].camera.x;
-      cam.properties.getProperty("Position").parameters.y.value = views[0].camera.y;
-      cam.properties.getProperty("Position").parameters.z.value = views[0].camera.z;
-
-      cam.properties.getProperty("TargetPosition").parameters.x.value = views[0].target.x;
-      cam.properties.getProperty("TargetPosition").parameters.y.value = views[0].target.y;
-      cam.properties.getProperty("TargetPosition").parameters.z.value = views[0].target.z;
     });
 
     $('.js-view-1').bind( "click", function(){
-      var cam = lapi.getCamera();
 
-      // change the zoom
-      cam.properties.getProperty("Lens").parameters.Zoom.value = 3;
+      setCamera(camPresets[1]);
 
-      cam.properties.getProperty("Position").parameters.x.value = views[1].camera.x;
-      cam.properties.getProperty("Position").parameters.y.value = views[1].camera.y;
-      cam.properties.getProperty("Position").parameters.z.value = views[1].camera.z;
-
-      cam.properties.getProperty("TargetPosition").parameters.x.value = views[1].target.x;
-      cam.properties.getProperty("TargetPosition").parameters.y.value = views[1].target.y;
-      cam.properties.getProperty("TargetPosition").parameters.z.value = views[1].target.z;
     });
 
+    $('.js-view-2').bind( "click", function(){
+
+      setCamera(camPresets[2]);
+
+    });
 
     $('.js-color-white').bind( "click", function(){
       lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork");
@@ -447,7 +465,7 @@
       }, 45000 );
     }
 
-    // lens zoom slider
+    // light sliders
     function refreshIntensitySlider(e, nr){
       var obj = lapi.getActiveScene().getObjectByName(DOME_LIGHT_NAME)[0];
 
@@ -480,6 +498,12 @@
       cam.properties.getProperty("Lens").parameters.Zoom.value = nr.value;
     }
 
+    // lens dof slider
+    function refreshSliderDof(e, nr){
+      var cam = lapi.getCamera();
+      cam.properties.getProperty("Lens").getParameter("Depth of field radius").value = nr.value;
+    }
+
     $( "#intensity-slider2" ).slider( { orientation: "horizontal",
       range: "min",
       min : 0,
@@ -491,18 +515,26 @@
     $( "#intensity-slider" ).slider( { orientation: "horizontal",
       range: "min",
       min : 0,
-      max: 50,
+      max: 25,
       value: 1,
       slide: refreshIntensitySlider,
       change: refreshIntensitySlider });
 
     $( "#slider" ).slider( { orientation: "horizontal",
     range: "min",
-    min : 3,
-    max: 25,
-    value: 13.3,
+    min : 20,
+    max: 100,
+    value: 50,
     slide: refreshSlider,
     change: refreshSlider });
+
+//    $( "#sliderDof" ).slider( { orientation: "horizontal",
+//      range: "min",
+//      min : 0,
+//      max: 100,
+//      value: 0,
+//      slide: refreshSlider,
+//      change: refreshSlider });
 
     $(document).ready(function() {
 
@@ -524,6 +556,8 @@
         // we will keep track of camera for animation
         camPos = cam.getProperty("Position").parameters;
         targetPos = cam.getProperty("TargetPosition").parameters;
+
+        setCamera(camPresets[0]);
 
         beginRendering(scn);
 
