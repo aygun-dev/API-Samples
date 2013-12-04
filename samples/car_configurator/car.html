@@ -68,11 +68,11 @@
     }
 
     .fillVertical{
-      height:700px;
+      height:600px;
     }
     .fillHeader{
       width:100%;
-      height:500px;
+      height:600px;
     }
     .fillHeader iframe{
       float : right;
@@ -85,7 +85,7 @@
 
 <body>
 <div class="bs-header fillHeader" id="content">
-  <iframe src="https://lagoa.com/embed_links/1097?validationHash=a5Kj7o5IKq1mne2zf6m1AMAt15Uj7w&width=500&height=330&auto_load_scene=true&asset_name=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+  <iframe src="https://lagoa.com/embed_links/568?validationHash=tdVVl2qL7L4sxq-AJt9dVw&width=500&height=330&fontcolor=&auto_load_scene=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 </div>
   <div class="container">
     <div class="row">
@@ -140,7 +140,7 @@
   <script>
     // some constants
     var DOME_LIGHT_NAME = "Dome light 1";
-    var SPHERE_LIGHT_NAME = "interior";
+    var SPHERE_LIGHT_NAME = "Sphere Light 1";
 
     var ONE_OVER_255 = 1/255;
     var EXPORT_TAG = "export";
@@ -157,11 +157,11 @@
 
     views = [];
 
-    views[0] = { camera : { x : 167, y: 60, z: 274 },
-                 target : { x : -2, y: 8, z: 8 }};
+    views[0] = { camera : { x : -325, y: 80, z: 250 },
+                 target : { x : 25, y: 31, z: 24 }};
 
-    views[1] = { camera : { x : 0, y: 26, z: -10},
-                 target : { x : 0, y: 24, z: 0}};
+    views[1] = { camera : { x : 154, y: 90, z: 90},
+                 target : { x : 122, y: 57, z: -14}};
 
     var cam, camPos, targetPos;
 
@@ -276,19 +276,11 @@
 
     // hook the buttons
     $('.js-color-black').bind( "click", function(){
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork1");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork2");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork3");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork4");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork5");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - BLACK", "BodyWork");
     });
 
     $('.js-view-0').bind( "click", function(){
       var cam = lapi.getCamera();
-
-      // change the zoom
-      cam.properties.getProperty("Lens").parameters.Zoom.value = 13.3;
 
       cam.properties.getProperty("Position").parameters.x.value = views[0].camera.x;
       cam.properties.getProperty("Position").parameters.y.value = views[0].camera.y;
@@ -302,9 +294,6 @@
     $('.js-view-1').bind( "click", function(){
       var cam = lapi.getCamera();
 
-      // change the zoom
-      cam.properties.getProperty("Lens").parameters.Zoom.value = 3;
-
       cam.properties.getProperty("Position").parameters.x.value = views[1].camera.x;
       cam.properties.getProperty("Position").parameters.y.value = views[1].camera.y;
       cam.properties.getProperty("Position").parameters.z.value = views[1].camera.z;
@@ -316,39 +305,19 @@
 
 
     $('.js-color-white').bind( "click", function(){
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork1");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork2");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork3");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork4");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork5");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - WHITE", "BodyWork");
     });
 
-    $('.js-color-blue').bind( "click", function(){
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork1");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork2");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork3");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork4");    
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork5");    
+    $('.js-color-white').bind( "click", function(){
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - BLUE", "BodyWork");
     });
 
     $('.js-color-red').bind( "click", function(){
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork1");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork2");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork3");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork4");    
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork5");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - RED", "BodyWork");
     });
 
     $('.js-color-gray').bind( "click", function(){
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork1");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork2");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork3");
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork4");      
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork5");      
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint BRDF - GRAY", "BodyWork");
     });
 
     $('.js-orbit').bind( "click", function(){
@@ -444,7 +413,7 @@
         }
         // start rendering
         lapi.startRender()
-      }, 5000 );
+      }, 2000 );
     }
 
     // lens zoom slider
@@ -483,7 +452,7 @@
     $( "#intensity-slider2" ).slider( { orientation: "horizontal",
       range: "min",
       min : 0,
-      max: 10,
+      max: 100,
       value: 0,
       slide: refreshIntensitySlider2,
       change: refreshIntensitySlider2 });
@@ -492,15 +461,15 @@
       range: "min",
       min : 0,
       max: 50,
-      value: 1,
+      value: 25,
       slide: refreshIntensitySlider,
       change: refreshIntensitySlider });
 
     $( "#slider" ).slider( { orientation: "horizontal",
     range: "min",
-    min : 3,
-    max: 25,
-    value: 13.3,
+    min : 15,
+    max: 150,
+    value: 15,
     slide: refreshSlider,
     change: refreshSlider });
 
