@@ -95,12 +95,12 @@
           <div id="slider"></div>
         </div>
         <div class="row">
-          <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-orbit">Orbit</a></div>
-          <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-pan">Pan</a></div>
+          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-orbit">Rotate tool</a></div>
+          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-pan">Pan tool</a></div>
         </div>
         <div class="row">
-          <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-view-0">0</a></div>
-          <div class="col-md-6"><a href="#" class="btn btn-block btn-lg btn-default js-view-1">1</a></div>
+          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-view-0">View Outside</a></div>
+          <div class="col-md-6"><a class="btn btn-block btn-lg btn-default js-view-1">View Inside</a></div>
         </div>
       </div>
       <div class="col-md-4">
@@ -116,11 +116,11 @@
         <!--<div id="patterns"></div>-->
         <!--<div class="col-md-12">-->
         <p>Paint</p>
-          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-black" style="background-color:black;"></a></div>
-          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-gray" style="background-color:darkgray;"></a></div>
-          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-red" style="background-color:darkred;"></a></div>
-          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-white" style="background-color:lightgray;"></a></div>
-          <div class="col-md-2"><a href="#" class="btn btn-block btn-lg btn-default js-color-blue" style="background-color:lightblue;"></a></div>
+          <div class="col-md-2"><a class="btn btn-block btn-lg btn-default js-color-black" style="background-color:black;"></a></div>
+          <div class="col-md-2"><a class="btn btn-block btn-lg btn-default js-color-gray" style="background-color:darkgray;"></a></div>
+          <div class="col-md-2"><a class="btn btn-block btn-lg btn-default js-color-red" style="background-color:darkred;"></a></div>
+          <div class="col-md-2"><a class="btn btn-block btn-lg btn-default js-color-white" style="background-color:lightgray;"></a></div>
+          <div class="col-md-2"><a class="btn btn-block btn-lg btn-default js-color-blue" style="background-color:lightblue;"></a></div>
 
         <!--<select name="color-picker1">-->
           <!--<option value="#7bd148">Green</option>-->
@@ -444,7 +444,7 @@
         }
         // start rendering
         lapi.startRender()
-      }, 25000 );
+      }, 45000 );
     }
 
     // lens zoom slider
@@ -464,7 +464,7 @@
     function refreshIntensitySlider2(e, nr){
       var obj = lapi.getActiveScene().getObjectByName(SPHERE_LIGHT_NAME)[0];
 
-      var val = nr.value;
+      var val = nr.value/2;
 
       var params = { r : val,
                     g : val,
@@ -483,7 +483,7 @@
     $( "#intensity-slider2" ).slider( { orientation: "horizontal",
       range: "min",
       min : 0,
-      max: 10,
+      max: 5,
       value: 0,
       slide: refreshIntensitySlider2,
       change: refreshIntensitySlider2 });
