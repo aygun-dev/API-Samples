@@ -268,7 +268,7 @@ function pickProjectID(){
       assetGUID = $(this).val();
       assetName = $(this).text();
     });
-    lapi._loadAssets([{name: assetName, datatype : assets[assetGUID],version_guid: assetGUID}]);
+    lapi.getActiveScene().addAssets([{name: assetName, datatype : assets[assetGUID],version_guid: assetGUID}]);
   };
 
 
