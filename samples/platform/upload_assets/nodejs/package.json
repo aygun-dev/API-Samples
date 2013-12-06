@@ -1,0 +1,13 @@
+{
+  "name": "API-Sample",
+  "description": "Sample how to upload an asset to Lagoa",
+  "version": "0.0.1",
+  "author": "Lagoa <join@lagoa.com >",
+  "dependencies": {
+   "express" : "3.x",
+   "request": "2.29.x"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}

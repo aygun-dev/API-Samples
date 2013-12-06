@@ -1,0 +1,13 @@
+{
+  "name": "API-Sample",
+  "description": "Sample how to grab an access token with Lagoa",
+  "version": "0.0.1",
+  "author": "Lagoa <join@lagoa.com >",
+  "dependencies": {
+   "express" : "3.x",
+   "oauth"   : "0.9.8"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}
