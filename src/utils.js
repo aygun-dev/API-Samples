@@ -53,16 +53,5 @@ lapi.utils = {
       g: parseInt(result[2], 16),
       b: parseInt(result[3], 16)
     } : null;
-  },
-
-  fetchAssetData : function(in_guid, in_cb){
-    var cb = function(data){
-      var assetData = {}; 
-      assetData.url = data.file.file.url;
-      assetData.datatype = data.datatype_id;
-      assetData.name = data.asset.name;
-      in_cb(assetData);
-    };
-    $.get(lapi._lagoaUrl + '/versions/'+in_guid+'.json',cb,'jsonp');
   }
 };
