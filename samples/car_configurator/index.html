@@ -86,7 +86,7 @@
 
 <body>
 <div class="bs-header fillHeader" id="content">
-  <iframe src="https://lagoa.com/embed_links/1097?validationHash=a5Kj7o5IKq1mne2zf6m1AMAt15Uj7w&width=500&height=330&auto_load_scene=true&asset_name=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+  <iframe src="https://lagoa.com/embed_links/1132?validationHash=8CY8JKLxSEpSFCIQN_5UUcVFpOiNdg&width=500&height=330&auto_load_scene=true&asset_name=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 </div>
   <div class="container">
     <div class="row">
@@ -141,7 +141,7 @@
 
   <script>
     // some constants
-    var DOME_LIGHT_NAME = "Dome light 1";
+    var DOME_LIGHT_NAME = "Dome Light";
     var SPHERE_LIGHT_NAME = "interior";
 
     var ONE_OVER_255 = 1/255;
@@ -161,19 +161,20 @@
     // hard coded view presets
     var camPresets = [
 
-      { Position : { x : -143.6, y : 23.9, z: 307.7 },
-        TargetPosition : { x : 0.93, y : 12.43, z : 14.6 },
-        Lens   : { zoom : 100, focallength: 70, dofradius : 0.12, bladecnt : 5 }
+      { Position : { x : -150, y : 25, z: 410 },
+        TargetPosition : { x : 0, y : 14, z : 14 },
+        // Lens   : { zoom : 100, focallength: 70, dofradius : 0.12, bladecnt : 5 }
+        Lens   : { zoom : 14, focallength: 1, dofradius : 0.0, bladecnt : 6 }
       },
 
-      { Position : { x : -66.8, y : 25.5, z: 88},
-        TargetPosition : { x : -2, y : 1, z : 9.5 },
-        Lens   : { zoom : 50, focallength: 25, dofradius :0, bladecnt : 5 }
+      { Position : { x : -106, y : 21, z: 155},
+        TargetPosition : { x : -18, y : 8, z : 28 },
+        Lens   : { zoom : 20, focallength: 17.2, dofroadius :0.5, bladecnt : 6 }
       },
 
-      { Position : { x : -59, y : 32, z: -114.0 },
-        TargetPosition : { x : -9, y : 6.5, z : -58.7 },
-        Lens   : { zoom : 50, focallength: 25, dofradius : 0.7, bladecnt : 5 }
+      { Position : { x : 80, y : 21, z: -165.0 },
+        TargetPosition : { x : -18, y : 8, z : 28 },
+        Lens   : { zoom : 20, focallength: 16.6, dofradius :1, bladecnt : 6 }
       }
 
     ];
@@ -313,6 +314,9 @@
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork3");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork4");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork5");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork6");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork7");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Black", "bodywork8");
     });
 
     $('.js-view-0').bind( "click", function(){
@@ -340,6 +344,9 @@
       lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork3");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork4");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork5");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork6");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork7");
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint White", "bodywork8");
     });
 
     $('.js-color-blue').bind( "click", function(){
@@ -349,6 +356,9 @@
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork3");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork4");    
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork5");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork6");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork7");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Blue", "bodywork8");    
     });
 
     $('.js-color-red').bind( "click", function(){
@@ -358,6 +368,9 @@
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork3");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork4");    
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork5");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork6");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork7");    
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Red", "bodywork8");    
     });
 
     $('.js-color-gray').bind( "click", function(){
@@ -366,7 +379,9 @@
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork2");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork3");
       lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork4");      
-      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork5");      
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork6");      
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork7");      
+      lapi.applyMaterialToMeshByName( "Realistic Carpaint Grey", "bodywork8");      
     });
 
     $('.js-orbit').bind( "click", function(){
@@ -462,7 +477,7 @@
         }
         // start rendering
         lapi.startRender()
-      }, 45000 );
+      }, 10000 );
     }
 
     // light sliders
@@ -515,16 +530,16 @@
     $( "#intensity-slider" ).slider( { orientation: "horizontal",
       range: "min",
       min : 0,
-      max: 25,
-      value: 1,
+      max: 20,
+      value: 2,
       slide: refreshIntensitySlider,
       change: refreshIntensitySlider });
 
     $( "#slider" ).slider( { orientation: "horizontal",
     range: "min",
-    min : 20,
+    min : 6,
     max: 100,
-    value: 50,
+    value: 14,
     slide: refreshSlider,
     change: refreshSlider });
 
