@@ -18,6 +18,9 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
   // the guid list for search
   this._guidItems = {};
 
+  // the scene object count
+  this._objectCount = 0;
+
 
   for( var i in in_guidList ){
 
@@ -32,6 +35,7 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
     for( var j in classID){
       tmpGuid = classID[j];
       this._guidItems[tmpGuid] = initClass[tmpGuid] = new lapi.SceneObject( tmpGuid );
+      ++this._objectCount;
     }
   }
 };
@@ -91,6 +95,14 @@ lapi.Scene.prototype = {
 
   getStates : function(){
     return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.STATES ]);
+  },
+
+  getObjectCount : function(){
+    return this._objectCount;
+  },
+
+  addAssets : function(in_assetArray){
+    lapi._loadAssets(in_assetArray);
   }
 
 };

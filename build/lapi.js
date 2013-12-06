@@ -208,6 +208,30 @@ var lapi = {};
     });
   };
 
+  /*
+   * Load assets dynamically into the scene.
+   * @in_assetArray {Array} a collection of assets we want to load.
+   * Each member is an object of the type {name : {string}, datatype : {number} , version_guid : {string}}.
+   * After the loading is done, the scene object is re-initialized.
+   * ex : lapi._loadAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}]);
+   * @private
+   */
+  lapi._loadAssets = function(in_assetArray){
+    var objectCount = this._activeScene.getObjectCount();
+    lapi._embedRPC("ACTIVEAPP.LoadAssets({ " +
+      "assets :" +
+        JSON.stringify(in_assetArray)+
+      "});",function(e){});
+    var checkAssetsLoaded = function(){
+      lapi._embedRPC("ACTIVEAPP.scene.GetObjects().length;",function(in_response){
+        if(in_response.data !== objectCount){
+          clearInterval(sceneTimer);
+          lapi._initialize();
+        }
+      });
+    };
+    var sceneTimer = setInterval(checkAssetsLoaded,3000);
+  };
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
@@ -854,6 +878,9 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
   // the guid list for search
   this._guidItems = {};
 
+  // the scene object count
+  this._objectCount = 0;
+
 
   for( var i in in_guidList ){
 
@@ -868,6 +895,7 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
     for( var j in classID){
       tmpGuid = classID[j];
       this._guidItems[tmpGuid] = initClass[tmpGuid] = new lapi.SceneObject( tmpGuid );
+      ++this._objectCount;
     }
   }
 };
@@ -927,6 +955,14 @@ lapi.Scene.prototype = {
 
   getStates : function(){
     return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.STATES ]);
+  },
+
+  getObjectCount : function(){
+    return this._objectCount;
+  },
+
+  addAssets : function(in_assetArray){
+    lapi._loadAssets(in_assetArray);
   }
 
 };

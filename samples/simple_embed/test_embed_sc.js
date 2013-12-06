@@ -42,7 +42,7 @@ var lagoaUrl="";
 var meshCount = 0;
 var userID;
 var projectID;
-var assetGUID;
+var assets = {};
 var objData = {};
 var sceneTimer;
 
@@ -78,6 +78,7 @@ function onLoad() {
   updateGuidMenu();
   updateMaterialMenu();
   updateToolsMenu();
+  updateAssetMenu();
 };
 
 /**
@@ -161,24 +162,25 @@ function updateProjectsMenu(in_userID){
   $.get(lagoaUrl + '/projects.json',{user_id : in_userID},cb, 'jsonp');
 };
 
-/**
- * Get a list of assets associated with a project id. Then,
- * update the assets menu.
- */
-function updateAssetMenu(in_projectID){
-  var cb = function (data) {
-    $('#js-assets_select_menu').empty();
-    $('#js-assets_select_menu').append("<option value></option>");
-    for(var i = 0 ; i < data.length ; ++i){
-        var asset = data[i];
-        $('#js-assets_select_menu').append("<option value="+
-          asset.latest.guid+">" + asset.name + "</option>");
-    }
-    $("#js-assets_select_menu option:first").attr('selected','selected');
-    $("#js-assets_select_menu").select2({placeholder: "Select an Asset"});
-  };
-  $.get(lagoaUrl + '/projects/'+ in_projectID+'/assets.json',cb, 'jsonp');
-};
+    /**
+    * Get a list of assets associated with a project id. Then,
+    * update the assets menu.
+    */
+    function updateAssetMenu(){
+      assets = {};
+      var cb = function (data) {
+        $('#js-assets_select_menu').empty();
+        $('#js-assets_select_menu').append("<option value></option>");
+        for(var i = 0 ; i < data.length ; ++i){
+          var asset = data[i];
+          $('#js-assets_select_menu').append("<option value="+
+            asset.latest.guid+">" + asset.name + "</option>");
+          assets[asset.latest.guid] = asset.latest.datatype_id;
+        }
+        $("#js-assets_select_menu").select2({placeholder: "Select an Asset"});
+      };
+      $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&tags=&sort_updated_at=true',cb, 'jsonp');
+    };
 
 
 /**
@@ -255,18 +257,19 @@ function pickProjectID(){
   updateAssetMenu(projectID);
 };
 
-/** 
- * A callback for asset selection dropdown menu.
- * Select the chosen asset.
- */
-function pickAsset(){
-  var assetName  ="";
-  $("#js-assets_select_menu option:selected").each(function (){
-    assetGUID = $(this).val();
-    assetName = $(this).text();
-  });
-  loadAssets({name: assetName, version_guid: assetGUID});
-};
+  /** 
+  * A callback for asset selection dropdown menu.
+  * Select the chosen asset.
+  */
+  function pickAsset(){
+    var assetName  ="";
+    var assetGUID='';
+    $("#js-assets_select_menu option:selected").each(function (){
+      assetGUID = $(this).val();
+      assetName = $(this).text();
+    });
+    lapi.getActiveScene().addAssets([{name: assetName, datatype : assets[assetGUID],version_guid: assetGUID}]);
+  };
 
 
 
