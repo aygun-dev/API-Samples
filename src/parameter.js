@@ -112,6 +112,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     _value = in_val;
     var paramList = {};
     paramList[ this.id ] = this.value;
+    if(this.parent._remoteUpdate) return;
     var parentPropName = this.parent.name;
     lapi.setObjectParameter( _contextObject.properties.getParameter("GUID").value, parentPropName, paramList )
   })
