@@ -179,7 +179,7 @@ function updateProjectsMenu(in_userID){
         }
         $("#js-assets_select_menu").select2({placeholder: "Select an Asset"});
       };
-      $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&tags=&sort_updated_at=true',cb, 'jsonp');
+      $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&datatype_ids=14,21&sort_updated_at=true',cb, 'jsonp');
     };
 
 
