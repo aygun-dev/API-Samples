@@ -1,0 +1,141 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"> //</script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js">//</script>
+    <link href="../assets/select2/select2.css" rel="stylesheet"/>
+    <!-- LAGOA API -->
+    <script src="../../build/lapi.js"></script>
+    <script src="../assets/select2/select2.js"></script>
+    <script>
+    /**
+     * Get a list of tools from the app. Then,
+     * update the asset tool menu.
+     */
+    function updateToolsMenu(){
+      $('#js-tools_select_menu').empty();
+      var validTools =['OrbitTool','PanTool'
+        ,'DollyTool','ZoomTool'
+        ,'SelectTool','ScaleTool'
+        ,'RotationTool','MoveTool'];
+      $('#js-tools_select_menu').append("<option></option>");
+      for(var i = 0 ; i < validTools.length ; ++i){
+        $('#js-tools_select_menu').append("<option>" + validTools[i] + "</option>");
+      }
+      $("#js-tools_select_menu option:first").attr('selected','selected');
+      $("#js-tools_select_menu").select2({placeholder: "Select a Tool"});
+    }
+    /** 
+     * A callback for tool selection dropdown menu.
+     * Select the chosen object.
+     */
+
+    function pickTool(){
+      var toolName = "";
+      $("#js-tools_select_menu option:selected").each(function (){
+        toolName = $(this).text();
+      });
+      lapi._embedRPC("ACTIVEAPP.Tools.setActiveTool('"+ toolName + "');",function(in_response){
+        console.log(in_response);
+      });
+    };
+    $( document ).ready(function() {
+      lapi.onSceneLoaded = function(){
+        lapi.objectPropertyBind('95e3c57c-5762-4bb0-84a4-6cb20b30faa9','Position',updatePosition);
+        lapi.objectPropertyBind('95e3c57c-5762-4bb0-84a4-6cb20b30faa9','Scale',updateScale);
+      };
+      // Make sure that the whole scene is loaded! Only then can you  set the first object selection.
+      // This happens because we want the user to have a reference object to guide them.
+      function checkLoaded(){
+        console.log("waiting for scene to load...");
+        lapi._embedRPC("ACTIVEAPP.getSceneLoaded();", function(in_response) { 
+          if (in_response.data === true){
+            clearInterval(timer);
+              updateToolsMenu();
+            }
+          });
+      }
+      var timer = setInterval(checkLoaded,3000);
+
+      $('#js-tools_select_menu').change(pickTool);
+    });
+
+    function updatePosition(data){
+      $('#position-x-value').val(data.x.value);
+      $('#position-y-value').val(data.y.value);
+      $('#position-z-value').val(data.z.value);
+    }
+
+    function updateScale(data){
+      $('#scale-x-value').val(data.x.value);
+      $('#scale-y-value').val(data.y.value);
+      $('#scale-z-value').val(data.z.value);
+    }
+    </script>
+    <!-- Latest compiled and minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
+ 
+<!-- Latest compiled and minified JavaScript -->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/js/bootstrap.min.js"></script>
+ 
+<!-- Latest Glyphicons minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css" rel="stylesheet">
+<style>
+  .fully-expanded{
+    width: 100%;
+    display: block;
+  }
+</style>
+  </head>
+  <body>
+    <div class="container">
+    <nav class="navbar" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Embed Event Scene Demo</a>
+    </div>
+    </nav>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-md-12">
+            <iframe src="https://lagoa.com/embed_links/1361?validationHash=KU-J1MXcXlXoJRt2FcE47YuqV6lGqg&width=500&height=330&asset_name=true&owner_name=true&lagoa_logo=true&version_number=2" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-8" style="padding-top:20px;">
+            <select id='js-tools_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+      <div class="row">
+        <div class="col-md-4">
+          <label>Position (x, y, z)</label>
+        </div>
+        <div class="col-md-3">
+          <input id="position-x-value" type="text" />
+          <input id="position-y-value" type="text" />
+          <input id="position-z-value" type="text" />
+        </div>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-md-4">
+          <label>Scale (x, y, z)</label>
+        </div>
+        <div class="col-md-3">
+          <input id="scale-x-value" type="text" />
+          <input id="scale-y-value" type="text" />
+          <input id="scale-z-value" type="text" />
+        </div>
+      </div>
+    </div>
+</body>
+</html>
