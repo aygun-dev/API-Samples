@@ -236,14 +236,14 @@
 
   /**
    * Active scene loaded in the embed
-   * @type {{}}
+   * @type {lapi.Scene}
    * @private
    */
   lapi._activeScene = null;
 
   /**
    * accessor to return the current loaded scene
-   * @returns {Scene}
+   * @returns {lapi.Scene}
    */
   lapi.getActiveScene = function(){
     return lapi._activeScene;
@@ -349,8 +349,8 @@
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
-    matParam.value = mat.properties.getParameter("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameterByName("Material");
+    matParam.value = mat.properties.getParameterByName("GUID").value;
   };
 
   /**
@@ -366,8 +366,8 @@
     var mesh = scn.getObjectByName( in_meshName )[0];
     var mat = scn.getObjectByName( in_materialName )[0];
 
-    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
-    matParam.value = mat.properties.getParameter("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameter("tmaterial");
+    matParam.value = mat.properties.getParameter("guid").value;
   };
 
 

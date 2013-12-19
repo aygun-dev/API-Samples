@@ -70,7 +70,7 @@ lapi.SceneObject.prototype = {
    * @returns {SceneObject}
    */
   getMaterial : function(){
-    var matGuid = this.properties.getProperty("Materials").getParameter("Material").value;
+    var matGuid = this.properties.getProperty("Materials").getParameter("tmaterial").value;
     return lapi.getActiveScene().getObjectByGuid( matGuid );
   },
 
