@@ -64,9 +64,9 @@ $(document).ready(function() {
             var reflectance = mat.properties.getProperty("reflectance");
 
             // pow 2 is just for gamma correction
-            reflectance.parameters.Red.value   = Math.pow( color.r * ONE_OVER_255, 2 );
-            reflectance.parameters.Green.value = Math.pow( color.g * ONE_OVER_255, 2 );
-            reflectance.parameters.Blue.value  = Math.pow( color.b * ONE_OVER_255, 2 );
+            reflectance.parameters.f0.value   = Math.pow( color.r * ONE_OVER_255, 2 );
+            reflectance.parameters.f1.value = Math.pow( color.g * ONE_OVER_255, 2 );
+            reflectance.parameters.f2.value  = Math.pow( color.b * ONE_OVER_255, 2 );
 
           }
         }
@@ -88,8 +88,8 @@ $(document).ready(function() {
 
       var cam = scn.getCameras()[0];
 
-      cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
-      cam.getProperty("Resolution").getParameter("Width").value = 720;
+      cam.getProperty("Lens").getParameter("dofradius").value = 0;
+      cam.getProperty("Resolution").getParameter("width").value = 720;
 
       lapi.desselectAll();
 
@@ -98,7 +98,7 @@ $(document).ready(function() {
         // now we will set all the GL meshes to not visible
         var meshes = scn.getMeshes();
         for( var m in meshes ){
-          meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
+          meshes[m].getProperty("Visibility").getParameter("visible").value = false;
         }
         lapi.startRender()
 
