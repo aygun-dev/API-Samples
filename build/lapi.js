@@ -247,14 +247,14 @@ var lapi = {};
 
   /**
    * Active scene loaded in the embed
-   * @type {{}}
+   * @type {lapi.Scene}
    * @private
    */
   lapi._activeScene = null;
 
   /**
    * accessor to return the current loaded scene
-   * @returns {Scene}
+   * @returns {lapi.Scene}
    */
   lapi.getActiveScene = function(){
     return lapi._activeScene;
@@ -360,8 +360,8 @@ var lapi = {};
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
-    matParam.value = mat.properties.getParameter("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameterByName("Material");
+    matParam.value = mat.properties.getParameterByName("GUID").value;
   };
 
   /**
@@ -377,8 +377,8 @@ var lapi = {};
     var mesh = scn.getObjectByName( in_meshName )[0];
     var mat = scn.getObjectByName( in_materialName )[0];
 
-    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
-    matParam.value = mat.properties.getParameter("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameter("tmaterial");
+    matParam.value = mat.properties.getParameter("guid").value;
   };
 
 
@@ -536,10 +536,17 @@ var lapi = {};
 lapi.Property = function( in_name ){
 
   /**
-   * @dict
+   * @type {lapi.Parameter}
    * @private
    */
   this._parameters = {};
+
+  /**
+   * Name lookup for search by name
+   * @type {lapi.Parameter}
+   * @private
+   */
+  this._parametersByName = {};
 
   /**
    * @dict
@@ -567,21 +574,26 @@ lapi.Property = function( in_name ){
  */
 lapi.Property.prototype = {
 
-  constructor    : lapi.Property,
+  constructor : lapi.Property,
 
   /**
-   * Accessor to get parameters by name in the Property
+   * Accessor to get parameters by ID in this Property
    * @function getParameter
-   * @param {string} in_param_name the name of the parameter we are looking for
+   * @param {string} in_param_id the name of the parameter we are looking for
    * @returns {Parameter} object
    */
-  getParameter   : function( in_param_name ){ return this.parameters[in_param_name]; },
+  getParameter : function( in_param_id ){
+    return this.parameters[in_param_id];
+  },
 
   /**
    * Add a Parameter object to this Property
    * @param {Parameter} in_parameter object to be added
    */
-  addParameter   : function( in_parameter ){ this.parameters[in_parameter.name] = in_parameter; },
+  addParameter   : function( in_parameter ){
+    this.parameters[in_parameter.id] = in_parameter;
+    this._parametersByName[in_parameter.name] = in_parameter;
+  },
 
   /**
    * Append another property under this property
@@ -765,7 +777,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     paramList[ this.id ] = this.value;
     if(this.parent._remoteUpdate) return;
     var parentPropName = this.parent.name;
-    lapi.setObjectParameter( _contextObject.properties.getParameter("GUID").value, parentPropName, paramList )
+    lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
   })
 
 };
@@ -850,7 +862,7 @@ lapi.SceneObject.prototype = {
    * @returns {SceneObject}
    */
   getMaterial : function(){
-    var matGuid = this.properties.getProperty("Materials").getParameter("Material").value;
+    var matGuid = this.properties.getProperty("Materials").getParameter("tmaterial").value;
     return lapi.getActiveScene().getObjectByGuid( matGuid );
   },
 
@@ -1015,7 +1027,7 @@ lapi.Scene.prototype = {
 
     for( var i in sceneObjs){
       o = sceneObjs[i];
-      if( in_name === o.properties.getParameter("Name").value ){
+      if( in_name === o.properties.getParameter("name").value ){
         find.push(o);
       }
     }

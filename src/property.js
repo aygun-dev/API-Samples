@@ -13,10 +13,17 @@
 lapi.Property = function( in_name ){
 
   /**
-   * @dict
+   * @type {lapi.Parameter}
    * @private
    */
   this._parameters = {};
+
+  /**
+   * Name lookup for search by name
+   * @type {lapi.Parameter}
+   * @private
+   */
+  this._parametersByName = {};
 
   /**
    * @dict
@@ -44,21 +51,26 @@ lapi.Property = function( in_name ){
  */
 lapi.Property.prototype = {
 
-  constructor    : lapi.Property,
+  constructor : lapi.Property,
 
   /**
-   * Accessor to get parameters by name in the Property
+   * Accessor to get parameters by ID in this Property
    * @function getParameter
-   * @param {string} in_param_name the name of the parameter we are looking for
+   * @param {string} in_param_id the name of the parameter we are looking for
    * @returns {Parameter} object
    */
-  getParameter   : function( in_param_name ){ return this.parameters[in_param_name]; },
+  getParameter : function( in_param_id ){
+    return this.parameters[in_param_id];
+  },
 
   /**
    * Add a Parameter object to this Property
    * @param {Parameter} in_parameter object to be added
    */
-  addParameter   : function( in_parameter ){ this.parameters[in_parameter.name] = in_parameter; },
+  addParameter   : function( in_parameter ){
+    this.parameters[in_parameter.id] = in_parameter;
+    this._parametersByName[in_parameter.name] = in_parameter;
+  },
 
   /**
    * Append another property under this property

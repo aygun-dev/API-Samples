@@ -269,9 +269,9 @@
       var reflectance = mat.properties.getProperty("color");
 
       // pow 2 is just for gamma correction
-      reflectance.parameters.Red.value   = Math.pow( color.r * ONE_OVER_255, 2 );
-      reflectance.parameters.Green.value = Math.pow( color.g * ONE_OVER_255, 2 );
-      reflectance.parameters.Blue.value  = Math.pow( color.b * ONE_OVER_255, 2 );
+      reflectance.parameters.f0.value   = Math.pow( color.r * ONE_OVER_255, 2 );
+      reflectance.parameters.f1.value = Math.pow( color.g * ONE_OVER_255, 2 );
+      reflectance.parameters.f2.value  = Math.pow( color.b * ONE_OVER_255, 2 );
     });
 
     // hook the buttons
@@ -342,7 +342,7 @@
       $(in_htmlElement).click(function(e){
         // grab the parameter that the element will handle
         var mat = lapi.getActiveScene().getObjectByName(DOME_LIGHT_NAME)[0];
-        var param = mat.getProperty("EnvironmentMap").parameters.Path;
+        var param = mat.getProperty("EnvironmentMap").parameters.path;
         param.value = in_clickValue;
       })
     }
@@ -360,16 +360,16 @@
       // expose all textures
       for( var i=0 ;i<textures.length; ++i){
         tmpTexture = textures[i];
-        textureName = tmpTexture.properties.parameters.Name.value;
+        textureName = tmpTexture.properties.parameters.name.value;
         isExport = textureName.indexOf(EXPORT_TAG);
         if(isExport >= 0){
 
           // create the HTML element
-          var imgUrl = tmpTexture.getProperty("url").parameters.URL.value;
+          var imgUrl = tmpTexture.getProperty("url").parameters.url.value;
           var img = $(document.createElement('img'));
 
           // assign the callback
-          setOnClickPattern( img, tmpTexture.properties.parameters.GUID.value );
+          setOnClickPattern( img, tmpTexture.properties.parameters.guid.value );
 
           img.attr('src', imgUrl );
           img.appendTo('#patterns');
@@ -387,7 +387,7 @@
       var sortedMeshNames = [];
 
       for (var i =0; i<count; i++){
-        meshName = meshes[i].properties.getParameter("Name").value;
+        meshName = meshes[i].properties.getParameter("name").value;
         if(meshName.indexOf(EXPORT_TAG)>=0){
           sortedMeshNames.push(meshName);
         }
@@ -409,7 +409,7 @@
         // now we will set all the GL meshes to not visible
         var meshes = in_scn.getMeshes();
         for( var m in meshes ){
-          meshes[m].getProperty("Visibility").getParameter("Visible").value = false;
+          meshes[m].getProperty("Visibility").getParameter("visible").value = false;
         }
         // start rendering
         lapi.startRender()
@@ -426,7 +426,7 @@
                      g : val,
                      b : val };
 
-      lapi.setObjectParameter( obj.properties.parameters.GUID.value, "Color", params );
+      lapi.setObjectParameter( obj.properties.parameters.guid.value, "Color", params );
 
     }
 
@@ -439,14 +439,14 @@
                     g : val,
                     b : val };
 
-      lapi.setObjectParameter( obj.properties.parameters.GUID.value, "Color", params );
+      lapi.setObjectParameter( obj.properties.parameters.guid.value, "Color", params );
 
     }
 
     // lens zoom slider
     function refreshSlider(e, nr){
       var cam = lapi.getCamera();
-      cam.properties.getProperty("Lens").parameters.Zoom.value = nr.value;
+      cam.properties.getProperty("Lens").parameters.zoom.value = nr.value;
     }
 
     $( "#intensity-slider2" ).slider( { orientation: "horizontal",
@@ -481,8 +481,8 @@
         // set some defaults
         var scn = lapi.getActiveScene();
         cam = scn.getCameras()[0];
-        cam.getProperty("Lens").getParameter("Depth of field radius").value = 0;
-        cam.getProperty("Resolution").getParameter("Width").value = RENDER_WIDTH;
+        cam.getProperty("Lens").getParameter("dofradius").value = 0;
+        cam.getProperty("Resolution").getParameter("width").value = RENDER_WIDTH;
 
         // get all shirts
         getAllExportMeshes(scn);

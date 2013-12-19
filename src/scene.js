@@ -62,7 +62,7 @@ lapi.Scene.prototype = {
 
     for( var i in sceneObjs){
       o = sceneObjs[i];
-      if( in_name === o.properties.getParameter("Name").value ){
+      if( in_name === o.properties.getParameter("name").value ){
         find.push(o);
       }
     }
