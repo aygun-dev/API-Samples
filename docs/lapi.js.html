@@ -181,6 +181,12 @@ var lapi = {};
   lapi._cbmap = {};
 
   /**
+   * @type {Object}
+   * @private
+   */
+  lapi._eventCbMap = {};
+
+  /**
    * @type {String}
    * @private
    */
@@ -232,7 +238,13 @@ var lapi = {};
         callback(retval);
         delete lapi._cbmap[retval.id];
       }
-    }
+      else if(lapi._eventCbMap[retval.id]){
+        var cbArray = lapi._eventCbMap[retval.id];
+        for(var i = 0 ; i &lt; cbArray.length; ++i){
+          cbArray[i](retval.data);
+        }
+      }
+    } 
   });
 
   /**
@@ -285,15 +297,89 @@ var lapi = {};
   };
 
   /**
+   * RPC call for SC to execute. It will bind our callbacks to a specific object's modifications.
+   * @in_GUID {string} The GUID of the object whose property we want to track.
+   * @in_property {string} The property of the object we want to track.
+   * @callback {function} Optional callback. It will use a stringified property object or
+   * a paramater. Note : property objects is made of key-value entries, where the key is a 
+   * parameter name and value is a strigified parameter.
+   */
+  lapi.objectPropertyBind = function(in_guid,in_property, callback){
+    var eventName = in_guid + ':' + in_property;
+    var initialBind = false;
+    if(!lapi._eventCbMap[eventName]){
+      var scn = lapi.getActiveScene();
+      var obj = scn.getObjectByGuid( in_guid );
+      initialBind = true;
+      var cb;
+      if(obj.properties.getParameter(in_property)){
+        cb = function(data){
+          obj.properties.getParameter(in_property).value = data.value;
+        };
+      }else{
+        var property = obj.properties.getProperty(in_property);
+        cb = function(data){
+          property._remoteUpdate = true;
+          for( var i in data){
+            property.getParameter(i).value = data[i].value;
+          }
+          property._remoteUpdate = false;
+        };
+      }
+      lapi._eventCbMap[eventName] = [cb];
+    }
+    if(callback){
+      lapi._eventCbMap[eventName].push(callback);
+    }
+    if(initialBind){
+      var iframe = document.getElementById('lagoaframe');
+      iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName}), '*');
+    }
+  };
+
+  /**
+   * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
+   * @in_GUID {string} The GUID of the object whose property we want to track.
+   * @in_property {string} The property of the object we want to track.
+   */
+  lapi.objectPropertyUnbind = function(in_guid,in_property){
+    var eventName = in_guid + ':' + in_property;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    delete lapi._eventCbMap[eventName];
+    var iframe = document.getElementById('lagoaframe');
+    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName, unbind : true}), '*');
+  };
+
+
+  /**
+   * This will unbind a callback from specific object's modifications.
+   * @in_GUID {string} The GUID of the object whose property we want to track.
+   * @in_property {string} The property of the object we want to track.
+   * @in_callback {function}  The callback we want to unbind.
+   */
+  lapi.objectPropertyUnbindCb = function(in_guid,in_property, in_callback){
+    var eventName = in_guid + ':' + in_property;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    var index = lapi._eventCbMap[eventName].indexOf(in_callback);
+    if (index > -1) {
+      lapi._eventCbMap[eventName].splice(index, 1);
+    }
+  };
+
+  /**
    * Active scene loaded in the embed
-   * @type {{}}
+   * @type {lapi.Scene}
    * @private
    */
   lapi._activeScene = null;
 
   /**
    * accessor to return the current loaded scene
-   * @returns {Scene}
+   * @returns {lapi.Scene}
    */
   lapi.getActiveScene = function(){
     return lapi._activeScene;
@@ -333,6 +419,30 @@ var lapi = {};
     });
   };
 
+  /*
+   * Load assets dynamically into the scene.
+   * @in_assetArray {Array} a collection of assets we want to load.
+   * Each member is an object of the type {name : {string}, datatype : {number} , version_guid : {string}}.
+   * After the loading is done, the scene object is re-initialized.
+   * ex : lapi._loadAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}]);
+   * @private
+   */
+  lapi._loadAssets = function(in_assetArray){
+    var objectCount = this._activeScene.getObjectCount();
+    lapi._embedRPC("ACTIVEAPP.LoadAssets({ " +
+      "assets :" +
+        JSON.stringify(in_assetArray)+
+      "});",function(e){});
+    var checkAssetsLoaded = function(){
+      lapi._embedRPC("ACTIVEAPP.scene.GetObjects().length;",function(in_response){
+        if(in_response.data !== objectCount){
+          clearInterval(sceneTimer);
+          lapi._initialize();
+        }
+      });
+    };
+    var sceneTimer = setInterval(checkAssetsLoaded,3000);
+  };
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
@@ -375,8 +485,8 @@ var lapi = {};
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
-    matParam.value = mat.properties.getParameter("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameterByName("Material");
+    matParam.value = mat.properties.getParameterByName("GUID").value;
   };
 
   /**
@@ -392,8 +502,8 @@ var lapi = {};
     var mesh = scn.getObjectByName( in_meshName )[0];
     var mat = scn.getObjectByName( in_materialName )[0];
 
-    var matParam = mesh.properties.getProperty("Materials").getParameter("Material");
-    matParam.value = mat.properties.getParameter("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameter("tmaterial");
+    matParam.value = mat.properties.getParameter("guid").value;
   };
 
 
@@ -551,10 +661,17 @@ var lapi = {};
 lapi.Property = function( in_name ){
 
   /**
-   * @dict
+   * @type {lapi.Parameter}
    * @private
    */
   this._parameters = {};
+
+  /**
+   * Name lookup for search by name
+   * @type {lapi.Parameter}
+   * @private
+   */
+  this._parametersByName = {};
 
   /**
    * @dict
@@ -568,6 +685,12 @@ lapi.Property = function( in_name ){
    */
   this._name = in_name;
 
+  /**
+   * @type {boolean}
+   * @private
+   */
+  this._remoteUpdate = false;
+
 };
 
 
@@ -576,21 +699,26 @@ lapi.Property = function( in_name ){
  */
 lapi.Property.prototype = {
 
-  constructor    : lapi.Property,
+  constructor : lapi.Property,
 
   /**
-   * Accessor to get parameters by name in the Property
+   * Accessor to get parameters by ID in this Property
    * @function getParameter
-   * @param {string} in_param_name the name of the parameter we are looking for
+   * @param {string} in_param_id the name of the parameter we are looking for
    * @returns {Parameter} object
    */
-  getParameter   : function( in_param_name ){ return this.parameters[in_param_name]; },
+  getParameter : function( in_param_id ){
+    return this.parameters[in_param_id];
+  },
 
   /**
    * Add a Parameter object to this Property
    * @param {Parameter} in_parameter object to be added
    */
-  addParameter   : function( in_parameter ){ this.parameters[in_parameter.name] = in_parameter; },
+  addParameter   : function( in_parameter ){
+    this.parameters[in_parameter.id] = in_parameter;
+    this._parametersByName[in_parameter.name] = in_parameter;
+  },
 
   /**
    * Append another property under this property
@@ -772,8 +900,9 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     _value = in_val;
     var paramList = {};
     paramList[ this.id ] = this.value;
+    if(this.parent._remoteUpdate) return;
     var parentPropName = this.parent.name;
-    lapi.setObjectParameter( _contextObject.properties.getParameter("GUID").value, parentPropName, paramList )
+    lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
   })
 
 };
@@ -858,7 +987,7 @@ lapi.SceneObject.prototype = {
    * @returns {SceneObject}
    */
   getMaterial : function(){
-    var matGuid = this.properties.getProperty("Materials").getParameter("Material").value;
+    var matGuid = this.properties.getProperty("Materials").getParameter("tmaterial").value;
     return lapi.getActiveScene().getObjectByGuid( matGuid );
   },
 
@@ -979,6 +1108,9 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
   // the guid list for search
   this._guidItems = {};
 
+  // the scene object count
+  this._objectCount = 0;
+
 
   for( var i in in_guidList ){
 
@@ -993,6 +1125,7 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
     for( var j in classID){
       tmpGuid = classID[j];
       this._guidItems[tmpGuid] = initClass[tmpGuid] = new lapi.SceneObject( tmpGuid );
+      ++this._objectCount;
     }
   }
 };
@@ -1019,7 +1152,7 @@ lapi.Scene.prototype = {
 
     for( var i in sceneObjs){
       o = sceneObjs[i];
-      if( in_name === o.properties.getParameter("Name").value ){
+      if( in_name === o.properties.getParameter("name").value ){
         find.push(o);
       }
     }
@@ -1052,6 +1185,14 @@ lapi.Scene.prototype = {
 
   getStates : function(){
     return lapi.utils.objToArray(this._classedItems[ lapi.CONSTANTS.SCENE.STATES ]);
+  },
+
+  getObjectCount : function(){
+    return this._objectCount;
+  },
+
+  addAssets : function(in_assetArray){
+    lapi._loadAssets(in_assetArray);
   }
 
 };
@@ -1076,7 +1217,7 @@ lapi.Scene.prototype = {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.0-dev</a>
-		on Tue Oct 08 2013 01:02:06 GMT-0400 (EDT) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		on Thu Dec 19 2013 13:38:09 GMT-0500 (EST) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
 			</div>
