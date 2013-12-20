@@ -178,16 +178,14 @@
       var cb;
       if(obj.properties.getParameter(in_property)){
         cb = function(data){
-          obj.properties.getParameter(in_property).value = data.value;
+          obj.properties.getParameter(in_property)._setValueMuted(data.value);
         };
       }else{
         var property = obj.properties.getProperty(in_property);
         cb = function(data){
-          property._remoteUpdate = true;
           for( var i in data){
-            property.getParameter(i).value = data[i].value;
+            property.getParameter(i)._setValueMuted(data[i].value);
           }
-          property._remoteUpdate = false;
         };
       }
       lapi._eventCbMap[eventName] = [cb];

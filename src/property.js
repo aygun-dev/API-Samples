@@ -37,12 +37,6 @@ lapi.Property = function( in_name ){
    */
   this._name = in_name;
 
-  /**
-   * @type {boolean}
-   * @private
-   */
-  this._remoteUpdate = false;
-
 };
 
 
