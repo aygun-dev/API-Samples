@@ -39,10 +39,13 @@
         console.log(in_response);
       });
     };
+
+    var cameraCB = function(data){
+      console.log(data);
+    };
     $( document ).ready(function() {
       lapi.onSceneLoaded = function(){
-        lapi.objectPropertyBind('95e3c57c-5762-4bb0-84a4-6cb20b30faa9','Position',updatePosition);
-        lapi.objectPropertyBind('95e3c57c-5762-4bb0-84a4-6cb20b30faa9','Scale',updateScale);
+        lapi.getActiveScene().getCameras()[0].bindProperty('Position',cameraCB);
       };
       // Make sure that the whole scene is loaded! Only then can you  set the first object selection.
       // This happens because we want the user to have a reference object to guide them.
