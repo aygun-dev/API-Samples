@@ -127,8 +127,9 @@ lapi.Parameter.prototype = {
 
   /**
    * Set the value of this parameter without updating the back-end
+   * @private
    */
-  setValueMuted : function(in_val){
+  _setValueMuted : function(in_val){
     this._value = in_val;
   }
 };
