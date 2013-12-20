@@ -144,6 +144,15 @@
   lapi._frame = 0;
 
   /**
+   * Pass messgage to SC
+   * @in_message {object} message we will stringify and send to SC
+   */
+  lapi._messageIframe = function(in_message){
+    var iframe = document.getElementById('lagoaframe');
+    iframe.contentWindow.postMessage(JSON.stringify(in_message), '*');
+  };
+
+  /**
    * RPC call for SC to execute.
    * @message {string} instructions we want to execute
    * @callback {function} Optional callback. It will use whatever the RPC call returns. Note, that RPC
@@ -152,12 +161,10 @@
    */
   lapi._embedRPC = function(message, callback){
     var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
-    var iframe = document.getElementById('lagoaframe');
     if(callback){
       lapi._cbmap[randName] = callback;
     }
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
-//    console.warn("API: "+ message);
+    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message});
   };
 
   /**
@@ -194,8 +201,7 @@
       lapi._eventCbMap[eventName].push(callback);
     }
     if(initialBind){
-      var iframe = document.getElementById('lagoaframe');
-      iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName}), '*');
+      lapi._messageIframe({channel : 'embedrpc', id: eventName});
     }
   };
 
@@ -210,8 +216,7 @@
       return;
     }
     delete lapi._eventCbMap[eventName];
-    var iframe = document.getElementById('lagoaframe');
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName, unbind : true}), '*');
+    lapi._messageIframe({channel : 'embedrpc', id: eventName, unbind : true});
   };
 
 
