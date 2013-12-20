@@ -84,6 +84,72 @@ lapi.SceneObject.prototype = {
   },
 
   /**
+   * RPC call for SC to execute. It will bind our callbacks to the object's modifications.
+   * @in_propName {string} The property of the object we want to track.
+   * @callback {function} Optional callback. It will use a stringified property object or
+   * a paramater. Note : property objects is made of key-value entries, where the key is a 
+   * parameter name and value is a strigified parameter.
+   */
+  bindProperty : function( in_propName, callback){
+    var eventName = this.guid + ':' + in_propName;
+    var initialBind = false;
+    if(!lapi._eventCbMap[eventName]){
+      initialBind = true;
+      var cb;
+      var property = this.getProperty(in_propName);
+      if(property){
+        cb = function(data){
+          for( var i in data){
+            property.getParameter(i)._setValueMuted(data[i].value);
+          }
+        };
+      }else {
+        property = this.properties.getParameter(in_propName);
+        cb = function(data){
+          property._setValueMuted(data.value);
+        };
+
+      }
+      lapi._eventCbMap[eventName] = [cb];
+    }
+    if(callback){
+      lapi._eventCbMap[eventName].push(callback);
+    }
+    if(initialBind){
+      lapi._messageIframe({channel : 'embedrpc', id: eventName});
+    }
+  },
+
+  /**
+   * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
+   * @in_propName {string} The property of the object we want to track.
+   */
+  unbindProperty : function( in_propName){
+    var eventName = this.guid + ':' + in_propName;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    delete lapi._eventCbMap[eventName];
+    lapi._messageIframe({channel : 'embedrpc', id: eventName, unbind : true});
+  },
+
+  /**
+   * This will unbind a callback from specific object's modifications.
+   * @in_propName {string} The property of the object we want to track.
+   * @callback {function}  The callback we want to unbind.
+   */
+  unbindPropertyCb : function( in_propName, callback){
+    var eventName = this.guid + ':' + in_propName;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    var index = lapi._eventCbMap[eventName].indexOf(callback);
+    if (index > -1) {
+      lapi._eventCbMap[eventName].splice(index, 1);
+    }
+  },
+
+  /**
    * copy a PropertySet that is returned via an embedRPC call. The returned object is
    * parsed into a local object made out of SceneObject, Property and Parameter classes.
    * @in_ctxtObject {SceneObject} the object this pset belongs to
