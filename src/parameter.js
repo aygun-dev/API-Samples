@@ -112,7 +112,6 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     _value = in_val;
     var paramList = {};
     paramList[ this.id ] = this.value;
-    if(this.parent._remoteUpdate) return;
     var parentPropName = this.parent.name;
     lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
   })
@@ -124,5 +123,12 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
  * @memberof Parameter
  */
 lapi.Parameter.prototype = {
-  constructor : lapi.Parameter
+  constructor : lapi.Parameter,
+
+  /**
+   * Set the value of this parameter without updating the back-end
+   */
+  setValueMuted : function(in_val){
+    this._value = in_val;
+  }
 };

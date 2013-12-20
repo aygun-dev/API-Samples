@@ -189,16 +189,14 @@ var lapi = {};
       var cb;
       if(obj.properties.getParameter(in_property)){
         cb = function(data){
-          obj.properties.getParameter(in_property).value = data.value;
+          obj.properties.getParameter(in_property).setValueMuted(data.value);
         };
       }else{
         var property = obj.properties.getProperty(in_property);
         cb = function(data){
-          property._remoteUpdate = true;
           for( var i in data){
-            property.getParameter(i).value = data[i].value;
+            property.getParameter(i).setValueMuted(data[i].value);
           }
-          property._remoteUpdate = false;
         };
       }
       lapi._eventCbMap[eventName] = [cb];
@@ -560,12 +558,6 @@ lapi.Property = function( in_name ){
    */
   this._name = in_name;
 
-  /**
-   * @type {boolean}
-   * @private
-   */
-  this._remoteUpdate = false;
-
 };
 
 
@@ -775,7 +767,6 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     _value = in_val;
     var paramList = {};
     paramList[ this.id ] = this.value;
-    if(this.parent._remoteUpdate) return;
     var parentPropName = this.parent.name;
     lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
   })
@@ -787,7 +778,14 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
  * @memberof Parameter
  */
 lapi.Parameter.prototype = {
-  constructor : lapi.Parameter
+  constructor : lapi.Parameter,
+
+  /**
+   * Set the value of this parameter without updating the back-end
+   */
+  setValueMuted : function(in_val){
+    this._value = in_val;
+  }
 };
 
 /**
