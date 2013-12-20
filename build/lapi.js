@@ -155,6 +155,15 @@ var lapi = {};
   lapi._frame = 0;
 
   /**
+   * Pass messgage to SC
+   * @in_message {object} message we will stringify and send to SC
+   */
+  lapi._messageIframe = function(in_message){
+    var iframe = document.getElementById('lagoaframe');
+    iframe.contentWindow.postMessage(JSON.stringify(in_message), '*');
+  };
+
+  /**
    * RPC call for SC to execute.
    * @message {string} instructions we want to execute
    * @callback {function} Optional callback. It will use whatever the RPC call returns. Note, that RPC
@@ -163,84 +172,10 @@ var lapi = {};
    */
   lapi._embedRPC = function(message, callback){
     var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
-    var iframe = document.getElementById('lagoaframe');
     if(callback){
       lapi._cbmap[randName] = callback;
     }
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: randName, command : message}), '*');
-//    console.warn("API: "+ message);
-  };
-
-  /**
-   * RPC call for SC to execute. It will bind our callbacks to a specific object's modifications.
-   * @in_GUID {string} The GUID of the object whose property we want to track.
-   * @in_property {string} The property of the object we want to track.
-   * @callback {function} Optional callback. It will use a stringified property object or
-   * a paramater. Note : property objects is made of key-value entries, where the key is a 
-   * parameter name and value is a strigified parameter.
-   */
-  lapi.objectPropertyBind = function(in_guid,in_property, callback){
-    var eventName = in_guid + ':' + in_property;
-    var initialBind = false;
-    if(!lapi._eventCbMap[eventName]){
-      var scn = lapi.getActiveScene();
-      var obj = scn.getObjectByGuid( in_guid );
-      initialBind = true;
-      var cb;
-      if(obj.properties.getParameter(in_property)){
-        cb = function(data){
-          obj.properties.getParameter(in_property)._setValueMuted(data.value);
-        };
-      }else{
-        var property = obj.properties.getProperty(in_property);
-        cb = function(data){
-          for( var i in data){
-            property.getParameter(i)._setValueMuted(data[i].value);
-          }
-        };
-      }
-      lapi._eventCbMap[eventName] = [cb];
-    }
-    if(callback){
-      lapi._eventCbMap[eventName].push(callback);
-    }
-    if(initialBind){
-      var iframe = document.getElementById('lagoaframe');
-      iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName}), '*');
-    }
-  };
-
-  /**
-   * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
-   * @in_GUID {string} The GUID of the object whose property we want to track.
-   * @in_property {string} The property of the object we want to track.
-   */
-  lapi.objectPropertyUnbind = function(in_guid,in_property){
-    var eventName = in_guid + ':' + in_property;
-    if(!lapi._eventCbMap[eventName]){
-      return;
-    }
-    delete lapi._eventCbMap[eventName];
-    var iframe = document.getElementById('lagoaframe');
-    iframe.contentWindow.postMessage(JSON.stringify({channel : 'embedrpc', id: eventName, unbind : true}), '*');
-  };
-
-
-  /**
-   * This will unbind a callback from specific object's modifications.
-   * @in_GUID {string} The GUID of the object whose property we want to track.
-   * @in_property {string} The property of the object we want to track.
-   * @in_callback {function}  The callback we want to unbind.
-   */
-  lapi.objectPropertyUnbindCb = function(in_guid,in_property, in_callback){
-    var eventName = in_guid + ':' + in_property;
-    if(!lapi._eventCbMap[eventName]){
-      return;
-    }
-    var index = lapi._eventCbMap[eventName].indexOf(in_callback);
-    if (index > -1) {
-      lapi._eventCbMap[eventName].splice(index, 1);
-    }
+    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message});
   };
 
   /**
@@ -872,6 +807,72 @@ lapi.SceneObject.prototype = {
    */
   getProperty : function( in_propName ){
     return this.properties.getProperty( in_propName );
+  },
+
+  /**
+   * RPC call for SC to execute. It will bind our callbacks to the object's modifications.
+   * @in_propName {string} The property of the object we want to track.
+   * @callback {function} Optional callback. It will use a stringified property object or
+   * a paramater. Note : property objects is made of key-value entries, where the key is a 
+   * parameter name and value is a strigified parameter.
+   */
+  bindProperty : function( in_propName, callback){
+    var eventName = this.guid + ':' + in_propName;
+    var initialBind = false;
+    if(!lapi._eventCbMap[eventName]){
+      initialBind = true;
+      var cb;
+      var property = this.getProperty(in_propName);
+      if(property){
+        cb = function(data){
+          for( var i in data){
+            property.getParameter(i)._setValueMuted(data[i].value);
+          }
+        };
+      }else {
+        property = this.properties.getParameter(in_propName);
+        cb = function(data){
+          property._setValueMuted(data.value);
+        };
+
+      }
+      lapi._eventCbMap[eventName] = [cb];
+    }
+    if(callback){
+      lapi._eventCbMap[eventName].push(callback);
+    }
+    if(initialBind){
+      lapi._messageIframe({channel : 'embedrpc', id: eventName});
+    }
+  },
+
+  /**
+   * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
+   * @in_propName {string} The property of the object we want to track.
+   */
+  unbindProperty : function( in_propName){
+    var eventName = this.guid + ':' + in_propName;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    delete lapi._eventCbMap[eventName];
+    lapi._messageIframe({channel : 'embedrpc', id: eventName, unbind : true});
+  },
+
+  /**
+   * This will unbind a callback from specific object's modifications.
+   * @in_propName {string} The property of the object we want to track.
+   * @callback {function}  The callback we want to unbind.
+   */
+  unbindPropertyCb : function( in_propName, callback){
+    var eventName = this.guid + ':' + in_propName;
+    if(!lapi._eventCbMap[eventName]){
+      return;
+    }
+    var index = lapi._eventCbMap[eventName].indexOf(callback);
+    if (index > -1) {
+      lapi._eventCbMap[eventName].splice(index, 1);
+    }
   },
 
   /**
