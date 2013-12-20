@@ -811,10 +811,13 @@ lapi.SceneObject.prototype = {
 
   /**
    * RPC call for SC to execute. It will bind our callbacks to the object's modifications.
+   * As a bonus, we will now automatically track the values of the property parameters and update our object
+   * accordingly. This way, the user won't be responsible for the updating/tracking!
    * @in_propName {string} The property of the object we want to track.
    * @callback {function} Optional callback. It will use a stringified property object or
-   * a paramater. Note : property objects is made of key-value entries, where the key is a 
-   * parameter name and value is a strigified parameter.
+   * a paramater. Note : property objects is made of key-value entries, where the key is a
+   * parameter id and value is a strigified parameter. The exception being if a property is
+   * a single parameter. Then, it's just the parameter object itself.  
    */
   bindProperty : function( in_propName, callback){
     var eventName = this.guid + ':' + in_propName;
@@ -848,6 +851,7 @@ lapi.SceneObject.prototype = {
 
   /**
    * RPC call for SC to execute. It will unbind all callbacks from specific object's modifications.
+   * This also means we are no longer tracking the object values.
    * @in_propName {string} The property of the object we want to track.
    */
   unbindProperty : function( in_propName){
@@ -860,7 +864,7 @@ lapi.SceneObject.prototype = {
   },
 
   /**
-   * This will unbind a callback from specific object's modifications.
+   * This will unbind a specific callback from the object's property modifications.
    * @in_propName {string} The property of the object we want to track.
    * @callback {function}  The callback we want to unbind.
    */
