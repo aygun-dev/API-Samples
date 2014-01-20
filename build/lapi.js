@@ -905,6 +905,26 @@ lapi.SceneObject.prototype = {
     diveIn(in_pset, rtn);
 
     return rtn;
+  },
+
+  /**
+   * This is an asynnchrnous function!
+   * Compute the BoundingBox of an object in world space. In other words, take into
+   * account the translation,rotation and scale components.
+   * @in_cb {function} function that expects an object  {min : {x : v, y : v, z :v}, max :{...}}
+   * the 'v' is a stand-in for numerical values.
+   */
+  computeTransformedAABB : function(in_cb){
+    var bb = this.properties.getProperty("BoundingBoxMin");
+    if(!bb){
+      console.warn('object has no bounding box');
+      return;
+    }
+    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + this.guid +"');"
+      + "var bbox = ACTIVEAPP.boundingBoxForEntity(obj);"
+      + "bbox.transformAndAxisAlign(obj.matrix);",function(in_response){
+        in_cb(in_response.data);
+      });
   }
 
 };
