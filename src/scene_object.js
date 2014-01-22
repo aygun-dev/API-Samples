@@ -47,7 +47,9 @@ lapi.SceneObject = function( in_guid ){
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
   console.warn("Building PSet of " + in_guid );
-  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
+  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
+    + "});",
     function(in_embedRPC_message){
       if( !(in_embedRPC_message.error === "EXECERR") ){
         var pSet = in_embedRPC_message.data;

@@ -293,8 +293,8 @@ var lapi = {};
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameterByName("Material");
-    matParam.value = mat.properties.getParameterByName("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameterByName("tmaterial");
+    matParam.value = mat.properties.getParameterByName("guid").value;
   };
 
   /**
@@ -773,7 +773,9 @@ lapi.SceneObject = function( in_guid ){
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
   console.warn("Building PSet of " + in_guid );
-  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
+  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
+    + "});",
     function(in_embedRPC_message){
       if( !(in_embedRPC_message.error === "EXECERR") ){
         var pSet = in_embedRPC_message.data;
@@ -1092,6 +1094,30 @@ lapi.Scene.prototype = {
 
   addAssets : function(in_assetArray){
     lapi._loadAssets(in_assetArray);
+  },
+
+  addObject : function(in_tuid,in_guid){
+    var initClass = this._classedItems[in_tuid];
+    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid );
+    ++this._objectCount;
+  },
+
+  addMaterial : function(in_materialType){
+    var self = this;
+    lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
+    + in_materialType + "'});"
+    + "mat.guid;",function(in_response){
+      self.addObject('MaterialID',in_response.data);
+    });
+  },
+
+  addLight : function(in_lightType){
+    var self = this;
+    lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
+    + in_lightType + "'});"
+    + "light.guid;",function(in_response){
+      self.addObject('LightID',in_response.data);
+    });
   }
 
 };

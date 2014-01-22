@@ -103,6 +103,30 @@ lapi.Scene.prototype = {
 
   addAssets : function(in_assetArray){
     lapi._loadAssets(in_assetArray);
+  },
+
+  addObject : function(in_tuid,in_guid){
+    var initClass = this._classedItems[in_tuid];
+    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid );
+    ++this._objectCount;
+  },
+
+  addMaterial : function(in_materialType){
+    var self = this;
+    lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
+    + in_materialType + "'});"
+    + "mat.guid;",function(in_response){
+      self.addObject('MaterialID',in_response.data);
+    });
+  },
+
+  addLight : function(in_lightType){
+    var self = this;
+    lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
+    + in_lightType + "'});"
+    + "light.guid;",function(in_response){
+      self.addObject('LightID',in_response.data);
+    });
   }
 
 };
