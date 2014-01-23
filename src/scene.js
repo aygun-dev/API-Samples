@@ -105,27 +105,39 @@ lapi.Scene.prototype = {
     lapi._loadAssets(in_assetArray);
   },
 
-  addObject : function(in_tuid,in_guid){
+  addObject : function(in_tuid,in_guid,in_cb){
     var initClass = this._classedItems[in_tuid];
-    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid );
+    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid,in_cb);
     ++this._objectCount;
   },
 
-  addMaterial : function(in_materialType){
+  /**
+   * Add a new material to scene.
+   * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
+   * @param {function} in_cb  optional callback that expects a material SceneObject as an argument.
+   * @returns {String}
+   */
+  addNewMaterial : function(in_materialType,in_cb){
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
     + in_materialType + "'});"
     + "mat.guid;",function(in_response){
-      self.addObject('MaterialID',in_response.data);
+      self.addObject('MaterialID',in_response.data,in_cb);
     });
   },
 
-  addLight : function(in_lightType){
+  /**
+   * Add a new light to scene.
+   * @param {string} in_lightType  The type of light the user wants to add : 'DomeLight','SunSkyLight' etc.
+   * @param {function} in_cb  optional callback that expects a light SceneObject as an argument.
+   * @returns {String}
+   */
+  addNewLight : function(in_lightType,in_cb){
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
     + in_lightType + "'});"
     + "light.guid;",function(in_response){
-      self.addObject('LightID',in_response.data);
+      self.addObject('LightID',in_response.data,in_cb);
     });
   }
 
