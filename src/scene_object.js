@@ -7,9 +7,11 @@
  * This object will be initialized – based on the input guid – producing a
  * mirror object locally outside of the embed.
  * @param {string} in_guid guid of an object in the scene
+ * @param {function} in_cb (optional) callback is called when object is done initializing.
+ * The callback expects an SceneObject.
  * @class SceneObject
  */
-lapi.SceneObject = function( in_guid ){
+lapi.SceneObject = function( in_guid, in_cb){
   var _guid = in_guid;
   var _properties = {};
   var _self = this;
@@ -47,11 +49,16 @@ lapi.SceneObject = function( in_guid ){
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
   console.warn("Building PSet of " + in_guid );
-  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
+  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
+    + "});",
     function(in_embedRPC_message){
       if( !(in_embedRPC_message.error === "EXECERR") ){
         var pSet = in_embedRPC_message.data;
         _properties = _self._pSetDeepCopy( _self, pSet );
+        if(in_cb){
+          in_cb(_self);
+        }
       }
     }
   );

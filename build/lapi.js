@@ -293,8 +293,8 @@ var lapi = {};
     var mesh = scn.getObjectByGuid( in_meshGuid );
     var mat = scn.getObjectByGuid( in_materialGuid );
 
-    var matParam = mesh.properties.getProperty("Materials").getParameterByName("Material");
-    matParam.value = mat.properties.getParameterByName("GUID").value;
+    var matParam = mesh.properties.getProperty("Materials").getParameterByName("tmaterial");
+    matParam.value = mat.properties.getParameterByName("guid").value;
   };
 
   /**
@@ -733,9 +733,11 @@ lapi.Parameter.prototype = {
  * This object will be initialized – based on the input guid – producing a
  * mirror object locally outside of the embed.
  * @param {string} in_guid guid of an object in the scene
+ * @param {function} in_cb (optional) callback is called when object is done initializing.
+ * The callback expects an SceneObject.
  * @class SceneObject
  */
-lapi.SceneObject = function( in_guid ){
+lapi.SceneObject = function( in_guid, in_cb){
   var _guid = in_guid;
   var _properties = {};
   var _self = this;
@@ -773,11 +775,16 @@ lapi.SceneObject = function( in_guid ){
   // We cache the entire PropertySet object (flattened) for local access
   // The deep copy routine builds the embed object using the local property and parameter objects
   console.warn("Building PSet of " + in_guid );
-  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten()",
+  lapi._embedRPC("ACTIVEAPP.GetScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
+    + "});",
     function(in_embedRPC_message){
       if( !(in_embedRPC_message.error === "EXECERR") ){
         var pSet = in_embedRPC_message.data;
         _properties = _self._pSetDeepCopy( _self, pSet );
+        if(in_cb){
+          in_cb(_self);
+        }
       }
     }
   );
@@ -1092,6 +1099,42 @@ lapi.Scene.prototype = {
 
   addAssets : function(in_assetArray){
     lapi._loadAssets(in_assetArray);
+  },
+
+  addObject : function(in_tuid,in_guid,in_cb){
+    var initClass = this._classedItems[in_tuid];
+    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid,in_cb);
+    ++this._objectCount;
+  },
+
+  /**
+   * Add a new material to scene.
+   * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
+   * @param {function} in_cb  optional callback that expects a material SceneObject as an argument.
+   * @returns {String}
+   */
+  addNewMaterial : function(in_materialType,in_cb){
+    var self = this;
+    lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
+    + in_materialType + "'});"
+    + "mat.guid;",function(in_response){
+      self.addObject('MaterialID',in_response.data,in_cb);
+    });
+  },
+
+  /**
+   * Add a new light to scene.
+   * @param {string} in_lightType  The type of light the user wants to add : 'DomeLight','SunSkyLight' etc.
+   * @param {function} in_cb  optional callback that expects a light SceneObject as an argument.
+   * @returns {String}
+   */
+  addNewLight : function(in_lightType,in_cb){
+    var self = this;
+    lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
+    + in_lightType + "'});"
+    + "light.guid;",function(in_response){
+      self.addObject('LightID',in_response.data,in_cb);
+    });
   }
 
 };
