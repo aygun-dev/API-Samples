@@ -107,6 +107,9 @@ lapi.Scene.prototype = {
 
   addObject : function(in_tuid,in_guid,in_cb){
     var initClass = this._classedItems[in_tuid];
+    if(!initClass){
+      initClass = this._classedItems[in_tuid] = {};
+    }
     this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid,in_cb);
     ++this._objectCount;
   },
