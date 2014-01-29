@@ -8,24 +8,28 @@
     <script src="../../build/lapi.js"></script>
     <script src="../assets/select2/select2.js"></script>
     <script>
-    var assets = {};
+    // A map that associates asset guid to to its type.
+    // We need to pass in this value to load an asseet.
+    var ASSETS = {};
     /**
     * Get a list of assets associated with a project id. Then,
     * update the assets menu.
     */
     function updateAssetMenu(){
-      assets = {};
+      ASSETS = {};
       var cb = function (data) {
         $('#js-assets_select_menu').empty();
         $('#js-assets_select_menu').append("<option value></option>");
         for(var i = 0 ; i < data.length ; ++i){
           var asset = data[i];
+          // fetch the assets and populate the ASSETS map.
           $('#js-assets_select_menu').append("<option value="+
             asset.latest.guid+">" + asset.name + "</option>");
-          assets[asset.latest.guid] = asset.latest.datatype_id;
+          ASSETS[asset.latest.guid] = asset.latest.datatype_id;
         }
         $("#js-assets_select_menu").select2({placeholder: "Select an Asset"});
       };
+      //  update this string to filter, you can add query,user_ids and project_ids. Note on query : it searches name, description and tags.
       $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&datatype_ids=1,2,3,4,14,15,17,21,23&sort_updated_at=true',cb, 'jsonp');
     }
 
@@ -40,7 +44,7 @@
         assetGUID = $(this).val();
         assetName = $(this).text();
       });
-      lapi.getActiveScene().addAssets([{name: assetName, datatype : assets[assetGUID],version_guid: assetGUID}]);
+      lapi.getActiveScene().addAssets([{name: assetName, datatype : ASSETS[assetGUID],version_guid: assetGUID}]);
     }
 
     $( document ).ready(function() {
