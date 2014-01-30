@@ -1,0 +1,121 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"> //</script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js">//</script>
+    <link href="../assets/select2/select2.css" rel="stylesheet"/>
+    <!-- LAGOA API -->
+    <script src="../../build/lapi.js"></script>
+    <script src="../assets/select2/select2.js"></script>
+    <script>
+
+    // Fetch all the available material types and populate the menu.
+    function updateMaterialMenu(){
+      var cb = function (in_response) {
+        var materials = in_response.data;
+        $('#js-materials_select_menu').empty();
+        // default material is Diffuse
+        //$('#js-materials_select_menu').append("<option>BASEMATERIAL</option>");
+        for(var matName in materials){
+          $('#js-materials_select_menu').append("<option>" + matName + "</option>");
+        }
+        $("#js-assets_select_menu").select2({placeholder: "Select a Material"});
+      };
+      // RPC to get a list of Mesh Objects
+      lapi._embedRPC("window.engine_materials",cb);
+    }
+
+    //Populate the light menu.
+    function updateLightMenu(){
+      var lights = ['DomeLight','HalfDomeLight', 'IsotropicDomeLight', 'SphereLight','SunSkyLight'];
+
+      $('#js-lights_select_menu').empty();
+      for(var i = 0 ; i < lights.length ; ++i ){
+        $('#js-lights_select_menu').append("<option>" + lights[i] + "</option>");
+      }
+      $("#js-lights_select_menu").select2({placeholder: "Select a Light"});
+    }
+
+    // CALLBACK for material addition and selection.
+    function pickMaterial(){
+      var mat = "";
+      $("#js-materials_select_menu option:selected").each(function (){
+        mat = $(this).val();
+      });
+      var scn = lapi.getActiveScene();
+      scn.addNewMaterial( mat , function(obj){
+        var matName = obj.properties.getParameter('name').value;
+        lapi.applyMaterialToMeshByName(matName,'Mesh_unit_cube');
+      });
+    }
+
+
+    // CALLBACK for light addition and selection.
+    function pickLight(){
+      var light = "";
+      $("#js-assets_select_menu option:selected").each(function (){
+        light = $(this).val();
+      });
+      var scn = lapi.getActiveScene();
+      scn.addNewLight(light, function(obj){console.log(obj);});
+    }
+
+
+    $( document ).ready(function() {
+      lapi.onSceneLoaded = function(){
+        updateMaterialMenu();
+        updateLightMenu();
+      };
+      $('#js-materials_select_menu').change(pickMaterial);
+      $('#js-lights_select_menu').change(pickLight);
+    });
+    </script>
+    <!-- Latest compiled and minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
+ 
+<!-- Latest compiled and minified JavaScript -->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/js/bootstrap.min.js"></script>
+ 
+<!-- Latest Glyphicons minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css" rel="stylesheet">
+<style>
+  .fully-expanded{
+    width: 100%;
+    display: block;
+  }
+</style>
+  </head>
+  <body>
+    <div class="container">
+    <nav class="navbar" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#">Load Asset Scene Demo</a>
+    </div>
+    </nav>
+    <div class="row">
+      <div class="col-md-8">
+        <div class="row">
+          <div class="col-md-12">
+            <iframe src="https://lagoa.com/embed_links/1874?validationHash=72etmFupOoxomgM_ywA8YoSnGu1wBA&width=500&height=330&asset_name=true&owner_name=true&lagoa_logo=true&version_number=3" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-8" style="padding-top:20px;">
+            <select id='js-materials_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-8" style="padding-top:20px;">
+            <select id='js-lights_select_menu' class="fully-expanded"></select>
+          </div>
+        </div>
+    </div>
+</body>
+</html>
