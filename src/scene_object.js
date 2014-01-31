@@ -189,7 +189,7 @@ lapi.SceneObject.prototype = {
   },
 
   /**
-   * This is an asynnchrnous function!
+   * This is an asynchronous function!
    * Compute the BoundingBox of an object in world space. In other words, take into
    * account the translation,rotation and scale components.
    * @in_cb {function} function that expects an object  {min : {x : v, y : v, z :v}, max :{...}}
@@ -204,6 +204,24 @@ lapi.SceneObject.prototype = {
     lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + this.guid +"');"
       + "var bbox = ACTIVEAPP.boundingBoxForEntity(obj);"
       + "bbox.transformAndAxisAlign(obj.matrix);",function(in_response){
+        in_cb(in_response.data);
+      });
+  },
+
+  /**
+   * This is an asynchronous function!
+   * If this is an object with children, return an of their guids!
+   * @in_cb {function} function that expects an array of guids
+   */
+  fetchChildren : function(in_cb){
+    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + this.guid +"');"
+      + "var arr = [];"
+      + "if (obj._children) { "
+      + " for (var i = 0 ; i < obj._children.length; ++i) {"
+      +  "  arr[i] = obj._children[i].guid; "
+      +  "}"
+      + "}"
+      + "arr",function(in_response){
         in_cb(in_response.data);
       });
   }
