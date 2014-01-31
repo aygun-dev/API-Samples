@@ -210,7 +210,7 @@ lapi.SceneObject.prototype = {
 
   /**
    * This is an asynchronous function!
-   * If this is an object with children, return an of their guids!
+   * If this is an object with children, return an array of their guids!
    * @in_cb {function} function that expects an array of guids
    */
   fetchChildren : function(in_cb){
