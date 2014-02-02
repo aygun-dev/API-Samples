@@ -466,20 +466,18 @@
       }
     }
 
-
     function updateZoomSlider(e){
-      console.log(e);
+      $( "#slider" ).slider('value', e.zoom.value);
     }
 
     function bindProperties(){
-      var cam = lapi.getCamera();
-      lapi.objectPropertyBind(cam.guid,'Lens', updateZoomSlider);
+      cam.bindProperty("Lens", updateZoomSlider);
     }
 
     // start rendering and hide meshes
     function beginRendering(in_scn){
 
-      // this timeout just prevents us from racing... avoid a bug. Just trust me.
+      // this timeout just prevents us from racing... avoid a bug.s Just trust me.
       setTimeout( function(){
         // now we will set all the GL meshes to not visible
         var meshes = in_scn.getMeshes();
@@ -529,24 +527,24 @@
       min : -180,
       max: 180,
       value: 20,
-      slide: refreshIntensitySlider2,
-      change: refreshIntensitySlider2 });
+      slide : refreshIntensitySlider2,
+      onSlide: refreshIntensitySlider2 });
 
     $( "#intensity-slider" ).slider( { orientation: "horizontal",
       range: "min",
       min : 0,
       max: 20,
       value: 2,
-      slide: refreshIntensitySlider,
-      change: refreshIntensitySlider });
+      slide : refreshIntensitySlider,
+      onSlide: refreshIntensitySlider });
 
     $( "#slider" ).slider( { orientation: "horizontal",
-    range: "min",
-    min : 6,
-    max: 100,
-    value: 14,
-    slide: refreshSlider,
-    change: refreshSlider });
+      range: "min",
+      min : 6,
+      max: 100,
+      value: 14,
+      slide : refreshSlider,
+      onSlide: refreshSlider });
 
 //    $( "#sliderDof" ).slider( { orientation: "horizontal",
 //      range: "min",
