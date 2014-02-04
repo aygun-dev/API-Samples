@@ -105,6 +105,21 @@ lapi.Scene.prototype = {
     lapi._loadAssets(in_assetArray);
   },
 
+  deleteObject : function(in_object){
+    var self = this;
+    var guid  =  in_object.guid;
+    var tuid = in_object.properties.getParameter("tuid").value;
+    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" +  guid + "'); "
+    + "ACTIVEAPP.RunCommand({"
+    +   "command : 'Delete',"
+    +   "data : { ctxt : obj }"
+    + "});", function(){
+      delete self._classedItems[tuid][guid];
+      delete self._guidItems[guid];
+      --this._objectCount;
+    });
+  },
+
   addObject : function(in_tuid,in_guid,in_cb){
     var initClass = this._classedItems[in_tuid];
     if(!initClass){
