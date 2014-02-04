@@ -29,6 +29,27 @@
         }
         $("#js-assets_select_menu").select2({placeholder: "Select an Asset"});
       };
+
+    /* ex for querying :
+     '/search/assets.json?per_page=100&page=1&datatype_ids=1,2,3,4,14,15,17,21,23&sort_updated_at=true&user_ids=xxxxx&project_ids=xxxxx&query=sometext'
+ 
+    The query parameter takes into account the asset's name,  owner's name,description and its tags. If there is a match it will show.
+
+    As for projects, you can get project_ids like this : '/search/projects.json?per_page=100&page=1&user_ids=xxxxx&query=sometext'
+    'query' here works just like it does for assets. 
+
+    As for the datatype_ids here is the mapping :
+    '1': 'jpg',
+    '2': 'jpeg',
+    '3': 'gif',
+    '4': 'png',
+    '14': 'json',
+    '15': 'exr',
+    '17': 'bmp',
+    '18': 'ase',
+    '21': 'lzmajson',
+    '23': 'hdr'*/
+
       //  update this string to filter, you can add query,user_ids and project_ids. Note on query : it searches name, description and tags.
       $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&datatype_ids=1,2,3,4,14,15,17,21,23&sort_updated_at=true',cb, 'jsonp');
     }
