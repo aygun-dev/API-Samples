@@ -254,16 +254,7 @@ var lapi = {};
     lapi._embedRPC("ACTIVEAPP.LoadAssets({ " +
       "assets :" +
         JSON.stringify(in_assetArray)+
-      "});",function(e){});
-    var checkAssetsLoaded = function(){
-      lapi._embedRPC("ACTIVEAPP.scene.GetObjects().length;",function(in_response){
-        if(in_response.data !== objectCount){
-          clearInterval(sceneTimer);
-          lapi._initialize();
-        }
-      });
-    };
-    var sceneTimer = setInterval(checkAssetsLoaded,3000);
+      "});");
   };
   /**
   * Assign value to object property .
