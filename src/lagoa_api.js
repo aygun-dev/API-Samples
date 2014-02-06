@@ -86,6 +86,15 @@
    */
   lapi._sceneTimer;
 
+
+  /**
+   * method for on Object Added event
+   * @virtual
+   * @callback called when object has been added to the scene. Expects the SceneObject that has jus been added;
+   */
+
+   lapi.onObjectAdded = function(){};
+
   /**
    * Implements the MPI interface to receive messages back from the lagoa embed
    * @private
@@ -108,7 +117,12 @@
           cbArray[i](retval.data);
         }
       }
-    } 
+    } else if (retval.channel === 'objectAdded') {
+      var scn = lapi.getActiveScene();
+      scn.addObject(retval.data.tuid,retval.data.guid, function(obj){
+        lapi.onObjectAdded(obj);
+      });
+    }
   });
 
   /**

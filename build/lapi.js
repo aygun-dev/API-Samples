@@ -97,6 +97,15 @@ var lapi = {};
    */
   lapi._sceneTimer;
 
+
+  /**
+   * method for on Object Added event
+   * @virtual
+   * @callback called when object has been added to the scene. Expects the SceneObject that has jus been added;
+   */
+
+   lapi.onObjectAdded = function(){};
+
   /**
    * Implements the MPI interface to receive messages back from the lagoa embed
    * @private
@@ -119,7 +128,12 @@ var lapi = {};
           cbArray[i](retval.data);
         }
       }
-    } 
+    } else if (retval.channel === 'objectAdded') {
+      var scn = lapi.getActiveScene();
+      scn.addObject(retval.data.tuid,retval.data.guid, function(obj){
+        lapi.onObjectAdded(obj);
+      });
+    }
   });
 
   /**
@@ -1163,10 +1177,7 @@ lapi.Scene.prototype = {
   addNewMaterial : function(in_materialType,in_cb){
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
-    + in_materialType + "'});"
-    + "mat.guid;",function(in_response){
-      self.addObject('MaterialID',in_response.data,in_cb);
-    });
+    + in_materialType + "'});");
   },
 
   /**
@@ -1178,10 +1189,7 @@ lapi.Scene.prototype = {
   addNewLight : function(in_lightType,in_cb){
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
-    + in_lightType + "'});"
-    + "light.guid;",function(in_response){
-      self.addObject('LightID',in_response.data,in_cb);
-    });
+    + in_lightType + "'});");
   }
 
 };
