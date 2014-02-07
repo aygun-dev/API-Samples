@@ -105,23 +105,26 @@
 
 //      console.warn("returning RPC call", lapi._cbStack);
 //      --lapi._cbStack;
-
-      if(lapi._cbmap[retval.id]){
-        var callback = lapi._cbmap[retval.id];
-        callback(retval);
-        delete lapi._cbmap[retval.id];
-      }
-      else if(lapi._eventCbMap[retval.id]){
-        var cbArray = lapi._eventCbMap[retval.id];
-        for(var i = 0 ; i < cbArray.length; ++i){
-          cbArray[i](retval.data);
+      if (retval.subchannel) {
+        if(retval.subchannel === 'objectAdded'){
+          var scn = lapi.getActiveScene();
+          scn.addObject(retval.data.tuid,retval.data.guid, function(obj){
+            lapi.onObjectAdded(obj);
+          });
+        }
+      } else {
+        if(lapi._cbmap[retval.id]){
+          var callback = lapi._cbmap[retval.id];
+          callback(retval);
+          delete lapi._cbmap[retval.id];
+        }
+        else if(lapi._eventCbMap[retval.id]){
+          var cbArray = lapi._eventCbMap[retval.id];
+          for(var i = 0 ; i < cbArray.length; ++i){
+            cbArray[i](retval.data);
+          }
         }
       }
-    } else if (retval.channel === 'objectAdded') {
-      var scn = lapi.getActiveScene();
-      scn.addObject(retval.data.tuid,retval.data.guid, function(obj){
-        lapi.onObjectAdded(obj);
-      });
     }
   });
 
