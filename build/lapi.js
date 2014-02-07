@@ -97,6 +97,15 @@ var lapi = {};
    */
   lapi._sceneTimer;
 
+
+  /**
+   * method for on Object Added event
+   * @virtual
+   * @callback called when object has been added to the scene. Expects the SceneObject that has jus been added;
+   */
+
+   lapi.onObjectAdded = function(){};
+
   /**
    * Implements the MPI interface to receive messages back from the lagoa embed
    * @private
@@ -107,19 +116,27 @@ var lapi = {};
 
 //      console.warn("returning RPC call", lapi._cbStack);
 //      --lapi._cbStack;
-
-      if(lapi._cbmap[retval.id]){
-        var callback = lapi._cbmap[retval.id];
-        callback(retval);
-        delete lapi._cbmap[retval.id];
-      }
-      else if(lapi._eventCbMap[retval.id]){
-        var cbArray = lapi._eventCbMap[retval.id];
-        for(var i = 0 ; i < cbArray.length; ++i){
-          cbArray[i](retval.data);
+      if (retval.subchannel) {
+        if(retval.subchannel === 'objectAdded'){
+          var scn = lapi.getActiveScene();
+          scn.addObject(retval.data.tuid,retval.data.guid, function(obj){
+            lapi.onObjectAdded(obj);
+          });
+        }
+      } else {
+        if(lapi._cbmap[retval.id]){
+          var callback = lapi._cbmap[retval.id];
+          callback(retval);
+          delete lapi._cbmap[retval.id];
+        }
+        else if(lapi._eventCbMap[retval.id]){
+          var cbArray = lapi._eventCbMap[retval.id];
+          for(var i = 0 ; i < cbArray.length; ++i){
+            cbArray[i](retval.data);
+          }
         }
       }
-    } 
+    }
   });
 
   /**
@@ -240,16 +257,7 @@ var lapi = {};
     lapi._embedRPC("ACTIVEAPP.LoadAssets({ " +
       "assets :" +
         JSON.stringify(in_assetArray)+
-      "});",function(e){});
-    var checkAssetsLoaded = function(){
-      lapi._embedRPC("ACTIVEAPP.scene.GetObjects().length;",function(in_response){
-        if(in_response.data !== objectCount){
-          clearInterval(sceneTimer);
-          lapi._initialize();
-        }
-      });
-    };
-    var sceneTimer = setInterval(checkAssetsLoaded,3000);
+      "});");
   };
   /**
   * Assign value to object property .
@@ -1163,10 +1171,7 @@ lapi.Scene.prototype = {
   addNewMaterial : function(in_materialType,in_cb){
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
-    + in_materialType + "'});"
-    + "mat.guid;",function(in_response){
-      self.addObject('MaterialID',in_response.data,in_cb);
-    });
+    + in_materialType + "'});");
   },
 
   /**
@@ -1178,10 +1183,7 @@ lapi.Scene.prototype = {
   addNewLight : function(in_lightType,in_cb){
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
-    + in_lightType + "'});"
-    + "light.guid;",function(in_response){
-      self.addObject('LightID',in_response.data,in_cb);
-    });
+    + in_lightType + "'});");
   }
 
 };
