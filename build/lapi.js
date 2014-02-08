@@ -1165,8 +1165,10 @@ lapi.Scene.prototype = {
   /**
    * Add a new material to scene.
    * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
+   * @param {function} in_cb  optional callback that expects a material SceneObject as an argument. The object is the one we just added
+   * to the scene through addNewMaterial().
    */
-  addNewMaterial : function(in_materialType){
+  addNewMaterial : function(in_materialType,in_cb){
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
     + in_materialType + "'});");
@@ -1175,8 +1177,10 @@ lapi.Scene.prototype = {
   /**
    * Add a new light to scene.
    * @param {string} in_lightType  The type of light the user wants to add : 'DomeLight','SunSkyLight' etc.
+   * @param {function} in_cb  optional callback that expects a light SceneObject as an argument. The object is the 
+   * one we just added to the scene through addNewLight().
    */
-  addNewLight : function(in_lightType){
+  addNewLight : function(in_lightType,in_cb){
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
     + in_lightType + "'});");
