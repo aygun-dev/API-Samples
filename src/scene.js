@@ -123,7 +123,10 @@ lapi.Scene.prototype = {
   addNewMaterial : function(in_materialType,in_cb){
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
-    + in_materialType + "'});");
+    + in_materialType + "'});"
+    + "mat.guid;",function(in_response){
+      self.addObject('MaterialID',in_response.data,in_cb);
+    });
   },
 
   /**
@@ -135,7 +138,10 @@ lapi.Scene.prototype = {
   addNewLight : function(in_lightType,in_cb){
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
-    + in_lightType + "'});");
+    + in_lightType + "'});"
+    + "light.guid;",function(in_response){
+      self.addObject('LightID',in_response.data,in_cb);
+    });
   }
 
 };
