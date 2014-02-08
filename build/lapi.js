@@ -119,9 +119,13 @@ var lapi = {};
       if (retval.subchannel) {
         if(retval.subchannel === 'objectAdded'){
           var scn = lapi.getActiveScene();
-          scn.addObject(retval.data.tuid,retval.data.guid, function(obj){
-            lapi.onObjectAdded(obj);
-          });
+          var tuid = retval.data.tuid;
+          // Don't add Material or lights since we add them already.
+          if(tuid !== 'MaterialID' && tuid !== 'LightID'){
+            scn.addObject(tuid,retval.data.guid, function(obj){
+              lapi.onObjectAdded(obj);
+            });
+          }
         }
       } else {
         if(lapi._cbmap[retval.id]){
@@ -1165,21 +1169,31 @@ lapi.Scene.prototype = {
   /**
    * Add a new material to scene.
    * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
+   * @param {function} in_cb  optional callback that expects a material SceneObject as an argument. The object is the one we just added
+   * to the scene through addNewMaterial().
    */
-  addNewMaterial : function(in_materialType){
+  addNewMaterial : function(in_materialType,in_cb){
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
-    + in_materialType + "'});");
+    + in_materialType + "'});"
+    + "mat.guid;",function(in_response){
+      self.addObject('MaterialID',in_response.data,in_cb);
+    });
   },
 
   /**
    * Add a new light to scene.
    * @param {string} in_lightType  The type of light the user wants to add : 'DomeLight','SunSkyLight' etc.
+   * @param {function} in_cb  optional callback that expects a light SceneObject as an argument. The object is the 
+   * one we just added to the scene through addNewLight().
    */
-  addNewLight : function(in_lightType){
+  addNewLight : function(in_lightType,in_cb){
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
-    + in_lightType + "'});");
+    + in_lightType + "'});"
+    + "light.guid;",function(in_response){
+      self.addObject('LightID',in_response.data,in_cb);
+    });
   }
 
 };
