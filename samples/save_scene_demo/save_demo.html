@@ -1,0 +1,175 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.9.1.js"> //</script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js">//</script>
+    <link href="../assets/select2/select2.css" rel="stylesheet"/>
+    <!-- LAGOA API -->
+    <script src="../../build/lapi.js"></script>
+    <script src="../assets/select2/select2.js"></script>
+    <script>
+    // A map that associates asset guid to to its type.
+    // We need to pass in this value to load an asseet.
+    var ASSETS = {};
+    /**
+    * Get a list of assets associated with a project id. Then,
+    * update the assets menu.
+    */
+    function updateAssetMenu(){
+      ASSETS = {};
+      var cb = function (data) {
+        $('#js-assets_select_menu').empty();
+        $('#js-assets_select_menu').append("<option value></option>");
+        for(var i = 0 ; i < data.length ; ++i){
+          var asset = data[i];
+          // fetch the assets and populate the ASSETS map.
+          $('#js-assets_select_menu').append("<option value="+
+            asset.latest.guid+">" + asset.name + "</option>");
+          ASSETS[asset.latest.guid] = asset.latest.datatype_id;
+        }
+        $("#js-assets_select_menu").select2({placeholder: "Select an Asset"});
+      };
+
+    /* ex for querying :
+     '/search/assets.json?per_page=100&page=1&datatype_ids=1,2,3,4,14,15,17,21,23&sort_updated_at=true&user_ids=xxxxx&project_ids=xxxxx&query=sometext'
+ 
+    The query parameter takes into account the asset's name,  owner's name,description and its tags. If there is a match it will show.
+
+    As for projects, you can get project_ids like this : '/search/projects.json?per_page=100&page=1&user_ids=xxxxx&query=sometext'
+    'query' here works just like it does for assets. 
+
+    As for the datatype_ids here is the mapping :
+    '1': 'jpg',
+    '2': 'jpeg',
+    '3': 'gif',
+    '4': 'png',
+    '14': 'json',
+    '15': 'exr',
+    '17': 'bmp',
+    '18': 'ase',
+    '21': 'lzmajson',
+    '23': 'hdr'*/
+
+      //  update this string to filter, you can add query,user_ids and project_ids. Note on query : it searches name, description and tags.
+      $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&datatype_ids=1,2,3,4,14,15,17,21,23&sort_updated_at=true',cb, 'jsonp');
+    }
+
+    /** 
+    * A callback for asset selection dropdown menu.
+    * Select the chosen asset.
+    */
+    function pickAsset(){
+      var assetName = "";
+      var assetGUID = '';
+      $("#js-assets_select_menu option:selected").each(function (){
+        assetGUID = $(this).val();
+        assetName = $(this).text();
+      });
+      lapi.getActiveScene().addAssets([{name: assetName, datatype : ASSETS[assetGUID],version_guid: assetGUID}]);
+    }
+
+    var compressCB = function(in_response) {
+        var file = in_response.data;
+        console.log(file);
+        var buffer = new Int8Array(file.data);
+        var date = new Date();
+        var timestamp = date.getFullYear().toString() +
+                        (date.getMonth() + 1).toString() +
+                        date.getDate().toString() +
+                        date.getHours().toString() +
+                        date.getMinutes().toString() +
+                        date.getSeconds().toString();
+
+        var filename = file.guid + "-" + timestamp +  '.lzmajson';
+        var blob = new Blob(
+                [buffer],
+                {type: "text/lzmajson" }
+        );
+        saveAs(blob, filename);
+    };
+
+    function saveAs(blob, filename) {
+        var data = new FormData();
+        data.append('blob', blob, filename);
+        $.ajax({
+            url :  "/scenes",
+            type: 'POST',
+            data: data,
+            contentType: false,
+            processData: false,
+            success: function(data) {
+                console.log(data);
+                alert(data);
+            },
+            error: function() {
+                alert("not so working!");
+            }
+        });
+    }
+
+    $( document ).ready(function() {
+      lapi.onSceneLoaded = function(){
+        updateAssetMenu();
+      };
+
+      $('#js-assets_select_menu').change(pickAsset);
+
+      $("#submit").on('click', function (event) {
+          lapi._embedRPC('compressScene',compressCB);
+      });
+    });
+    </script>
+    <!-- Latest compiled and minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap.min.css" rel="stylesheet">
+ 
+<!-- Latest compiled and minified JavaScript -->
+<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/js/bootstrap.min.js"></script>
+ 
+<!-- Latest Glyphicons minified CSS -->
+<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0-rc2/css/bootstrap-glyphicons.css" rel="stylesheet">
+<style>
+  .fully-expanded{
+    width: 100%;
+    display: block;
+  }
+</style>
+  </head>
+  <body>
+    <div class="container">
+      <nav class="navbar" role="navigation">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Load Asset Scene Demo</a>
+        </div>
+      </nav>
+      <div class="row">
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-12">
+                <!--Replace with your embed-->
+                <iframe src="https://lagoa.com/embed_links/2026?validationHash=e1alXbYx-LOv_0mf9YwfMBIf2a0aiA&width=500&height=330&asset_name=true&owner_name=true&lagoa_logo=true&version_number=1" id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+            </div>
+
+            <div class="row">
+              <div class="col-md-8" style="padding-top:20px;">
+                <select id='js-assets_select_menu' class="fully-expanded"></select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-8"  style="padding-top:20px;">
+                <input type="submit" value="save" name="submit" id="submit"/>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

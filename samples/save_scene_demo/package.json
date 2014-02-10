@@ -1,0 +1,13 @@
+{
+  "name": "lagoa-save-scene",
+  "description": "How to fetch a scene from embed and save it",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "express": "3.4.8",
+    "formidable": "1.0.14"  ,
+    "ejs": "0.8.5",
+    "request": "2.33.0",
+    "async": "0.2.9"
+  }
+}
