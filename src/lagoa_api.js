@@ -109,12 +109,24 @@
         if(retval.subchannel === 'objectAdded'){
           var scn = lapi.getActiveScene();
           var tuid = retval.data.tuid;
-          // Don't add Material or lights since we add them already.
-          if(tuid !== 'MaterialID' && tuid !== 'LightID'){
-            scn.addObject(tuid,retval.data.guid, function(obj){
-              lapi.onObjectAdded(obj);
-            });
-          }
+          scn.addObject(tuid,retval.data.guid, function(obj){
+            var guid = obj.properties.getParameter('guid').value;
+            if(lapi._cbmap[guid]){
+              var callback = lapi._cbmap[guid];
+              callback(obj);
+              delete lapi._cbmap[guid];
+            } else {
+              var assetName = obj.properties.getParameter('name').value;
+              if(lapi._cbmap[assetName]){
+                var name = assetName.split(':')[0];
+                obj.properties.getParameter('name').value = name;
+                var callback = lapi._cbmap[assetName];
+                callback(obj);
+                delete lapi._cbmap[assetName];
+              }
+            }
+            lapi.onObjectAdded(obj);
+          });
         }
       } else {
         if(lapi._cbmap[retval.id]){
@@ -164,6 +176,10 @@
    */
   lapi._frame = 0;
 
+  lapi._generateRandomString = function (){
+    return 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
+  };
+
   /**
    * Pass messgage to SC
    * @in_message {object} message we will stringify and send to SC
@@ -180,12 +196,13 @@
    * return value is a stringified object we parse. It's not returning a proxy or the actual object.
    * Interactions with the scene will happen only through embedRPC calls.
    */
-  lapi._embedRPC = function(message, callback){
-    var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
+  lapi._embedRPC = function(message, callback, params){
+    var randName = lapi._generateRandomString();
+    params = params || undefined;
     if(callback){
       lapi._cbmap[randName] = callback;
     }
-    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message});
+    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message, params : params});
   };
 
   /**
@@ -245,12 +262,9 @@
    * ex : lapi._loadAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}]);
    * @private
    */
-  lapi._loadAssets = function(in_assetArray){
+  lapi._loadAssets = function(in_assetArray, in_cb){
     var objectCount = this._activeScene.getObjectCount();
-    lapi._embedRPC("ACTIVEAPP.LoadAssets({ " +
-      "assets :" +
-        JSON.stringify(in_assetArray)+
-      "});");
+    lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
   /**
   * Assign value to object property .
