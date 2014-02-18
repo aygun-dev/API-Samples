@@ -115,15 +115,6 @@
               var callback = lapi._cbmap[guid];
               callback(obj);
               delete lapi._cbmap[guid];
-            } else {
-              var assetName = obj.properties.getParameter('name').value;
-              if(lapi._cbmap[assetName]){
-                var name = assetName.split(':')[0];
-                obj.properties.getParameter('name').value = name;
-                var callback = lapi._cbmap[assetName];
-                callback(obj);
-                delete lapi._cbmap[assetName];
-              }
             }
             lapi.onObjectAdded(obj);
           });
