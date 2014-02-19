@@ -15,6 +15,7 @@ lapi.SceneObject = function( in_guid, in_cb){
   var _guid = in_guid;
   var _properties = {};
   var _self = this;
+  this._copiedCount = 0;
 
   /**
    * Get the property of the SceneObject
