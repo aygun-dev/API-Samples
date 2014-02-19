@@ -116,7 +116,7 @@ lapi.Scene.prototype = {
 
   /**
    * Duplicate a SceneObject.
-   * @param {Object} in_sceneObhect The SceneObject we want to duplicate.
+   * @param {lapi.SceneObject} in_sceneObhect The SceneObject we want to duplicate.
    * @param {function} in_cb  optional callback that expects a  SceneObject as an argument. The object is the one we just added.
    */
   duplicateObject : function(in_sceneObject,in_cb){
