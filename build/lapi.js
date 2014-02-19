@@ -120,12 +120,15 @@ var lapi = {};
         if(retval.subchannel === 'objectAdded'){
           var scn = lapi.getActiveScene();
           var tuid = retval.data.tuid;
-          // Don't add Material or lights since we add them already.
-          if(tuid !== 'MaterialID' && tuid !== 'LightID'){
-            scn.addObject(tuid,retval.data.guid, function(obj){
-              lapi.onObjectAdded(obj);
-            });
-          }
+          scn.addObject(tuid,retval.data.guid, function(obj){
+            var guid = obj.properties.getParameter('guid').value;
+            if(lapi._cbmap[guid]){
+              var callback = lapi._cbmap[guid];
+              callback(obj);
+              delete lapi._cbmap[guid];
+            }
+            lapi.onObjectAdded(obj);
+          });
         }
       } else {
         if(lapi._cbmap[retval.id]){
@@ -779,6 +782,7 @@ lapi.SceneObject = function( in_guid, in_cb){
   var _guid = in_guid;
   var _properties = {};
   var _self = this;
+  this._copiedCount = 0;
 
   /**
    * Get the property of the SceneObject
@@ -1167,6 +1171,43 @@ lapi.Scene.prototype = {
   },
 
   /**
+   * Duplicate a SceneObject.
+   * @param {lapi.SceneObject} in_sceneObhect The SceneObject we want to duplicate.
+   * @param {function} in_cb  optional callback that expects a  SceneObject as an argument. The object is the one we just added.
+   */
+  duplicateObject : function(in_sceneObject,in_cb){
+    var self = this;
+    var tuid = in_sceneObject.properties.getParameter('tuid').value;
+    if(tuid === 'SceneStateID' || tuid === 'CameraID'){
+      console.warn("Cannot duplicate states or cameras.");
+      return;
+    }
+
+    var guid = in_sceneObject.properties.getParameter('guid').value;
+    var name = [in_sceneObject.properties.getParameter('name').value,
+      'Copy ',
+        String(in_sceneObject._copiedCount++)
+    ].join(' ');
+    var self = this;
+    lapi._embedRPC(" var newGuid = generateGUID();"
+      + "var pset = ACTIVEAPP.GetScene().GetByGUID('"+guid+"').PropertySet.flatten({"
+      +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
+      + "});"
+      + "pset.guid.value = newGuid;"
+      + "var obj  = [{tuid : pset.tuid.value , pset : pset}];"
+      + " ACTIVEAPP.RunCommand({"
+      +   "command : 'InsertObjects',"
+      +   "data : obj"
+      + " });"
+      + "newGuid;",
+      function(in_response){
+        if(in_cb){
+          lapi._cbmap[in_response.data] = in_cb;
+        }
+      });
+  },
+
+  /**
    * Add a new material to scene.
    * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
    * @param {function} in_cb  optional callback that expects a material SceneObject as an argument. The object is the one we just added
@@ -1177,7 +1218,9 @@ lapi.Scene.prototype = {
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
     + in_materialType + "'});"
     + "mat.guid;",function(in_response){
-      self.addObject('MaterialID',in_response.data,in_cb);
+      if(in_cb){
+        lapi._cbmap[in_response.data] = in_cb;
+      }
     });
   },
 
@@ -1192,7 +1235,9 @@ lapi.Scene.prototype = {
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
     + in_lightType + "'});"
     + "light.guid;",function(in_response){
-      self.addObject('LightID',in_response.data,in_cb);
+      if(in_cb){
+        lapi._cbmap[in_response.data] = in_cb;
+      }
     });
   }
 
