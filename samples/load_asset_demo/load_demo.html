@@ -67,9 +67,14 @@
       });
       var datatype  = ASSETS[assetGUID];
       lapi.getActiveScene().addSceneAsset( assetGUID, datatype, assetName, function(e){
-        console.log('Done Loading! Here is the asset guid array : '); 
+        console.log('Done Loading! Here is the asset guid array : ');
         console.log(e.data);
-      }); 
+        var scn = lapi.getActiveScene();
+        for(var i = 0 ; i < e.data.length ; ++i){
+          var obj = scn.getObjectByGuid(e.data[i]);
+          console.log(obj);
+        }
+      });
 
     }
 
