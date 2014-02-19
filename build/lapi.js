@@ -1194,6 +1194,7 @@ lapi.Scene.prototype = {
       +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
       + "pset.guid.value = newGuid;"
+      + "pset.name.value = '" + name +"';"
       + "var obj  = [{tuid : pset.tuid.value , pset : pset}];"
       + " ACTIVEAPP.RunCommand({"
       +   "command : 'InsertObjects',"
