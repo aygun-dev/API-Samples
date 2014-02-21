@@ -290,6 +290,20 @@ var lapi = {};
   };
 
   /**
+   * method to control the display of the toolbar
+   * @in_enable {Boolean} flag for indicating if we want to display the toolbar or not.
+   */
+  lapi.showToolbar = function(in_enable){
+    var str = "";
+    if(in_enable){
+      str = "ACTIVEAPP.toolbar.show();";
+    } else {
+      str = "ACTIVEAPP.toolbar.hide();";
+    }
+    lapi._embedRPC(str);
+  };
+
+  /**
    * Desselect all selected objects
    */
   lapi.desselectAll = function(){
