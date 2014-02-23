@@ -249,14 +249,13 @@
    * Load assets dynamically into the scene.
    * @in_assetArray {Array} a collection of assets we want to load.
    * Each member is an object of the type {name : {string}, datatype : {number} , version_guid : {string}}.
-   * After the loading is done, the scene object is re-initialized.
    * ex : lapi._loadAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}]);
    * @private
    */
   lapi._loadAssets = function(in_assetArray, in_cb){
-    var objectCount = this._activeScene.getObjectCount();
     lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
+
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
