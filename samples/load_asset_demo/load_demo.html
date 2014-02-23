@@ -66,7 +66,7 @@
         assetName = $(this).text();
       });
       var datatype  = ASSETS[assetGUID];
-      lapi.getActiveScene().addSceneAsset( assetGUID, datatype, assetName, function(e){
+      lapi.getActiveScene().addAssets([{name : assetName, datatype : datatype, version_guid : assetGUID}], function(e){
         console.log('Done Loading! Here is the asset guid array : ');
         console.log(e.data);
         var scn = lapi.getActiveScene();

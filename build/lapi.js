@@ -260,14 +260,13 @@ var lapi = {};
    * Load assets dynamically into the scene.
    * @in_assetArray {Array} a collection of assets we want to load.
    * Each member is an object of the type {name : {string}, datatype : {number} , version_guid : {string}}.
-   * After the loading is done, the scene object is re-initialized.
    * ex : lapi._loadAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}]);
    * @private
    */
   lapi._loadAssets = function(in_assetArray, in_cb){
-    var objectCount = this._activeScene.getObjectCount();
     lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
+
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
@@ -1173,26 +1172,19 @@ lapi.Scene.prototype = {
     return this._objectCount;
   },
 
-  addAssets : function(in_assetArray){
-    lapi._loadAssets(in_assetArray);
-  },
-
-
   /*
-   * Load a scene asset dynamically into the scene. Coule be mesh, images, materials or scenes!
-   * @in_guid {String} The guid of the asset we want to load
-   * @in_dataType {Number} The datatype of the asset
-   * @in_name {String} name of the asset. Can be user-defined.
+   * Load scene assets dynamically into the scene. Coule be meshes, images, materials or scenes!
+   * @in_assetArray {Array} a collection of assets we want to load.
+   *  Each member is an object of the type {name : {string}, datatype : {number} , version_guid : {string}}.
+   *  guid : The guid of the asset we want to load
+   *  datatype :  The datatype of the asset
+   *  name : name of the asset. Can be user-defined.
+   *  ex : addAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}], cb);
    * @in_cb {Function} optional callback that expects an array of guids of the just added assets.
    */
-  addSceneAsset : function(in_guid, in_dataType, in_name, in_cb){
-    var scn = lapi.getActiveScene();
-    var obj = scn.getObjectByGuid(in_guid);
-    if(obj){
-      console.warn("Asset already added to scene.");
-      return;
-    }
-    lapi._loadAssets([{name : in_name, datatype : in_dataType, version_guid : in_guid}],in_cb);
+
+  addAssets : function(in_assetArray,in_cb){
+    lapi._loadAssets(in_assetArray,in_cb);
   },
 
   addObject : function(in_tuid,in_guid,in_cb){
