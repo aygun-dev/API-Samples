@@ -105,6 +105,24 @@ lapi.Scene.prototype = {
     lapi._loadAssets(in_assetArray);
   },
 
+
+  /*
+   * Load a scene asset dynamically into the scene. Coule be mesh, images, materials or scenes!
+   * @in_guid {String} The guid of the asset we want to load
+   * @in_dataType {Number} The datatype of the asset
+   * @in_name {String} name of the asset. Can be user-defined.
+   * @in_cb {Function} optional callback that expects an array of guids of the just added assets.
+   */
+  addSceneAsset : function(in_guid, in_dataType, in_name, in_cb){
+    var scn = lapi.getActiveScene();
+    var obj = scn.getObjectByGuid(in_guid);
+    if(obj){
+      console.warn("Asset already added to scene.");
+      return;
+    }
+    lapi._loadAssets([{name : in_name, datatype : in_dataType, version_guid : in_guid}],in_cb);
+  },
+
   addObject : function(in_tuid,in_guid,in_cb){
     var initClass = this._classedItems[in_tuid];
     if(!initClass){

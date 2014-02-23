@@ -178,6 +178,10 @@ var lapi = {};
    */
   lapi._frame = 0;
 
+  lapi._generateRandomString = function (){
+    return 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
+  };
+
   /**
    * Pass messgage to SC
    * @in_message {object} message we will stringify and send to SC
@@ -194,12 +198,13 @@ var lapi = {};
    * return value is a stringified object we parse. It's not returning a proxy or the actual object.
    * Interactions with the scene will happen only through embedRPC calls.
    */
-  lapi._embedRPC = function(message, callback){
-    var randName = 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
+  lapi._embedRPC = function(message, callback, params){
+    var randName = lapi._generateRandomString();
+    params = params || undefined;
     if(callback){
       lapi._cbmap[randName] = callback;
     }
-    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message});
+    lapi._messageIframe({channel : 'embedrpc', id: randName, command : message, params : params});
   };
 
   /**
@@ -259,12 +264,9 @@ var lapi = {};
    * ex : lapi._loadAssets([{name : 'UntitledScene',datatype : 14, version_guid : '5fee03c9-8985-42fa-a4aa-a5689c6ab7e9'}]);
    * @private
    */
-  lapi._loadAssets = function(in_assetArray){
+  lapi._loadAssets = function(in_assetArray, in_cb){
     var objectCount = this._activeScene.getObjectCount();
-    lapi._embedRPC("ACTIVEAPP.LoadAssets({ " +
-      "assets :" +
-        JSON.stringify(in_assetArray)+
-      "});");
+    lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
   /**
   * Assign value to object property .
@@ -1173,6 +1175,24 @@ lapi.Scene.prototype = {
 
   addAssets : function(in_assetArray){
     lapi._loadAssets(in_assetArray);
+  },
+
+
+  /*
+   * Load a scene asset dynamically into the scene. Coule be mesh, images, materials or scenes!
+   * @in_guid {String} The guid of the asset we want to load
+   * @in_dataType {Number} The datatype of the asset
+   * @in_name {String} name of the asset. Can be user-defined.
+   * @in_cb {Function} optional callback that expects an array of guids of the just added assets.
+   */
+  addSceneAsset : function(in_guid, in_dataType, in_name, in_cb){
+    var scn = lapi.getActiveScene();
+    var obj = scn.getObjectByGuid(in_guid);
+    if(obj){
+      console.warn("Asset already added to scene.");
+      return;
+    }
+    lapi._loadAssets([{name : in_name, datatype : in_dataType, version_guid : in_guid}],in_cb);
   },
 
   addObject : function(in_tuid,in_guid,in_cb){
