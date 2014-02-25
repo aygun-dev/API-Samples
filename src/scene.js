@@ -181,10 +181,18 @@ lapi.Scene.prototype = {
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
     + in_materialType + "'});"
-    + "mat.guid;",function(in_response){
-      if(in_cb){
-        lapi._cbmap[in_response.data] = in_cb;
-      }
+    + "var pset = mat.PropertySet.flatten({flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID});"
+    + "var data = {tuid : mat.tuid, guid : mat.guid, pset : pset};" 
+    + "data;",function(in_response){
+        var scn = lapi.getActiveScene();
+        var tuid = in_response.data.tuid;
+        var pset = in_response.data.pset;
+        scn.addObject(tuid,in_response.data.guid, pset, function(obj){
+          if(in_cb){
+            in_cb(obj);
+          }
+          lapi.onObjectAdded(obj);
+        });
     });
   },
 
@@ -198,10 +206,18 @@ lapi.Scene.prototype = {
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
     + in_lightType + "'});"
-    + "light.guid;",function(in_response){
-      if(in_cb){
-        lapi._cbmap[in_response.data] = in_cb;
-      }
+    + "var pset = light.PropertySet.flatten({flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID});"
+    + "var data = {tuid : light.tuid, guid : light.guid, pset : pset };" 
+    + "data;",function(in_response){
+        var scn = lapi.getActiveScene();
+        var tuid = in_response.data.tuid;
+        var pset = in_response.data.pset;
+        scn.addObject(tuid,in_response.data.guid, pset, function(obj){
+          if(in_cb){
+            in_cb(obj);
+          }
+          lapi.onObjectAdded(obj);
+        });
     });
   }
 
