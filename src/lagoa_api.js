@@ -108,18 +108,16 @@
       if (retval.subchannel) {
         if(retval.subchannel === 'objectAdded'){
           var tuid = retval.data.tuid;
-          if(tuid !== 'MaterialID' && tuid !== 'LightID'){
-            var scn = lapi.getActiveScene();
-            scn.addObject(tuid,retval.data.guid, function(obj){
-              var guid = obj.properties.getParameter('guid').value;
-              if(lapi._cbmap[guid]){
-                var callback = lapi._cbmap[guid];
-                callback(obj);
-                delete lapi._cbmap[guid];
-              }
-              lapi.onObjectAdded(obj);
-            });
-          }
+          var scn = lapi.getActiveScene();
+          scn.addObject(tuid,retval.data.guid, function(obj){
+            var guid = obj.properties.getParameter('guid').value;
+            if(lapi._cbmap[guid]){
+              var callback = lapi._cbmap[guid];
+              callback(obj);
+              delete lapi._cbmap[guid];
+            }
+            lapi.onObjectAdded(obj);
+          });
         }
       } else {
         if(lapi._cbmap[retval.id]){
