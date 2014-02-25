@@ -124,7 +124,9 @@ lapi.Scene.prototype = {
     var self = this;
     var sceneObject = new lapi.SceneObject( in_guid, function(obj){
       self._guidItems[in_guid] = initClass[in_guid] = obj;
-      in_cb(obj);
+      if(in_cb){
+        in_cb(obj);
+      }
     });
     ++this._objectCount;
   },
