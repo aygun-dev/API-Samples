@@ -119,18 +119,16 @@ var lapi = {};
       if (retval.subchannel) {
         if(retval.subchannel === 'objectAdded'){
           var tuid = retval.data.tuid;
-          if(tuid !== 'MaterialID' && tuid !== 'LightID'){
-            var scn = lapi.getActiveScene();
-            scn.addObject(tuid,retval.data.guid, function(obj){
-              var guid = obj.properties.getParameter('guid').value;
-              if(lapi._cbmap[guid]){
-                var callback = lapi._cbmap[guid];
-                callback(obj);
-                delete lapi._cbmap[guid];
-              }
-              lapi.onObjectAdded(obj);
-            });
-          }
+          var scn = lapi.getActiveScene();
+          scn.addObject(tuid,retval.data.guid, function(obj){
+            var guid = obj.properties.getParameter('guid').value;
+            if(lapi._cbmap[guid]){
+              var callback = lapi._cbmap[guid];
+              callback(obj);
+              delete lapi._cbmap[guid];
+            }
+            lapi.onObjectAdded(obj);
+          });
         }
       } else {
         if(lapi._cbmap[retval.id]){
@@ -1264,18 +1262,11 @@ lapi.Scene.prototype = {
     var self = this;
     lapi._embedRPC("var mat = ACTIVEAPP.AddEngineMaterial({minortype : '"
     + in_materialType + "'});"
-    + "var pset = mat.PropertySet.flatten({flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID});"
-    + "var data = {tuid : mat.tuid, guid : mat.guid, pset : pset};" 
-    + "data;",function(in_response){
-        var scn = lapi.getActiveScene();
-        var tuid = in_response.data.tuid;
-        var pset = in_response.data.pset;
-        scn.addObject(tuid,in_response.data.guid, pset, function(obj){
-          if(in_cb){
-            in_cb(obj);
-          }
-          lapi.onObjectAdded(obj);
-        });
+    + "mat.guid;",function(in_response){
+        if(in_cb){
+          var scn = lapi.getActiveScene();
+          in_cb(scn.getObjectByGuid(in_response.data));
+        }
     });
   },
 
@@ -1289,18 +1280,11 @@ lapi.Scene.prototype = {
     var self = this;
     lapi._embedRPC("var light = ACTIVEAPP.AddLight({minortype : '"
     + in_lightType + "'});"
-    + "var pset = light.PropertySet.flatten({flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID});"
-    + "var data = {tuid : light.tuid, guid : light.guid, pset : pset };" 
-    + "data;",function(in_response){
-        var scn = lapi.getActiveScene();
-        var tuid = in_response.data.tuid;
-        var pset = in_response.data.pset;
-        scn.addObject(tuid,in_response.data.guid, pset, function(obj){
-          if(in_cb){
-            in_cb(obj);
-          }
-          lapi.onObjectAdded(obj);
-        });
+    + "light.guid;",function(in_response){
+        if(in_cb){
+          var scn = lapi.getActiveScene();
+          in_cb(scn.getObjectByGuid(in_response.data));
+        }
     });
   }
 
