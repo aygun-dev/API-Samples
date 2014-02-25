@@ -107,9 +107,10 @@
 //      --lapi._cbStack;
       if (retval.subchannel) {
         if(retval.subchannel === 'objectAdded'){
-          var tuid = retval.data.tuid;
           var scn = lapi.getActiveScene();
-          scn.addObject(tuid,retval.data.guid, function(obj){
+          var tuid = retval.data.tuid;
+          var pset = retval.data.pset;
+          scn.addObject(tuid,retval.data.guid,pset,function(obj){
             var guid = obj.properties.getParameter('guid').value;
             if(lapi._cbmap[guid]){
               var callback = lapi._cbmap[guid];
