@@ -116,12 +116,20 @@ lapi.Scene.prototype = {
     lapi._loadAssets(in_assetArray,in_cb);
   },
 
-  addObject : function(in_tuid,in_guid,in_cb){
+  /*
+   * Add an object to the scene!
+   * @in_tuid {String} the tuid type of this object. "MeshID", "MaterialID" etc.
+   * @in_guid {String} the guid of this object.
+   * @in_pset {Object} (Optional) PropertySet data for this object.
+   * @in_cb {Function} optional callback that expects an array of guids of the just added assets.
+   */
+  addObject : function(in_tuid,in_guid,in_pset,in_cb){
     var initClass = this._classedItems[in_tuid];
+    in_pset = in_pset || null;
     if(!initClass){
       initClass = this._classedItems[in_tuid] = {};
     }
-    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid,in_cb);
+    this._guidItems[in_guid] = initClass[in_guid] = new lapi.SceneObject( in_guid,in_pset,in_cb);
     ++this._objectCount;
   },
 

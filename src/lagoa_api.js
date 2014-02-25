@@ -109,7 +109,8 @@
         if(retval.subchannel === 'objectAdded'){
           var scn = lapi.getActiveScene();
           var tuid = retval.data.tuid;
-          scn.addObject(tuid,retval.data.guid, function(obj){
+          var pset = retval.data.pset;
+          scn.addObject(tuid,retval.data.guid, pset, function(obj){
             var guid = obj.properties.getParameter('guid').value;
             if(lapi._cbmap[guid]){
               var callback = lapi._cbmap[guid];
@@ -253,6 +254,7 @@
    * @private
    */
   lapi._loadAssets = function(in_assetArray, in_cb){
+    in_cb = in_cb || null;
     lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
 
