@@ -1,0 +1,12 @@
+{
+  "name": "API-Sample",
+  "description": "Sample how to copy an asset to a project",
+  "version": "0.0.1",
+  "author": "Lagoa <join@lagoa.com >",
+  "dependencies": {
+    "request": "2.29.x"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}
