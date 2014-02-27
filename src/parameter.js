@@ -130,6 +130,6 @@ lapi.Parameter.prototype = {
    * @private
    */
   _setValueMuted : function(in_val){
-    this._value = in_val;
+    _value = in_val;
   }
 };
