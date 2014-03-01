@@ -1,7 +1,7 @@
 [
   "src/namespace.js",
-	"src/lagoa_api.js",
-	"src/property.js",
+  "src/lagoa_api.js",
+  "src/property.js",
   "src/parameter.js",
   "src/scene_object.js",
   "src/utils.js",

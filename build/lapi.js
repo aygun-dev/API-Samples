@@ -762,7 +762,15 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     paramList[ this.id ] = this.value;
     var parentPropName = this.parent.name;
     lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
-  })
+  });
+
+  /**
+   * Set the value of this parameter without updating the back-end
+   * @private
+   */
+  this._setValueMuted = function(in_val){
+    _value = in_val;
+  }
 
 };
 
@@ -1018,6 +1026,26 @@ lapi.SceneObject.prototype = {
       + "arr",function(in_response){
         in_cb(in_response.data);
       });
+  },
+
+  /**
+   * Translate this object in local space!
+   * @in_axis {String} the axis we want translate in : must be 'x','y' or 'z'.
+   * @in_distance {number} value to translate.
+   */
+  translate : function(in_axis, in_distance){
+    var axis = in_axis.toUpperCase();
+    lapi._embedRPC("var mesh  = ACTIVEAPP.GetScene().GetByGUID('" + this.guid +"');" 
+      +"mesh.translate"+ axis +"("+in_distance+");"
+      +"var prop = mesh.PropertySet.getProperty('Position');"
+      +"var newPos = {x: mesh.position.x, y : mesh.position.y , z : mesh.position.z};"
+      +"mesh.position.x = 0; mesh.position.y = 0; mesh.position.z = 0;"
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      + ", data : {ctxt : mesh, list : "
+      + "[{parameter : prop.getParameter('x'), value : newPos.x}"
+      + ",{parameter : prop.getParameter('y'), value : newPos.y}"
+      + ",{parameter : prop.getParameter('z'), value : newPos.z}]}"
+      + ", mutebackend : mesh.local, forcedirty : true });");
   }
 
 };
