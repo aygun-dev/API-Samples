@@ -258,6 +258,9 @@
     lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
 
+  var BACKEND_DELAY_SHORT = 3000;
+  var BACKEND_DELAY_LONG = 10000;
+
 
   /*
    * Fire a job that relies on the the backend. In other words, we  query our system
@@ -272,7 +275,7 @@
   lapi._backEndJob = function(in_command, in_params, in_delay, in_cb){
     in_cb = in_cb || null;
     in_params = in_params || undefined;
-    in_delay = in_delay || 20000;
+    in_delay = in_delay || BACKEND_DELAY_LONG;
     lapi._embedRPC(in_command, function(in_response){
       var guid = in_response.data.version_guid;
       if(in_cb){
@@ -295,11 +298,12 @@
 
   /*
    * Save the current rendering. Note : must be rendering.
+   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    * The callback must return true on success and false otherwise!
    */
-  lapi.saveRender = function(in_cb){
-    lapi._backEndJob('saveRender',null,null,in_cb);
+  lapi.saveRender = function(in_tags, in_cb){
+    lapi._backEndJob('saveRender',in_tags,BACKEND_DELAY_SHORT,in_cb);
   };
 
   /*
@@ -310,7 +314,7 @@
    * The callback must return true on success and false otherwise!
    */
   lapi.saveScene = function(in_tags, in_cb){
-    lapi._backEndJob('saveScene',in_tags,7000,in_cb);
+    lapi._backEndJob('saveScene',in_tags,BACKEND_DELAY_SHORT,in_cb);
   };
 
   /*
@@ -318,18 +322,14 @@
    * @in_params {Object}  Optional argument objects.
    *  in_params.name {String} Optional name of the object.
    *  in_params.duration {Number} Optional number of minutes that we will render for.
-   *  in_params.width {Number} Optional width value in pixels. Default is 2048.
-   *  in_params.height {Number} Optional height value in pixels. Default is 3072.
+   *  in_params.width {Number} Optional width value in pixels.
+   *  in_params.height {Number} Optional height value in pixels.
+   *  in_params.tags {Array} Optional array of strings representing the tags.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    * The callback must return true on success and false otherwise!
    */
   lapi.startBackgroundRender = function(in_params, in_cb){
-    var delay = 1;
-    if(in_params){
-      delay = delay || in_params.duration;
-    }
-    delay *= 60000;
-    lapi._backEndJob('startBackgroundRender',in_params,delay,in_cb);
+    lapi._backEndJob('startBackgroundRender',in_params,BACKEND_DELAY_LONG,in_cb);
   };
 
   /*
