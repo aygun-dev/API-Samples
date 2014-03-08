@@ -316,7 +316,7 @@ var lapi = {};
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
   lapi.saveScene = function(in_tags, in_cb){
-    lapi._backEndJob('saveScene',in_tags,null,in_cb);
+    lapi._backEndJob('saveScene',in_tags,7000,in_cb);
   };
 
   /*
