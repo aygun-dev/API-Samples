@@ -277,12 +277,12 @@
       var guid = in_response.data.version_guid;
       if(in_cb){
         var timer = null;
-        var cb = function(data){
+        var cb = function(){
           var _cb = function(reply){
             if(!reply.errors){
-              var ret = in_cb(reply); 
+              var ret = in_cb(reply);
               if(ret){
-                clearInterval(timer); 
+                clearInterval(timer);
               }
             }
           };
