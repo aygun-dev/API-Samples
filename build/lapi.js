@@ -277,6 +277,7 @@ var lapi = {};
    * @in_params {Object} Optional and can be anything(object,array, string etc.)
    * @in_delay {Number} Optional delay that will determine the frequency of querrying the backend.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * The callback must return true on success and false otherwise!
    * @private
    */
   lapi._backEndJob = function(in_command, in_params, in_delay, in_cb){
@@ -290,8 +291,10 @@ var lapi = {};
         var cb = function(data){
           var _cb = function(reply){
             if(!reply.errors){
-              clearInterval(timer); 
-              in_cb(reply); 
+              var ret = in_cb(reply); 
+              if(ret){
+                clearInterval(timer); 
+              }
             }
           };
           $.get(lapi._lagoaUrl + '/versions/' +guid+'.json',_cb, 'jsonp');
@@ -304,6 +307,7 @@ var lapi = {};
   /*
    * Save the current rendering. Note : must be rendering.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * The callback must return true on success and false otherwise!
    */
   lapi.saveRender = function(in_cb){
     lapi._backEndJob('saveRender',null,null,in_cb);
@@ -314,6 +318,7 @@ var lapi = {};
    * Note that the asset guid of this saved scene is the same as the original but it differs in version_guids.
    * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * The callback must return true on success and false otherwise!
    */
   lapi.saveScene = function(in_tags, in_cb){
     lapi._backEndJob('saveScene',in_tags,7000,in_cb);
@@ -327,6 +332,7 @@ var lapi = {};
    *  in_params.width {Number} Optional width value in pixels. Default is 2048.
    *  in_params.height {Number} Optional height value in pixels. Default is 3072.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * The callback must return true on success and false otherwise!
    */
   lapi.startBackgroundRender = function(in_params, in_cb){
     var delay = 1;
