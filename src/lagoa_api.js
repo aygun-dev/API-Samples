@@ -258,6 +258,86 @@
     lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
 
+
+  /*
+   * Fire a job that relies on the the backend. In other words, we  query our system
+   * for the result of this call.
+   * @in_command {String}  The type of command we want to run.
+   * @in_params {Object} Optional and can be anything(object,array, string etc.)
+   * @in_delay {Number} Optional delay that will determine the frequency of querrying the backend.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * @private
+   */
+  lapi._backEndJob = function(in_command, in_params, in_delay, in_cb){
+    in_cb = in_cb || null;
+    in_params = in_params || undefined;
+    in_delay = in_delay || 20000;
+    lapi._embedRPC(in_command, function(in_response){
+      var guid = in_response.data.version_guid;
+      if(in_cb){
+        var timer = null;
+        var cb = function(data){
+          var _cb = function(reply){
+            if(!reply.errors){
+              clearInterval(timer); 
+              in_cb(reply); 
+            }
+          };
+          $.get(lapi._lagoaUrl + '/versions/' +guid+'.json',_cb, 'jsonp');
+        };
+        timer = setInterval(cb,in_delay);
+      }
+    },in_params);
+  };
+
+  /*
+   * Save the current rendering. Note : must be rendering.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.saveRender = function(in_cb){
+    lapi._backEndJob('saveRender',null,null,in_cb);
+  };
+
+  /*
+   * Save the scene. This saves the current scene in our backend system. 
+   * Note that the asset guid of this saved scene is the same as the original but it differs in version_guids.
+   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.saveScene = function(in_tags, in_cb){
+    lapi._backEndJob('saveScene',in_tags,null,in_cb);
+  };
+
+  /*
+   * Start a BG Render. 
+   * @in_params {Object}  Optional argument objects.
+   *  in_params.name {String} Optional name of the object.
+   *  in_params.duration {Number} Optional number of minutes that we will render for.
+   *  in_params.width {Number} Optional width value in pixels. Default is 2048.
+   *  in_params.height {Number} Optional height value in pixels. Default is 3072.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.startBackgroundRender = function(in_params, in_cb){
+    var delay = 1;
+    if(in_params){
+      delay = delay || in_params.duration;
+    }
+    delay *= 60000;
+    lapi._backEndJob('startBackgroundRender',in_params,delay,in_cb);
+  };
+
+  /*
+   * Fetch a compressed version of the scene. One that you can upload directly to Lagoa. 
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.fetchScene = function(in_cb){
+    lapi._embedRPC('compressScene', function(in_response){
+      if(in_cb){
+        in_cb(in_response.data);
+      }
+    })
+  };
+
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
