@@ -280,6 +280,10 @@
     in_params = in_params || undefined;
     in_delay = in_delay || BACKEND_DELAY_LONG;
     lapi._embedRPC(in_command, function(in_response){
+      if(in_response.error){
+        console.error(in_command + ': ' + in_response.error);
+        return;
+      }
       var guid = in_response.data.version_guid;
       if(in_cb){
         var timer = null;
