@@ -280,11 +280,14 @@ var lapi = {};
    * @in_params {Object} Optional and can be anything(object,array, string etc.)
    * @in_delay {Number} Optional delay that will determine the frequency of querrying the backend.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * @in_readyCb {Function} Optional callback that checks if our data uis ready.
+   * This is necessary because an entry may already exist before its members are set.
    * The callback must return true on success and false otherwise!
    * @private
    */
-  lapi._backEndJob = function(in_command, in_params, in_delay, in_cb){
+  lapi._backEndJob = function(in_command, in_params, in_delay, in_readyCb, in_cb){
     in_cb = in_cb || null;
+    in_readyCb = in_readyCb || null;
     in_params = in_params || undefined;
     in_delay = in_delay || BACKEND_DELAY_LONG;
     lapi._embedRPC(in_command, function(in_response){
@@ -294,9 +297,11 @@ var lapi = {};
         var cb = function(){
           var _cb = function(reply){
             if(!reply.errors){
-              var ret = in_cb(reply);
-              if(ret){
+              if(in_readyCb && !in_readyCb(reply)){
+                return;
+              } else {
                 clearInterval(timer);
+                in_cb(reply);
               }
             }
           };
@@ -311,10 +316,15 @@ var lapi = {};
    * Save the current rendering. Note : must be rendering.
    * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
-   * The callback must return true on success and false otherwise!
    */
   lapi.saveRender = function(in_tags, in_cb){
-    lapi._backEndJob('saveRender',in_tags,BACKEND_DELAY_SHORT,in_cb);
+    var _ready = function(data){
+      if(data.downloadable_formats.length){
+        return true;
+      }
+      return false;
+    };
+    lapi._backEndJob('saveRender',in_tags,BACKEND_DELAY_SHORT,_ready,in_cb);
   };
 
   /*
@@ -322,10 +332,9 @@ var lapi = {};
    * Note that the asset guid of this saved scene is the same as the original but it differs in version_guids.
    * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
-   * The callback must return true on success and false otherwise!
    */
   lapi.saveScene = function(in_tags, in_cb){
-    lapi._backEndJob('saveScene',in_tags,BACKEND_DELAY_SHORT,in_cb);
+    lapi._backEndJob('saveScene',in_tags,BACKEND_DELAY_SHORT,null,in_cb);
   };
 
   /*
@@ -337,10 +346,15 @@ var lapi = {};
    *  in_params.height {Number} Optional height value in pixels.
    *  in_params.tags {Array} Optional array of strings representing the tags.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
-   * The callback must return true on success and false otherwise!
    */
   lapi.startBackgroundRender = function(in_params, in_cb){
-    lapi._backEndJob('startBackgroundRender',in_params,BACKEND_DELAY_LONG,in_cb);
+    var _ready = function(data){
+      if(data.downloadable_formats.length){
+        return true;
+      }
+      return false;
+    };
+    lapi._backEndJob('startBackgroundRender',in_params,BACKEND_DELAY_LONG,_ready,in_cb);
   };
 
   /*
