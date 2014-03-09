@@ -373,6 +373,16 @@ var lapi = {};
     })
   };
 
+  /*
+   * Fetch assets that match an array of tags.
+   * @in_tags {Array} Array of strings representing the tags.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.fetchAssetsByTags = function(in_tags,in_cb){
+    var tags = in_tags.join();
+    $.get(lapi._lagoaUrl + '/search/assets.json?tags='+tags,in_cb, 'jsonp');
+  };
+
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
