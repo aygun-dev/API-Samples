@@ -259,7 +259,7 @@
   };
 
   var BACKEND_DELAY_SHORT = 3000;
-  var BACKEND_DELAY_LONG = 10000;
+  var BACKEND_DELAY_LONG = 6000;
 
 
   /*
@@ -279,6 +279,12 @@
     in_readyCb = in_readyCb || null;
     in_params = in_params || undefined;
     in_delay = in_delay || BACKEND_DELAY_LONG;
+    var pollDelay  = null;
+    if(in_delay > BACKEND_DELAY_LONG){
+      pollDelay  = BACKEND_DELAY_LONG;
+    } else {
+      pollDelay = in_delay;
+    }
     lapi._embedRPC(in_command, function(in_response){
       if(in_response.error){
         console.error(in_command + ': ' + in_response.error);
@@ -286,6 +292,7 @@
       }
       var guid = in_response.data.version_guid;
       if(in_cb){
+        var initTimer = null;
         var timer = null;
         var cb = function(){
           var _cb = function(reply){
@@ -294,13 +301,19 @@
                 return;
               } else {
                 clearInterval(timer);
+                timer = null;
                 in_cb(reply);
               }
             }
           };
           $.get(lapi._lagoaUrl + '/versions/' +guid+'.json',_cb, 'jsonp');
         };
-        timer = setInterval(cb,in_delay);
+        var fireCb  = function(){
+          clearTimeout(initTimer);
+          initTimer = null;
+          timer = setInterval(cb,pollDelay);
+        };
+        initTimer = setTimeout(fireCb, in_delay);
       }
     },in_params);
   };
@@ -341,13 +354,18 @@
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
   lapi.startBackgroundRender = function(in_params, in_cb){
+    var delay = 1;
+    if(in_params){
+      delay = delay || in_params.duration;
+    }
+    delay *= 60000
     var _ready = function(data){
       if(data.downloadable_formats.length){
         return true;
       }
       return false;
     };
-    lapi._backEndJob('startBackgroundRender',in_params,BACKEND_DELAY_LONG,_ready,in_cb);
+    lapi._backEndJob('startBackgroundRender',in_params,delay,_ready,in_cb);
   };
 
   /*
