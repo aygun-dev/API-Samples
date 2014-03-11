@@ -320,17 +320,18 @@
 
   /*
    * Save the current rendering. Note : must be rendering.
-   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
+   *  in_params.name {String} Optional name of the object.
+   *  in_params.tags {Array} Optional array of strings representing the tags.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
-  lapi.saveRender = function(in_tags, in_cb){
+  lapi.saveRender = function(in_params, in_cb){
     var _ready = function(data){
       if(data.downloadable_formats.length){
         return true;
       }
       return false;
     };
-    lapi._backEndJob('saveRender',in_tags,BACKEND_DELAY_SHORT,_ready,in_cb);
+    lapi._backEndJob('saveRender',in_params,BACKEND_DELAY_SHORT,_ready,in_cb);
   };
 
   /*
@@ -388,12 +389,18 @@
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
   lapi.fetchAssetsByTags = function(in_match,in_tags,in_cb){
-    var union = '';
-    if(in_match){
-      union = 'union_tag=true&';
-    }
-    var tags = in_tags.join();
-    $.get(lapi._lagoaUrl + '/search/assets.json?'+ union +'tags='+tags,in_cb, 'jsonp');
+    $.ajax({url: lapi._lagoaUrl + '/users/current_user.json', type: 'GET', success: function(data) {
+      var user = '';
+      if(data.id){
+        user = 'current_user_id=' + data.id +'&';
+      }
+      var union = '';
+      if(in_match){
+        union = 'union_tag=true&';
+      }
+      var tags = in_tags.join();
+      $.get(lapi._lagoaUrl + '/search/assets.json?'+ union + user +'tags='+tags,in_cb, 'jsonp');
+    }, dataType: 'jsonp' });
   };
 
   /**
