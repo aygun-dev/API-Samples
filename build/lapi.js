@@ -269,6 +269,144 @@ var lapi = {};
     lapi._embedRPC('loadAssets', in_cb,in_assetArray);
   };
 
+  var BACKEND_DELAY_SHORT = 3000;
+  var BACKEND_DELAY_LONG = 6000;
+
+
+  /*
+   * Fire a job that relies on the the backend. In other words, we  query our system
+   * for the result of this call.
+   * @in_command {String}  The type of command we want to run.
+   * @in_params {Object} Optional and can be anything(object,array, string etc.)
+   * @in_delay {Number} Optional delay that will determine the frequency of querrying the backend.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   * @in_readyCb {Function} Optional callback that checks if our data uis ready.
+   * This is necessary because an entry may already exist before its members are set.
+   * The callback must return true on success and false otherwise!
+   * @private
+   */
+  lapi._backEndJob = function(in_command, in_params, in_delay, in_readyCb, in_cb){
+    in_cb = in_cb || null;
+    in_readyCb = in_readyCb || null;
+    in_params = in_params || undefined;
+    in_delay = in_delay || BACKEND_DELAY_LONG;
+    var pollDelay  = null;
+    if(in_delay > BACKEND_DELAY_LONG){
+      pollDelay  = BACKEND_DELAY_LONG;
+    } else {
+      pollDelay = in_delay;
+    }
+    lapi._embedRPC(in_command, function(in_response){
+      if(in_response.error){
+        console.error(in_command + ': ' + in_response.error);
+        return;
+      }
+      var guid = in_response.data.version_guid;
+      if(in_cb){
+        var initTimer = null;
+        var timer = null;
+        var cb = function(){
+          var _cb = function(reply){
+            if(!reply.errors){
+              if(in_readyCb && !in_readyCb(reply)){
+                return;
+              } else {
+                clearInterval(timer);
+                timer = null;
+                in_cb(reply);
+              }
+            }
+          };
+          $.get(lapi._lagoaUrl + '/versions/' +guid+'.json',_cb, 'jsonp');
+        };
+        var fireCb  = function(){
+          clearTimeout(initTimer);
+          initTimer = null;
+          timer = setInterval(cb,pollDelay);
+        };
+        initTimer = setTimeout(fireCb, in_delay);
+      }
+    },in_params);
+  };
+
+  /*
+   * Save the current rendering. Note : must be rendering.
+   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.saveRender = function(in_tags, in_cb){
+    var _ready = function(data){
+      if(data.downloadable_formats.length){
+        return true;
+      }
+      return false;
+    };
+    lapi._backEndJob('saveRender',in_tags,BACKEND_DELAY_SHORT,_ready,in_cb);
+  };
+
+  /*
+   * Save the scene. This saves the current scene in our backend system. 
+   * Note that the asset guid of this saved scene is the same as the original but it differs in version_guids.
+   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.saveScene = function(in_tags, in_cb){
+    lapi._backEndJob('saveScene',in_tags,BACKEND_DELAY_SHORT,null,in_cb);
+  };
+
+  /*
+   * Start a BG Render. 
+   * @in_params {Object}  Optional argument objects.
+   *  in_params.name {String} Optional name of the object.
+   *  in_params.duration {Number} Optional number of minutes that we will render for.
+   *  in_params.width {Number} Optional width value in pixels.
+   *  in_params.height {Number} Optional height value in pixels.
+   *  in_params.tags {Array} Optional array of strings representing the tags.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.startBackgroundRender = function(in_params, in_cb){
+    var delay = 1;
+    if(in_params){
+      delay = delay || in_params.duration;
+    }
+    delay *= 60000
+    var _ready = function(data){
+      if(data.downloadable_formats.length){
+        return true;
+      }
+      return false;
+    };
+    lapi._backEndJob('startBackgroundRender',in_params,delay,_ready,in_cb);
+  };
+
+  /*
+   * Fetch a compressed version of the scene. One that you can upload directly to Lagoa. 
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.fetchScene = function(in_cb){
+    lapi._embedRPC('compressScene', function(in_response){
+      if(in_cb){
+        in_cb(in_response.data);
+      }
+    })
+  };
+
+  /*
+   * Fetch assets that match an array of tags.
+   * @in_match {Boolean} If true, will return assets who matches all the tags. Otherwise, return 
+   * object if any tag matches.
+   * @in_tags {Array} Array of strings representing the tags.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.fetchAssetsByTags = function(in_match,in_tags,in_cb){
+    var union = '';
+    if(in_match){
+      union = 'union_tag=true&';
+    }
+    var tags = in_tags.join();
+    $.get(lapi._lagoaUrl + '/search/assets.json?'+ union +'tags='+tags,in_cb, 'jsonp');
+  };
+
   /**
   * Assign value to object property .
   * @in_GUID {string} The GUID of the object we want to modify.
