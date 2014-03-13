@@ -254,6 +254,22 @@ lapi.SceneObject.prototype = {
       + ",{parameter : prop.getParameter('y'), value : newPos.y}"
       + ",{parameter : prop.getParameter('z'), value : newPos.z}]}"
       + ", mutebackend : mesh.local, forcedirty : true });");
+  },
+
+  /**
+   * Set image. ( Background, EnvironmentMap ,Watermark...etc)
+   * @in_property {String} the object property that we must assign path and imgType to.
+   * @in_path {String} the guid of the image.
+   * @in_imgType {String} the ext/type of the image.
+   */
+  setImage : function(in_property, in_path, in_imgType){
+    lapi._embedRPC("var obj  = ACTIVEAPP.GetScene().GetByGUID('" + this.guid +"');" 
+      +"var prop = obj.PropertySet.getProperty('" + in_property + "');"
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      + ", data : {ctxt : obj, list : "
+      + "[{parameter : prop.getParameter('imgType'), value : '" + in_imgType + "'}"
+      + ",{parameter : prop.getParameter('path'), value : '" + in_path + "'}]}"
+      + ", mutebackend : obj.local, forcedirty : true });");
   }
 
 };
