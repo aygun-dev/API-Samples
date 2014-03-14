@@ -53,7 +53,12 @@
       //  update this string to filter, you can add query,user_ids and project_ids. Note on query : it searches name, description and tags.
       $.get(lapi._lagoaUrl + '/search/assets.json?per_page=100&page=1&datatype_ids=1,2,3,4,14,15,17,21,23&sort_updated_at=true',cb, 'jsonp');
     }
-
+/*
+      var svName = ['Preview Render','-', jobid, '-',new Date().toString()].join(' ');
+      lapi.saveRender({name : svName,tags : ['test',"Preview"]},function(e){console.log(e);});
+      var bgName = ['BG Render','-', jobid, '-',new Date().toString()].join(' ');
+      lapi.startBackgroundRender({name : bgName, tags : ['HQ','test']},function(e){console.log(e);});
+*/
     /** 
     * A callback for asset selection dropdown menu.
     * Select the chosen asset.
