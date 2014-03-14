@@ -290,7 +290,17 @@
         console.error(in_command + ': ' + in_response.error);
         return;
       }
-      var guid = in_response.data.version_guid;
+      var guid = null;
+      var path = '';
+      var args = '';
+      if(in_response.data.newScene){
+        path = '/assets/';
+        args = '&versions=true';
+        guid = in_response.data.asset_guid;
+      } else {
+        path = '/versions/';
+        guid = in_response.data.version_guid;
+      }
       if(in_cb){
         var initTimer = null;
         var timer = null;
@@ -306,7 +316,7 @@
               }
             }
           };
-          $.get(lapi._lagoaUrl + '/versions/' +guid+'.json',_cb, 'jsonp');
+          $.get(lapi._lagoaUrl + path +guid+'.json' + args,_cb, 'jsonp');
         };
         var fireCb  = function(){
           clearTimeout(initTimer);
