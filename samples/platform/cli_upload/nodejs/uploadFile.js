@@ -22,6 +22,7 @@ var filepath = args.path;
 
 if (!filename || !filepath) {
   console.log('node uploadFile --name=friendly_file_name --path=file_path');
+  console.log('  --folder=<folderID> (optional)');
   process.exit(0);
 }
 
@@ -56,12 +57,18 @@ async.waterfall([
 //---------------------------------------------------------------------------
 
 function createNewSession(asset_name, asset_path, cb) {
+
+  var file = {
+    access_token: ACCESS_TOKEN,
+    files: [{ name: asset_name, options: options}]
+  };
+
+  if (args.folder){
+    file.files[0].folder_id = args.folder;
+  }
   request.post({
     url: util.format("%s%s%s.json", host, api_path, "/upload_sessions"),
-    json: {
-      access_token: ACCESS_TOKEN,
-      files: [{ name: asset_name, options: options}]
-    }
+    json: file
   }, function(error, response, body) {
     cb(error, body.files[0].url, asset_name, asset_path, body.session_token);
   });
