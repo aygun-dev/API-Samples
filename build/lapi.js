@@ -301,7 +301,17 @@ var lapi = {};
         console.error(in_command + ': ' + in_response.error);
         return;
       }
-      var guid = in_response.data.version_guid;
+      var guid = null;
+      var path = '';
+      var args = '';
+      if(in_response.data.newScene){
+        path = '/assets/';
+        args = '?versions=true';
+        guid = in_response.data.asset_guid;
+      } else {
+        path = '/versions/';
+        guid = in_response.data.version_guid;
+      }
       if(in_cb){
         var initTimer = null;
         var timer = null;
@@ -317,7 +327,7 @@ var lapi = {};
               }
             }
           };
-          $.get(lapi._lagoaUrl + '/versions/' +guid+'.json',_cb, 'jsonp');
+          $.get(lapi._lagoaUrl + path +guid+'.json' + args,_cb, 'jsonp');
         };
         var fireCb  = function(){
           clearTimeout(initTimer);
@@ -346,13 +356,15 @@ var lapi = {};
   };
 
   /*
-   * Save the scene. This saves the current scene in our backend system. 
+   * Save the scene. This saves the current scene in our backend system.
    * Note that the asset guid of this saved scene is the same as the original but it differs in version_guids.
-   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
+   * @in_params {Object}  Optional param object that specify this scene's tags or if we are creating a new scene. Helps for searching.
+   *  in_params.tags  {Array} Optional array of strings representing the tags.
+   *  in_params.newScene {Boolean} Optional flag to indicate we are creating a new scene.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
-  lapi.saveScene = function(in_tags, in_cb){
-    lapi._backEndJob('saveScene',in_tags,BACKEND_DELAY_SHORT,null,in_cb);
+  lapi.saveScene = function(in_params, in_cb){
+    lapi._backEndJob('saveScene',in_params,BACKEND_DELAY_SHORT,null,in_cb);
   };
 
   /*
