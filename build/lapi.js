@@ -356,13 +356,15 @@ var lapi = {};
   };
 
   /*
-   * Save the scene. This saves the current scene in our backend system. 
+   * Save the scene. This saves the current scene in our backend system.
    * Note that the asset guid of this saved scene is the same as the original but it differs in version_guids.
-   * @in_tags {Array}  Optional array of strings that specify this scene's tags. Helps for searching.
+   * @in_params {Object}  Optional param object that specify this scene's tags or if we are creating a new scene. Helps for searching.
+   *  in_params.tags  {Array} Optional array of strings representing the tags.
+   *  in_params.newScene {Boolean} Optional flag to indicate we are creating a new scene.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
-  lapi.saveScene = function(in_tags, in_cb){
-    lapi._backEndJob('saveScene',in_tags,BACKEND_DELAY_SHORT,null,in_cb);
+  lapi.saveScene = function(in_params, in_cb){
+    lapi._backEndJob('saveScene',in_params,BACKEND_DELAY_SHORT,null,in_cb);
   };
 
   /*
