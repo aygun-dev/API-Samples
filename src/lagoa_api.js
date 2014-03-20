@@ -295,7 +295,7 @@
       var args = '';
       if(in_response.data.newScene){
         path = '/assets/';
-        args = '&versions=true';
+        args = '?versions=true';
         guid = in_response.data.asset_guid;
       } else {
         path = '/versions/';
