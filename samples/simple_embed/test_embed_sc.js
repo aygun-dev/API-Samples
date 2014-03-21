@@ -300,7 +300,7 @@ function pickTool(){
   $("#js-tools_select_menu option:selected").each(function (){
     toolName = $(this).text();
   });
-  embedRPC("ACTIVEAPP.Tools.setActiveTool('"+ toolName + "');",function(in_response){
+  embedRPC("ACTIVEAPP.getToolManager().setActiveTool('"+ toolName + "');",function(in_response){
     console.log(in_response);
   });
 };
