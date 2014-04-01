@@ -29,7 +29,7 @@
     TEXTURE : "TextureID",
     GROUP : "GroupID",
     PROJECTION : "TextureProjectionID",
-    STATES : "StateID"
+    STATES : "SceneStateID"
   };
 
   /**

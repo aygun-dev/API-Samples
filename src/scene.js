@@ -205,6 +205,21 @@ lapi.Scene.prototype = {
           in_cb(scn.getObjectByGuid(in_response.data));
         }
     });
+  },
+
+  /**
+   * Activate a scene state.
+   * @param {Object} in_state The state we want to make active.
+   * @param {Boolean} in_active  The flag that activates/deactivates the state. 
+   */
+  setSceneStateActive : function(in_state,in_active){
+    var self = this;
+    lapi._embedRPC("var obj  = ACTIVEAPP.GetScene().GetByGUID('" + in_state.guid +"');" 
+      +"var param = obj.PropertySet.getParameter('active');"
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      + ", data : {ctxt : obj, list : "
+      + "[{parameter : param, value : " + in_active + "}]}"
+      + ", mutebackend : false, forcedirty : true });");
   }
 
 };
