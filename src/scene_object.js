@@ -284,7 +284,7 @@ lapi.SceneObject.prototype = {
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
       + "[{parameter : prop.getParameter('imgtype'), value : '" + in_imgType + "'}"
-      + ",{parameter : prop.getParameter('texture'), value : '" + in_path + "'}]}"
+      + ",{parameter : prop.getParameter('texture'), value : '" + in_guid + "'}]}"
       + ", mutebackend : obj.local, forcedirty : true });");
   }
 
