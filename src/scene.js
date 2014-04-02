@@ -210,9 +210,16 @@ lapi.Scene.prototype = {
   /**
    * Activate a scene state.
    * @param {Object} in_state The state we want to make active.
+   * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
    */
-  setActiveSceneState : function(in_state){
-    lapi._embedRPC("ACTIVEAPP.sceneStateManager.activateState('" + in_state.guid +"');");
+  setActiveSceneState : function(in_state, in_cb){
+    lapi._embedRPC("ACTIVEAPP.sceneStateManager.activateState('" + in_state.guid +"');", function(e){
+      if(!e.error){
+        in_cb();
+      } else {
+        console.log('There was an error. Could not change scene state.');
+      }
+    });
   }
 
 };
