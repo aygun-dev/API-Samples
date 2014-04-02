@@ -612,24 +612,28 @@
     }
   };
 
+  lapi._activeTool = function(in_tool){
+    lapi._embedRPC("ACTIVEAPP.getToolManager().setActiveTool('" + in_tool + "');");
+  }
+
   lapi.moveTool = function(){
-    lapi._embedRPC("ACTIVEAPP.getToolManager().setActiveTool('MoveTool');");
+    lapi._activeTool('MoveTool');
   };
 
   lapi.scaleTool = function(){
-    lapi._embedRPC("ACTIVEAPP.getToolManager().setActiveTool('ScaleTool');");
+    lapi._activeTool('ScaleTool');
   };
 
   lapi.rotateTool = function(){
-    lapi._embedRPC("ACTIVEAPP.getToolManager().setActiveTool('RotationTool');");
+    lapi._activeTool('RotationTool');
   };
 
   lapi.orbitTool = function(){
-    lapi._embedRPC("ACTIVEAPP.getToolManager().setActiveTool('OrbitTool');");
+    lapi._activeTool('OrbitTool');
   };
 
   lapi.panTool = function(){
-    lapi._embedRPC("ACTIVEAPP.getToolManager().setActiveTool('PanTool');");
+    lapi._activeTool('PanTool');
   };
 
   /**
