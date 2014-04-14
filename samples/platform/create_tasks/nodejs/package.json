@@ -1,0 +1,13 @@
+{
+  "name": "API-Sample",
+  "description": "Sample how to start a background render for an asset",
+  "version": "0.0.1",
+  "author": "Lagoa <join@lagoa.com >",
+  "dependencies": {
+    "request": "2.29.x",
+    "async": "0.2.9"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  }
+}
