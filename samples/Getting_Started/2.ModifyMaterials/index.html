@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Sample</title>
+
+    <!-- The following are boilerplate calls to load external libraries-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.js"></script>
+
+    <!-- LAGOA API  --- NOTE: It is a good idea to serve this file from your own CDN -->
+    <script src="http://home.lagoa.com/wp-content/uploads/API-Samples/build/lapi.js"></script>
+
+</head>
+
+<body class="ui-widget-content" style="border: 0;">
+
+<!--- place our scene -- REPLACE THIS WITH THE SCENE YOU WISH TO LOAD --->
+<iframe src="https://lagoa.com/embed_links/3161?validationHash=9HZVYc3gGTi6pUm_5-zNHBkwUbrBUw&width=500&height=330&auto_load_scene=true&asset_name=true&owner_name=true&lagoa_logo=true"
+        id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+<br>
+
+<script>
+
+    // called once the scene is fully loaded – warning: geometry might not be present!
+    lapi.onSceneLoaded = function() {
+
+        // Hide the toolbar
+        lapi.showToolbar(false);
+
+        /***
+         * Add the render button
+         */
+        var btn = document.createElement("BUTTON");
+        var t = document.createTextNode("Render");
+        btn.appendChild(t);
+        document.body.appendChild(btn);
+
+        btn.onclick = function () {
+            if (!lapi.isRendering()) {
+                lapi.startRender()
+            } else {
+                lapi.stopRender();
+            }
+        };
+
+        /**
+         * Add the materials we support editing
+         */
+        // some constants
+        var SENTINEL = 'edit_';
+        var ONE_OVER_255 = 1/255;
+
+        var scn = lapi.getActiveScene();
+        var mats = scn.getMaterials();
+        if (mats.length) {
+            for (var itr = 0; itr < mats.length; itr++) {
+                // get the name and check for "edit_"
+                var name = mats[itr].properties.getParameter('name').value;
+
+                if (name.indexOf(SENTINEL) === 0) {
+
+                    // get the current value
+                    // we are interested in changing the reflectance property
+                    var reflectance = mats[itr].properties.getProperty("reflectance");
+                    var startColor = lapi.utils.rgbToHEX(
+                            Math.floor(reflectance.parameters.f0.value*255),
+                            Math.floor(reflectance.parameters.f1.value*255),
+                            Math.floor(reflectance.parameters.f2.value*255));
+
+                    var clr = document.createElement("input");
+                    clr.setAttribute('value', '#' + startColor);
+                    clr.setAttribute('type', 'color');
+                    clr.setAttribute('name', name.replace(SENTINEL, ''));
+                    document.body.appendChild(clr);
+
+                    clr.onchange = function () {
+                        var color = lapi.utils.hexToRGB(this.value);
+
+                        // this will return an array with all objects that have the part name, in Lagoa multiple parts
+                        // can have the same name – no "name uniqueness" only object GUID uniqueness is guaranteed.
+                        // we will make an assumption that we are only interested in the first one, therefore the array [0]
+                        var mat = lapi.getActiveScene().getObjectByName(SENTINEL+this.name)[0];
+
+                        // we are interested in changing the reflectance property
+                        var reflectance = mat.properties.getProperty("reflectance");
+
+                        // pow 2 is just for gamma correction
+                        reflectance.parameters.f0.value = Math.pow(color.r * ONE_OVER_255, 2);
+                        reflectance.parameters.f1.value = Math.pow(color.g * ONE_OVER_255, 2);
+                        reflectance.parameters.f2.value = Math.pow(color.b * ONE_OVER_255, 2);
+                    }
+                }
+            }
+        }
+    };
+
+</script>
+
+</body>
+</html>

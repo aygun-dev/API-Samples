@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Sample</title>
+
+    <!-- The following are boilerplate calls to load external libraries-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.js"></script>
+
+    <!-- LAGOA API  --- NOTE: It is a good idea to serve this file from your own CDN -->
+    <script src="http://home.lagoa.com/wp-content/uploads/API-Samples/build/lapi.js"></script>
+
+
+</head>
+
+<body class="ui-widget-content" style="border: 0;">
+
+<!--- place our scene -- REPLACE THIS WITH THE SCENE YOU WISH TO LOAD --->
+<iframe src="https://lagoa.com/embed_links/3161?validationHash=9HZVYc3gGTi6pUm_5-zNHBkwUbrBUw&width=500&height=330&auto_load_scene=true&asset_name=true&owner_name=true&lagoa_logo=true"
+        id="lagoaframe" width="500" height="330" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+<br>
+<script>
+    // called once the scene is fully loaded – warning: geometry might not be present!
+    lapi.onSceneLoaded = function() {
+
+        // Hide the toolbar
+        lapi.showToolbar(false);
+
+        /***
+         * Add the render button
+         */
+        var btn = document.createElement("BUTTON");
+        var t = document.createTextNode("Render");
+        btn.appendChild(t);
+        document.body.appendChild(btn);
+
+        btn.onclick = function () {
+            if (!lapi.isRendering()) {
+                lapi.startRender()
+            } else {
+                lapi.stopRender();
+            }
+        };
+    };
+
+</script>
+
+</body>
+</html>
