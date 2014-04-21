@@ -220,6 +220,60 @@ lapi.Scene.prototype = {
         console.log('There was an error. Could not change scene state.');
       }
     });
+  },
+
+  /**
+   * Activate a scene state.
+   * @param {Object} in_state The state we want to make active.
+   * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
+   */
+  orbitPitch : function(in_degrees){
+    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
+      +"var prop = cam.PropertySet.getProperty('Position');"
+      +'var pitch = (' + in_degrees+'/ 180) * Math.PI;'
+      +'var position = Application.Math.safeOrbit({'
+      +'up: cam.up,'
+      +'center: cam.target.position,'
+      +'position: cam.position,'
+      +'yawDelta: 0,'
+      +'pitchDelta: pitch'
+      +'});'
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      +', data : {ctxt : cam'
+      +", list : [{ parameter : prop.getParameter('x'), value : position.x }"
+      +", { parameter : prop.getParameter('y'), value : position.y }"
+      +", { parameter : prop.getParameter('z'), value : position.z }]}"
+      +', mutebackend : cam.local'
+      +', forcedirty : true });'
+    );
+  },
+
+
+  /**
+   * Activate a scene state.
+   * @param {Object} in_state The state we want to make active.
+   * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
+   */
+  orbitYaw : function(in_degrees){
+    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
+      +"var prop = cam.PropertySet.getProperty('Position');"
+      +'var yaw = (' + in_degrees+'/ 360) * 2 * Math.PI;'
+      +'var position = Application.Math.safeOrbit({'
+      +'up: cam.up,'
+      +'center: cam.target.position,'
+      +'position: cam.position,'
+      +'yawDelta: yaw,'
+      +'pitchDelta: 0'
+      +'});'
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      +', data : {ctxt : cam'
+      +", list : [{ parameter : prop.getParameter('x'), value : position.x }"
+      +", { parameter : prop.getParameter('y'), value : position.y }"
+      +", { parameter : prop.getParameter('z'), value : position.z }]}"
+      +', mutebackend : cam.local'
+      +', forcedirty : true });'
+    );
   }
+
 
 };
