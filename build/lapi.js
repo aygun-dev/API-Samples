@@ -1528,6 +1528,7 @@ lapi.Scene.prototype = {
    * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
    */
   orbitPitch : function(in_degrees){
+    var pitch = ( in_degrees/180) * Math.PI;
     lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
       +"var prop = cam.PropertySet.getProperty('Position');"
       +'var pitch = (' + in_degrees+'/ 180) * Math.PI;'
@@ -1536,7 +1537,7 @@ lapi.Scene.prototype = {
       +'center: cam.target.position,'
       +'position: cam.position,'
       +'yawDelta: 0,'
-      +'pitchDelta: pitch'
+      +'pitchDelta: ' + pitch + ','
       +'});'
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       +', data : {ctxt : cam'
@@ -1555,14 +1556,14 @@ lapi.Scene.prototype = {
    * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
    */
   orbitYaw : function(in_degrees){
+    var yaw = (in_degrees/ 360) * 2 * Math.PI;
     lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
       +"var prop = cam.PropertySet.getProperty('Position');"
-      +'var yaw = (' + in_degrees+'/ 360) * 2 * Math.PI;'
       +'var position = Application.Math.safeOrbit({'
       +'up: cam.up,'
       +'center: cam.target.position,'
       +'position: cam.position,'
-      +'yawDelta: yaw,'
+      +'yawDelta:' + yaw + ','
       +'pitchDelta: 0'
       +'});'
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
