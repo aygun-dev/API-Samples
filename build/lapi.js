@@ -1523,9 +1523,8 @@ lapi.Scene.prototype = {
   },
 
   /**
-   * Activate a scene state.
-   * @param {Object} in_state The state we want to make active.
-   * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
+   * Orbit scene using pitch.
+   * @param {Number} in_degrees  The amount in degrees we will rotate the camera.
    */
   orbitPitch : function(in_degrees){
     var pitch = ( in_degrees/180) * Math.PI;
@@ -1551,9 +1550,8 @@ lapi.Scene.prototype = {
 
 
   /**
-   * Activate a scene state.
-   * @param {Object} in_state The state we want to make active.
-   * @param {function} in_cb  Optional callback that gets executed after activating a scene state. Does not expect any arguments.
+   * Orbit scene using yaw.
+   * @param {Number} in_degrees  The amount in degrees we will rotate the camera.
    */
   orbitYaw : function(in_degrees){
     var yaw = (in_degrees/ 360) * 2 * Math.PI;
