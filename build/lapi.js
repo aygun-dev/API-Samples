@@ -648,6 +648,28 @@ var lapi = {};
   };
 
   /**
+   * method to enable mouse inetractions.
+   * This means the viewport reacts to the mouse inetractions ( dollies, orbits).
+   * @in_enable {Boolean} Flag that enables/disables mouse interactions.
+   */
+  lapi.enableMouseInteractions = function (in_enable){
+    var action;
+    if(in_enable){
+      action = 'appendBinding';
+    } else {
+      action = 'removeBinding';
+    }
+    lapi._embedRPC("ACTIVEAPP.vpman.leafWalk(function (v) {"
+      + "if ( (v instanceof Application.Viewport)) {"
+        + "v." + action +"({"
+        + "event : 'wheel',"
+        + "callback : v._onWheel"
+        + "});"
+      + "}"
+    +"});");
+  };
+
+  /**
    * method for on Scene Loaded event
    * @virtual
    * @callback called when scene finishes loading – no geometry data is guaranteed to have loaded
