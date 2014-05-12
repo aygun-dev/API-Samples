@@ -17,6 +17,12 @@ node uploadFile.js --name=<Friendly File Name.ext> --path=<path to file>
 
 Additionally there are some optional parameters:
 
+Folder:
+    --folder=<folder id>
+
+Tags:
+    --tags=<comma separated tag names, no spaces between tags>
+
 2D images
   --image-gamma=<number>
 
