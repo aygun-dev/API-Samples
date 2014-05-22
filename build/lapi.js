@@ -438,7 +438,13 @@ var lapi = {};
     }
     var list = [];
     for(var v in in_values){
-      list.push("{ parameter : prop.getParameter('" + v + "'), value : " + in_values[v] + "}");
+      var paramValue = in_values[v];
+      if(typeof paramValue !== "string" ){
+        list.push("{ parameter : prop.getParameter('" + v + "'), value : " + paramValue + "}");        
+      } else {
+        list.push("{ parameter : prop.getParameter('" + v + "'), value : '" + paramValue + "'}");        
+      }
+
     }
 
     lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + in_GUID +"');" 
