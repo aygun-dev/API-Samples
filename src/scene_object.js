@@ -118,10 +118,21 @@ lapi.SceneObject.prototype = {
       var cb;
       var property = this.getProperty(in_propName);
       if(property){
-        cb = function(data){
+        var setPropertyValues = function(prop,data){
           for( var i in data){
-            property.getParameter(i)._setValueMuted(data[i].value);
-          }
+            var param = prop.getParameter(i);
+            if(param){
+              param._setValueMuted(data[i].value);
+            } else {
+              var innerProp = prop.getProperty(i);
+              if(innerProp){
+                setPropertyValues(innerProp,data[i]);
+              }
+            }
+          }          
+        }
+        cb = function(data){
+          setPropertyValues(property,data);
         };
       }else {
         property = this.properties.getParameter(in_propName);
