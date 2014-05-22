@@ -433,10 +433,20 @@ var lapi = {};
   * @in_values {object} The values we are assigning.
   */
   lapi.setObjectParameter = function( in_GUID, in_property, in_values ){
-    lapi._embedRPC("ACTIVEAPP.setObjectParameter('" +in_GUID + "'"
-      +",{property : '" + in_property + "', value : "
-      + JSON.stringify(in_values) + "});",function(in_response){
-    });
+    if(!(in_property instanceof Array)){
+      in_property = [in_property];
+    }
+    var list = [];
+    for(var v in in_values){
+      list.push("{ parameter : prop.getParameter('" + v + "'), value : " + in_values[v] + "}");
+    }
+
+    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + in_GUID +"');" 
+      +"var prop = obj.PropertySet.getProperty('" + in_property.join("').getProperty('") + "');"
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      + ", data : {ctxt : obj, list : "
+      + "[" + list.join()+ "]}"
+      + ", mutebackend : false, forcedirty : true });");
   };
 
   /**
@@ -739,6 +749,12 @@ lapi.Property = function( in_name ){
    */
   this._name = in_name;
 
+  /**
+   * @type {Property}
+   * @private
+   */
+  this._parent = null;
+
 };
 
 
@@ -772,7 +788,7 @@ lapi.Property.prototype = {
    * Append another property under this property
    * @param {Property} in_property
    */
-  appendProperty : function( in_property ){ this.properties[in_property.name] = in_property; },
+  appendProperty : function( in_property ){ in_property._parent = this; this.properties[in_property.name] = in_property; },
 
   /**
    * Get a property by name
@@ -788,7 +804,7 @@ lapi.Property.prototype = {
    * @type {String}
    */
   get name(){
-    return this._name
+    return this._name;
   },
 
   /**
@@ -796,6 +812,23 @@ lapi.Property.prototype = {
    * @private
    */
   set name(in_val){
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
+  },
+
+  /**
+   * The parent of this Property,if it exists. 
+   * Otherwise return null.
+   * @type {Property}
+   */
+  get parent(){
+    return this._parent;
+  },
+
+  /**
+   * setter to assign its parent property.
+   * @private
+   */
+  set parent(in_val){
     console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   },
 
@@ -948,8 +981,14 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
     _value = in_val;
     var paramList = {};
     paramList[ this.id ] = this.value;
-    var parentPropName = this.parent.name;
-    lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropName, paramList )
+    var parentPropHierarchy = [];
+    var parent = this.parent;
+    while(parent && parent.name !== 'PropertySet'){
+      parentPropHierarchy.push(parent.name);
+      parent = parent.parent;
+    }
+    parentPropHierarchy.reverse();
+    lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropHierarchy, paramList )
   });
 
   /**

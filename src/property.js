@@ -37,6 +37,12 @@ lapi.Property = function( in_name ){
    */
   this._name = in_name;
 
+  /**
+   * @type {Property}
+   * @private
+   */
+  this._parent = null;
+
 };
 
 
@@ -70,7 +76,7 @@ lapi.Property.prototype = {
    * Append another property under this property
    * @param {Property} in_property
    */
-  appendProperty : function( in_property ){ this.properties[in_property.name] = in_property; },
+  appendProperty : function( in_property ){ in_property._parent = this; this.properties[in_property.name] = in_property; },
 
   /**
    * Get a property by name
@@ -86,7 +92,7 @@ lapi.Property.prototype = {
    * @type {String}
    */
   get name(){
-    return this._name
+    return this._name;
   },
 
   /**
@@ -94,6 +100,23 @@ lapi.Property.prototype = {
    * @private
    */
   set name(in_val){
+    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
+  },
+
+  /**
+   * The parent of this Property,if it exists. 
+   * Otherwise return null.
+   * @type {Property}
+   */
+  get parent(){
+    return this._parent;
+  },
+
+  /**
+   * setter to assign its parent property.
+   * @private
+   */
+  set parent(in_val){
     console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
   },
 

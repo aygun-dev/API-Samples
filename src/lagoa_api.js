@@ -422,10 +422,20 @@
   * @in_values {object} The values we are assigning.
   */
   lapi.setObjectParameter = function( in_GUID, in_property, in_values ){
-    lapi._embedRPC("ACTIVEAPP.setObjectParameter('" +in_GUID + "'"
-      +",{property : '" + in_property + "', value : "
-      + JSON.stringify(in_values) + "});",function(in_response){
-    });
+    if(!(in_property instanceof Array)){
+      in_property = [in_property];
+    }
+    var list = [];
+    for(var v in in_values){
+      list.push("{ parameter : prop.getParameter('" + v + "'), value : " + in_values[v] + "}");
+    }
+
+    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + in_GUID +"');" 
+      +"var prop = obj.PropertySet.getProperty('" + in_property.join("').getProperty('") + "');"
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      + ", data : {ctxt : obj, list : "
+      + "[" + list.join()+ "]}"
+      + ", mutebackend : false, forcedirty : true });");
   };
 
   /**
