@@ -153,7 +153,7 @@ lapi.Scene.prototype = {
     ].join(' ');
     var self = this;
     lapi._embedRPC(" var newGuid = generateGUID();"
-      + "var pset = ACTIVEAPP.GetScene().GetByGUID('"+guid+"').PropertySet.flatten({"
+      + "var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
       +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
       + "pset.guid.value = newGuid;"

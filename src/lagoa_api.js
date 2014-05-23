@@ -436,7 +436,7 @@
 
     }
 
-    lapi._embedRPC("var obj = ACTIVEAPP.GetScene().GetByGUID('" + in_GUID +"');" 
+    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');" 
       +"var prop = obj.PropertySet.getProperty('" + in_property.join("').getProperty('") + "');"
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
