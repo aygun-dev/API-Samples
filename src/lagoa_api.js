@@ -411,7 +411,8 @@
         union = 'union_tag=true&';
       }
       var tags = in_tags.join();
-      $.get(lapi._lagoaUrl + '/search/assets.json?'+ union + user +'tags='+tags,in_cb, 'jsonp');
+      // Set max count to a silly number like a million inorder to fetch everything.  * TEMPORARY *
+      $.get(lapi._lagoaUrl + '/search/assets.json?'+ union + user +'tags='+tags+'&per_page=1000000000',in_cb, 'jsonp');
     }, dataType: 'jsonp' });
   };
 
