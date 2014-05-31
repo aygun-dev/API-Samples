@@ -422,8 +422,24 @@ var lapi = {};
         union = 'union_tag=true&';
       }
       var tags = in_tags.join();
-      // Set max count to a silly number like a million inorder to fetch everything.  * TEMPORARY *
-      $.get(lapi._lagoaUrl + '/search/assets.json?'+ union + user +'tags='+tags+'&per_page=1000000000',in_cb, 'jsonp');
+      var assets = [];
+      var page = 0;
+      var accum = function(idx,res){
+        res = res || [];
+        var len = res.length;
+        if(!len && idx !== 0){
+          in_cb(assets);
+          return;
+        }
+        if(len){
+          for(var i = 0; i < len; ++i){
+            assets.push(res[i]);
+          }
+        }
+        ++idx;
+        $.get(lapi._lagoaUrl + '/search/assets.json?'+ union + user +'tags='+tags+'&per_page=25&page=' + idx,accum.bind(null, idx), 'jsonp');
+      };
+      accum(0);
     }, dataType: 'jsonp' });
   };
 
