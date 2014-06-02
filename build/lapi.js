@@ -404,6 +404,67 @@ var lapi = {};
     })
   };
 
+
+  /*
+   * Fetch assets that match specified parameters. All the arguments are optional.
+   * @in_params.tags {Array} Array of strings representing the tags.
+   * @in_params.match {Boolean} If true, will return assets who matches all the tags. Otherwise, return 
+   * object if any tag matches.
+   * @in_params.projects {Array} Array of numbers representing project ids from which we'd like to query the assets.
+   * @in_params.datatypes {Array} Array of numbers representing the type of assets we'd like to fetch.
+   * @in_params.query {String} The query parameter takes into account the asset's name,  owner's name,description and its tags. If there is a match it will show.
+   * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
+   */
+  lapi.fetchAssets = function(in_params,in_cb){
+    in_params = in_params || {};
+    $.ajax({url: lapi._lagoaUrl + '/users/current_user.json', type: 'GET', success: function(data) {
+      var user = '';
+      if(data.id){
+        user = 'current_user_id=' + data.id;
+      }
+
+      var tags = '',projects = '',query = '', datatypes = ''
+      if(in_params.tags){
+        var union = '';
+        if(in_params.match){
+          union = '&union_tag=true&';
+        }
+        tags = union + 'tags='+ in_params.tags.join();
+      }
+
+      if(in_params.projects){
+        projects = '&project_ids=' + in_params.projects.join();
+      }
+
+      if(in_params.datatypes){
+        datatypes = '&datatype_ids=' + in_params.datatypes.join();
+      }
+
+      if(in_params.query){
+        query = '&query=' + in_params.query;
+      }
+      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ user + tags + projects + datatypes + query + '&per_page=25&page=';
+      var assets = [];
+      var page = 0;
+      var accum = function(idx,res){
+        res = res || [];
+        var len = res.length;
+        if(!len && idx !== 0){
+          in_cb(assets);
+          return;
+        }
+        if(len){
+          for(var i = 0; i < len; ++i){
+            assets.push(res[i]);
+          }
+        }
+        ++idx;
+        $.get(searchStr + idx,accum.bind(null, idx), 'jsonp');
+      };
+      accum(0);
+    }, dataType: 'jsonp' });
+  };
+
   /*
    * Fetch assets that match an array of tags.
    * @in_match {Boolean} If true, will return assets who matches all the tags. Otherwise, return 
