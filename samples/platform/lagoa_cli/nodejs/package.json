@@ -1,0 +1,14 @@
+{
+  "name": "lagoaCli",
+  "description": "",
+  "version": "0.0.1",
+  "author": "TeamUp Technologies <join@lagoa.com >",
+  "dependencies": {
+    "async" : "0.2.9",
+    "request": "2.29.x",
+    "underscore": "1.5.2",
+    "optimist" : "*",
+    "progress" : "*"
+  },
+  "engines": { "node": ">= 0.8.0" }
+}
