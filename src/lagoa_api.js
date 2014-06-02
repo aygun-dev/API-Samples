@@ -399,7 +399,7 @@
    * @in_params.tags {Array} Array of strings representing the tags.
    * @in_params.match {Boolean} If true, will return assets who matches all the tags. Otherwise, return 
    * object if any tag matches.
-   * @in_params.projects {Array} Array of numbers representing project ids from which we'd like to query the assets.
+   * @in_params.projects {Array} Array of numbers representing ids of the projects we want to fetch from.
    * @in_params.datatypes {Array} Array of numbers representing the type of assets we'd like to fetch.
    * @in_params.query {String} The query parameter takes into account the asset's name,  owner's name,description and its tags. If there is a match it will show.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
@@ -411,8 +411,10 @@
       if(data.id){
         user = 'current_user_id=' + data.id;
       }
-
-      var tags = '',projects = '',query = '', datatypes = ''
+      var tags = '';
+      var projects = '';
+      var query = '';
+      var datatypes = '';
       if(in_params.tags){
         var union = '';
         if(in_params.match){
@@ -462,35 +464,8 @@
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
   lapi.fetchAssetsByTags = function(in_match,in_tags,in_cb){
-    $.ajax({url: lapi._lagoaUrl + '/users/current_user.json', type: 'GET', success: function(data) {
-      var user = '';
-      if(data.id){
-        user = 'current_user_id=' + data.id +'&';
-      }
-      var union = '';
-      if(in_match){
-        union = 'union_tag=true&';
-      }
-      var tags = in_tags.join();
-      var assets = [];
-      var page = 0;
-      var accum = function(idx,res){
-        res = res || [];
-        var len = res.length;
-        if(!len && idx !== 0){
-          in_cb(assets);
-          return;
-        }
-        if(len){
-          for(var i = 0; i < len; ++i){
-            assets.push(res[i]);
-          }
-        }
-        ++idx;
-        $.get(lapi._lagoaUrl + '/search/assets.json?'+ union + user +'tags='+tags+'&per_page=25&page=' + idx,accum.bind(null, idx), 'jsonp');
-      };
-      accum(0);
-    }, dataType: 'jsonp' });
+    console.warn('Deprecated - Please use fetchAssets instead');
+    lapi.fetchAssets({tags : in_tags, match : in_match},in_cb);
   };
 
   /**
