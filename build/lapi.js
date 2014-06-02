@@ -728,7 +728,7 @@ var lapi = {};
         }
       });
     }
-    var timer = setInterval(checkLoaded,3000);
+    var timer = setInterval(checkLoaded,500);
   });
 
 })();
