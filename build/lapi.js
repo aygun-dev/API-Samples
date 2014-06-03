@@ -183,6 +183,13 @@ var lapi = {};
     return 'xxxxxxxxxx'.replace(/x/g,function(){return Math.floor(Math.random()*16).toString(16)});
   };
 
+  lapi._generateGUID = function () {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
   /**
    * Pass messgage to SC
    * @in_message {object} message we will stringify and send to SC
@@ -1582,24 +1589,22 @@ lapi.Scene.prototype = {
       'Copy ',
         String(in_sceneObject._copiedCount++)
     ].join(' ');
+    var newGuid = lapi._generateGUID();
     var self = this;
-    lapi._embedRPC(" var newGuid = generateGUID();"
-      + "var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
+    if(in_cb){
+      lapi._cbmap[newGuid] = in_cb;
+    }
+    lapi._embedRPC("var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
       +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
-      + "pset.guid.value = newGuid;"
+      + "pset.guid.value = '" + newGuid +"';"
       + "pset.name.value = '" + name +"';"
       + "var obj  = [{tuid : pset.tuid.value , pset : pset}];"
       + " ACTIVEAPP.RunCommand({"
       +   "command : 'InsertObjects',"
       +   "data : obj"
       + " });"
-      + "newGuid;",
-      function(in_response){
-        if(in_cb){
-          lapi._cbmap[in_response.data] = in_cb;
-        }
-      });
+    );
   },
 
   /**

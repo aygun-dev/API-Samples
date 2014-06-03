@@ -151,24 +151,22 @@ lapi.Scene.prototype = {
       'Copy ',
         String(in_sceneObject._copiedCount++)
     ].join(' ');
+    var newGuid = lapi._generateGUID();
     var self = this;
-    lapi._embedRPC(" var newGuid = generateGUID();"
-      + "var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
+    if(in_cb){
+      lapi._cbmap[newGuid] = in_cb;
+    }
+    lapi._embedRPC("var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
       +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
-      + "pset.guid.value = newGuid;"
+      + "pset.guid.value = '" + newGuid +"';"
       + "pset.name.value = '" + name +"';"
       + "var obj  = [{tuid : pset.tuid.value , pset : pset}];"
       + " ACTIVEAPP.RunCommand({"
       +   "command : 'InsertObjects',"
       +   "data : obj"
       + " });"
-      + "newGuid;",
-      function(in_response){
-        if(in_cb){
-          lapi._cbmap[in_response.data] = in_cb;
-        }
-      });
+    );
   },
 
   /**
