@@ -96,6 +96,13 @@
    lapi.onObjectAdded = function(){};
 
   /**
+   * method for first render frame event
+   * @virtual
+   */
+
+   lapi.onFirstFrame = function(){};
+
+  /**
    * Implements the MPI interface to receive messages back from the lagoa embed
    * @private
    */
@@ -119,6 +126,8 @@
             }
             lapi.onObjectAdded(obj);
           });
+        } else if(retval.subchannel === 'firstFrame'){
+          lapi.onFirstFrame();
         }
       } else {
         if(lapi._cbmap[retval.id]){
