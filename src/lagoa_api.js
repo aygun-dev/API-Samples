@@ -417,6 +417,7 @@
    * object if any tag matches.
    * @in_params.projects {Array} Array of numbers representing ids of the projects we want to fetch from.
    * @in_params.datatypes {Array} Array of numbers representing the type of assets we'd like to fetch.
+   * @in_params.max {Number} max number of elements we want.
    * @in_params.query {String} The query parameter takes into account the asset's name,  owner's name,description and its tags. If there is a match it will show.
    * @in_cb {Function} Optional callback that expects a JSON object (our result) as an argument.
    */
@@ -456,7 +457,7 @@
       var accum = function(idx,res){
         res = res || [];
         var len = res.length;
-        if(!len && idx !== 0){
+        if((in_params.max && assets.length >= in_params.max) || (!len && idx !== 0)){
           in_cb(assets);
           return;
         }
