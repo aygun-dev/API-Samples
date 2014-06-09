@@ -451,13 +451,18 @@
       if(in_params.query){
         query = '&query=' + in_params.query;
       }
-      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ user + tags + projects + datatypes + query + '&per_page=25&page=';
+      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ user + tags + projects + datatypes + query;
+      if(in_params.max){
+        $.get(searchStr + '&per_page=' + in_params.max + '&page=1',in_cb, 'jsonp');
+        return;
+      }
+      searchStr += '&per_page=25&page=';
       var assets = [];
       var page = 0;
       var accum = function(idx,res){
         res = res || [];
         var len = res.length;
-        if((in_params.max && assets.length >= in_params.max) || (!len && idx !== 0)){
+        if(!len && idx !== 0){
           in_cb(assets);
           return;
         }
