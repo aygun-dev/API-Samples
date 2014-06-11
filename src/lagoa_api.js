@@ -258,7 +258,7 @@
         self._activeCamera = cams[0];
 
         // give it sometime to call the event...
-        setTimeout( lapi.onSceneLoaded, 3000 );
+        setTimeout( lapi.onSceneLoaded, 500 );
     });
   };
 
