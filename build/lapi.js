@@ -1366,13 +1366,20 @@ lapi.SceneObject.prototype = {
    * @in_imgType {String} the ext/type of the image.
    */
   setImage : function(in_property, in_path, in_imgType){
+    var self = this;
     lapi._embedRPC("var obj  = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');" 
       +"var prop = obj.PropertySet.getProperty('" + in_property + "');"
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
       + "[{parameter : prop.getParameter('imgType'), value : '" + in_imgType + "'}"
       + ",{parameter : prop.getParameter('path'), value : '" + in_path + "'}]}"
-      + ", mutebackend : obj.local, forcedirty : true });");
+      + ", mutebackend : obj.local, forcedirty : true });", 
+      function(e){
+        var prop = self.getProperty(in_property);
+        prop.parameters.imgType._setValueMuted(in_imgType);
+        prop.parameters.path._setValueMuted(in_guid);
+      }
+    );
   },
 
   /**
@@ -1382,13 +1389,20 @@ lapi.SceneObject.prototype = {
    * @in_imgType {String} the ext/type of the image.
    */
   setTexture : function(in_property, in_guid, in_imgType){
+    var self = this;
     lapi._embedRPC("var obj  = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');"
       +"var prop = obj.PropertySet.getProperty('" + in_property + "');"
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
       + "[{parameter : prop.getParameter('imgtype'), value : '" + in_imgType + "'}"
       + ",{parameter : prop.getParameter('texture'), value : '" + in_guid + "'}]}"
-      + ", mutebackend : obj.local, forcedirty : true });");
+      + ", mutebackend : obj.local, forcedirty : true });", 
+      function(e){
+        var prop = self.getProperty(in_property);
+        prop.parameters.imgtype._setValueMuted(in_imgType);
+        prop.parameters.texture._setValueMuted(in_guid);
+      }
+    );
   }
 
 };
