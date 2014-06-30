@@ -106,6 +106,16 @@ var lapi = {};
 
    lapi.onObjectAdded = function(){};
 
+
+  /**
+   * method for fetching the guid of the object we just clicked on
+   * @virtual
+   * @callback called when we are in checkGuidTool context and we click on an object
+   * Expects an object with a tuid and guid  ex {tuid : 'MeshID', guid : '9cbcd524-5991-4861-b98a-764dfa72400d'} 
+   */
+
+   lapi.checkGuidToolCB = function(){};
+
   /**
    * method for first render frame event
    * @virtual
@@ -124,7 +134,8 @@ var lapi = {};
 //      console.warn("returning RPC call", lapi._cbStack);
 //      --lapi._cbStack;
       if (retval.subchannel) {
-        if(retval.subchannel === 'objectAdded'){
+        var subchannel = retval.subchannel;
+        if(subchannel === 'objectAdded'){
           var scn = lapi.getActiveScene();
           var tuid = retval.data.tuid;
           var pset = retval.data.pset;
@@ -137,8 +148,10 @@ var lapi = {};
             }
             lapi.onObjectAdded(obj);
           });
-        } else if(retval.subchannel === 'firstFrame'){
+        } else if(subchannel === 'firstFrame'){
           lapi.onFirstFrame();
+        } else if(subchannel === 'checkGuid'){
+          lapi.checkGuidToolCB(retval.data);
         }
       } else {
         if(lapi._cbmap[retval.id]){
@@ -737,6 +750,10 @@ var lapi = {};
   lapi.panTool = function(){
     lapi._activeTool('PanTool');
   };
+
+  lapi.checkGuidTool = function(){
+    lapi._activeTool('CheckGuidTool');
+  }
 
   /**
    * method to enable mouse inetractions.
