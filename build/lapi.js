@@ -276,13 +276,13 @@ var lapi = {};
 
         // delete the scene guid because this can cause trouble...
         delete classedItems["SceneID"];
-        self._activeScene = new lapi.Scene( sceneGuid, classedItems );
+        self._activeScene = new lapi.Scene( sceneGuid, classedItems, function(){
+          var cams = self._activeScene.getCameras();
+          self._activeCamera = cams[0];
 
-        var cams = self._activeScene.getCameras();
-        self._activeCamera = cams[0];
-
-        // give it sometime to call the event...
-        setTimeout( lapi.onSceneLoaded, 500 );
+          // give it sometime to call the event...
+          setTimeout( lapi.onSceneLoaded, 500 );
+        });
     });
   };
 
@@ -1489,9 +1489,10 @@ lapi.utils = {
 
 /** flat Scene representation organized by object kind (Light, Material, Mesh, etc...)
  * @param {object} in_guidList is expected to be { classID : [ Array ] }
+ * @param {Callback} Function that is called when all objects are loaded.
  * @constructor Scene
  */
-lapi.Scene = function( in_sceneGuid, in_guidList ){
+lapi.Scene = function( in_sceneGuid, in_guidList,in_cb ){
 
   // this is just so we keep track of the guid of the scene here.
   this._guid = in_sceneGuid;
@@ -1505,7 +1506,7 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
   // the scene object count
   this._objectCount = 0;
 
-
+  var that = this;
   for( var i in in_guidList ){
 
     var tmpGuid;
@@ -1518,8 +1519,12 @@ lapi.Scene = function( in_sceneGuid, in_guidList ){
     // build the shallow SceneObject in place
     for( var j in classID){
       tmpGuid = classID[j];
-      this._guidItems[tmpGuid] = initClass[tmpGuid] = new lapi.SceneObject( tmpGuid );
-      ++this._objectCount;
+      this._guidItems[tmpGuid] = initClass[tmpGuid] = new lapi.SceneObject( tmpGuid , null, function(){
+        ++that._objectCount; 
+        if(that._objectCount === Object.keys(that._guidItems).length){
+          in_cb();
+        }
+      });
     }
   }
 };
