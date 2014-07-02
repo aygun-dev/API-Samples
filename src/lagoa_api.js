@@ -265,13 +265,13 @@
 
         // delete the scene guid because this can cause trouble...
         delete classedItems["SceneID"];
-        self._activeScene = new lapi.Scene( sceneGuid, classedItems );
+        self._activeScene = new lapi.Scene( sceneGuid, classedItems, function(){
+          var cams = self._activeScene.getCameras();
+          self._activeCamera = cams[0];
 
-        var cams = self._activeScene.getCameras();
-        self._activeCamera = cams[0];
-
-        // give it sometime to call the event...
-        setTimeout( lapi.onSceneLoaded, 500 );
+          // give it sometime to call the event...
+          setTimeout( lapi.onSceneLoaded, 500 );
+        });
     });
   };
 
