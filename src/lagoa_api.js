@@ -54,7 +54,7 @@
    * @type {String}
    * @private
    */
-  lapi._lagoaUrl="http://lagoa.com";
+  lapi._lagoaUrl="https://lagoa.com";
 
   /**
    * @type {number}
