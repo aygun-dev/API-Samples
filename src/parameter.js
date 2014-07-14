@@ -48,78 +48,91 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
    */
   var _id = in_params.id || null;
 
-  /**
-   * the name of the parameter
-   * @type {string}
-   * @name name
-   * @memberof Parameter
-   */
-  this.__defineGetter__("name", function(){ return _name; });
+  Object.defineProperty(this,"name",{
+   /**
+    * the name of the parameter
+    * @type {string}
+    * @name name
+    * @memberof Parameter
+    */
+    get:function(){return _name;},
+    /**
+    * setter blocker – blocks member variable from changing, this routine will return an error
+    * @params {string}
+    */
+    set:function(in_val){console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); },
+    enumerable: true
+  });
 
-  /**
-   * setter blocker – blocks member variable from changing, this routine will return an error
-   * @params {string}
-   */
-  this.__defineSetter__("name", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
-  /**
-   * type getter
-   * @returns {string} the type of the parameter
-   */
-  this.__defineGetter__("type", function(){ return _type; });
+  Object.defineProperty(this,"type",{
+   /**
+    * type getter
+    * @returns {string} the type of the parameter
+    */
+    get:function(){return _type;},
+   /**
+    * setter blocker
+    * @params {string} blocks member variable from changing, this routine will return an error
+    */
+    set:function(in_val){console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); },
+    enumerable: true
+  });
 
-  /**
-   * setter blocker
-   * @params {string} blocks member variable from changing, this routine will return an error
-   */
-  this.__defineSetter__("type", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
+  Object.defineProperty(this,"parent",{
   /**
-   * parent getter
-   * @returns {string} the parent of the parameter
-   */
-  this.__defineGetter__("parent", function(){ return _parent; });
+    * parent getter
+    * @returns {string} the parent of the parameter
+    */
+    get:function(){return _parent;},
+   /**
+    * setter blocker
+    * @params {string} blocks member variable from changing, this routine will return an error
+    */
+    set:function(in_val){console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); },
+    enumerable: true
+  });
 
-  /**
-   * setter blocker
-   * @params {string} blocks member variable from changing, this routine will return an error
-   */
-  this.__defineSetter__("parent", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
 
-  /**
-   * value getter
-   * @returns {number|string|boolean} the value of the parameter
-   */
-  this.__defineGetter__("value", function(){ return _value; });
+  Object.defineProperty(this,"value",{
+    /**
+    * value getter
+    * @returns {number|string|boolean} the value of the parameter
+    */
+    get:function(){return _value;},
+    /**
+    * parent setter
+    * @returns {string} sets the value of this Parameter, and pushes the change to the Lagoa platform
+    */
+    set:function(in_val){
+      _value = in_val;
+      var paramList = {};
+      paramList[ this.id ] = this.value;
+      var parentPropHierarchy = [];
+      var parent = this.parent;
+      while(parent && parent.name !== 'PropertySet'){
+        parentPropHierarchy.push(parent.name);
+        parent = parent.parent;
+      }
+      parentPropHierarchy.reverse();
+      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropHierarchy, paramList );
+    },
+    enumerable: true
+  });
 
-  /**
-   * value getter
-   * @returns {string} the id of the parameter
-   */
-  this.__defineGetter__("id", function() {return _id;});
-
-  /**
-   * setter blocker
-   * @params {string} blocks member variable from changing, this routine will return an error
-   */
-  this.__defineSetter__("id", function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); });
-
-  /**
-   * parent setter
-   * @returns {string} sets the value of this Parameter, and pushes the change to the Lagoa platform
-   */
-  this.__defineSetter__("value", function(in_val){
-    _value = in_val;
-    var paramList = {};
-    paramList[ this.id ] = this.value;
-    var parentPropHierarchy = [];
-    var parent = this.parent;
-    while(parent && parent.name !== 'PropertySet'){
-      parentPropHierarchy.push(parent.name);
-      parent = parent.parent;
-    }
-    parentPropHierarchy.reverse();
-    lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropHierarchy, paramList )
+  Object.defineProperty(this,"id",{
+   /**
+    * value getter
+    * @returns {string} the id of the parameter
+    */
+    get:function(){return _id;},
+   /**
+    * setter blocker
+    * @params {string} blocks member variable from changing, this routine will return an error
+    */
+    set:function(in_val){console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE ); },
+    enumerable: true
   });
 
   /**

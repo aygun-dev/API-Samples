@@ -19,35 +19,34 @@ lapi.SceneObject = function( in_guid,in_pset,in_cb){
   this._copiedCount = 0;
   in_pset = in_pset || undefined;
   in_cb = in_cb || undefined;
+
+  Object.defineProperty(this,"properties",{
+   /**
+    * Get the property of the SceneObject
+    * @type {Property}
+    */
+    get:function(){return _properties;},
   /**
-   * Get the property of the SceneObject
-   * @type {Property}
-   */
-  this.__defineGetter__("properties", function(){
-    return _properties;
+    * @method setter block access to changing the reference
+    * to the properties object represented by this SceneObject
+    */
+    set:function(in_val){ console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );},
+    enumerable: true
   });
 
-  /**
-   * @method setter block access to changing the reference
-   * to the properties object represented by this SceneObject
-   */
-  this.__defineSetter__("properties", function(in_val){
-    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
+
+  Object.defineProperty(this,"guid",{
+   /**
+    * @member {string} guid of this object
+    */
+    get:function(){return _guid;},
+   /**
+    * @member {string} setter that blocks changing the guid of this object
+    */
+    set:function(in_val){console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );},
+    enumerable: true
   });
 
-  /**
-   * @member {string} guid of this object
-   */
-  this.__defineGetter__("guid", function(){
-    return _guid;
-  });
-
-  /**
-   * @member {string} setter that blocks changing the guid of this object
-   */
-  this.__defineSetter__("guid", function(in_val){
-    console.error( lapi.CONSTANTS.CONSOLE_MSGS.IMMUTABLE );
-  });
 
   if(in_pset){
     _properties = _self._pSetDeepCopy( _self, in_pset );
