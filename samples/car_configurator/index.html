@@ -506,7 +506,7 @@
     function refreshIntensitySlider2(e, nr){
       var obj = lapi.getActiveScene().getObjectByName(DOME_LIGHT_NAME)[0];
 
-      lapi.setObjectParameter( obj.properties.parameters.guid.value, "Rotation", { y : nr.value } );
+      lapi.setObjectParameter( obj.properties.parameters.guid.value, "Rotation", { angley : nr.value } );
 
     }
 
