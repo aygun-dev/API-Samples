@@ -1406,7 +1406,7 @@ lapi.SceneObject.prototype = {
       function(e){
         var prop = self.getProperty(in_property);
         prop.parameters.imgType._setValueMuted(in_imgType);
-        prop.parameters.path._setValueMuted(in_guid);
+        prop.parameters.path._setValueMuted(in_path);
       }
     );
   },
