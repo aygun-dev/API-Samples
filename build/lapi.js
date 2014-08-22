@@ -1671,6 +1671,39 @@ lapi.Scene.prototype = {
   },
 
   /**
+   * Delete a SceneObject.
+   * @param {lapi.SceneObject} in_sceneObhect The SceneObject we want to delete.
+   */
+  deleteObject : function(in_sceneObject){
+    var self = this;
+    var tuid = in_sceneObject.properties.getParameter('tuid').value;
+    if(tuid === 'CameraID'){
+      console.warn("Cannot delete camera!");
+      return;
+    }
+
+    var guid = in_sceneObject.properties.getParameter('guid').value;
+    var self = this;
+    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('"+guid+"');"
+      + " ACTIVEAPP.RunCommand({"
+      + "   command : 'Delete',"
+      + "   data : { "
+      + "     ctxt : obj"
+      + "   }"
+      + "});",
+      function(e){
+        if(e.error){
+          return;
+        }
+        var initClass = self._classedItems[tuid];
+        delete self._guidItems[guid];
+        delete initClass[guid];
+        --self._objectCount;
+      }
+    );
+  },
+
+  /**
    * Add a new material to scene.
    * @param {string} in_materialType  The type of material the user wants to add : 'Glossy Diffuse','Architectural Glass' etc.
    * @param {function} in_cb  optional callback that expects a material SceneObject as an argument. The object is the one we just added
