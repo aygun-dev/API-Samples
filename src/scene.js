@@ -140,7 +140,7 @@ lapi.Scene.prototype = {
 
   /**
    * Duplicate a SceneObject.
-   * @param {lapi.SceneObject} in_sceneObhect The SceneObject we want to duplicate.
+   * @param {lapi.SceneObject} in_sceneObject The SceneObject we want to duplicate.
    * @param {function} in_cb  optional callback that expects a  SceneObject as an argument. The object is the one we just added.
    */
   duplicateObject : function(in_sceneObject,in_cb){
@@ -176,7 +176,7 @@ lapi.Scene.prototype = {
 
   /**
    * Delete a SceneObject.
-   * @param {lapi.SceneObject} in_sceneObhect The SceneObject we want to delete.
+   * @param {lapi.SceneObject} in_sceneObject The SceneObject we want to delete.
    */
   deleteObject : function(in_sceneObject){
     var self = this;
