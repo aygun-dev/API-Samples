@@ -565,13 +565,22 @@ var lapi = {};
       }
       ++i;
     }
-
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
+    var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
       +" ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
       + "[" + paramList.join()+ "]}"
-      + ", mutebackend : false, forcedirty : true });");
+      + ", mutebackend : false, forcedirty : true });"
+
+    lapi._embedRPC(
+      command,
+      function(e){
+        if(e.error){
+          console.error("Couldn't modify object with guid :  " + in_GUID + 'with the following parameters :' );
+          console.error(in_properties);
+        }
+      }
+    );
   };
 
   /**
@@ -690,10 +699,14 @@ var lapi = {};
     in_Params.height = "height" in in_Params ? in_Params.height : resProp.parameters.height.value;
 
     // set once
-    lapi.setObjectParameter(
-      camGuid, 'Resolution',
-      { width  : in_Params.width,
-        height : in_Params.height }
+    lapi.setObjectParameters(
+      camGuid,
+      {
+        Resolution : {
+          width  : in_Params.width,
+          height : in_Params.height 
+        }
+      }
     );
   };
 
@@ -1116,7 +1129,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
       var path = parentPropHierarchy.join('/');
       var properties = {};
       properties[path] = paramList;
-      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, properties);
+      lapi.setObjectParameters( _contextObject.properties.getParameter("guid").value, properties);
     },
     enumerable: true
   });

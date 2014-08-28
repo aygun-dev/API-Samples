@@ -118,7 +118,7 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
       var path = parentPropHierarchy.join('/');
       var properties = {};
       properties[path] = paramList;
-      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, properties);
+      lapi.setObjectParameters( _contextObject.properties.getParameter("guid").value, properties);
     },
     enumerable: true
   });
