@@ -112,11 +112,13 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
       var parentPropHierarchy = [];
       var parent = this.parent;
       while(parent && parent.name !== 'PropertySet'){
-        parentPropHierarchy.push(parent.name);
+        parentPropHierarchy.unshift(parent.name);
         parent = parent.parent;
       }
-      parentPropHierarchy.reverse();
-      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropHierarchy, paramList );
+      var path = parentPropHierarchy.join('/');
+      var properties = {};
+      properties[path] = paramList;
+      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, properties);
     },
     enumerable: true
   });

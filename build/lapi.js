@@ -521,26 +521,10 @@ var lapi = {};
   * @in_values {object} The values we are assigning.
   */
   lapi.setObjectParameter = function( in_GUID, in_property, in_values ){
-    if(!(in_property instanceof Array)){
-      in_property = [in_property];
-    }
-    var list = [];
-    for(var v in in_values){
-      var paramValue = in_values[v];
-      if(typeof paramValue !== "string" ){
-        list.push("{ parameter : prop.getParameter('" + v + "'), value : " + paramValue + "}");        
-      } else {
-        list.push("{ parameter : prop.getParameter('" + v + "'), value : '" + paramValue + "'}");        
-      }
-
-    }
-
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');" 
-      +"var prop = obj.PropertySet.getProperty('" + in_property.join("').getProperty('") + "');"
-      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
-      + ", data : {ctxt : obj, list : "
-      + "[" + list.join()+ "]}"
-      + ", mutebackend : false, forcedirty : true });");
+    console.warn('Deprecated - Please use setObjectParameters instead');
+    var properties = {};
+    properties[in_property] = in_values
+    lapi.setObjectParameters(in_GUID, properties);
   };
 
   /**
@@ -554,11 +538,17 @@ var lapi = {};
   *   TargetPosition : { x : 0, y : 1, z : 3}
   * }
   */
-  lapi.setObjectParametersBulk = function( in_GUID, in_properties){
+  lapi.setObjectParameters = function( in_GUID, in_properties){
     var i = 0;
     var propList = [];
     for(var p in in_properties){
-      propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + p + "');");
+      var property;
+      if(p.indexOf('/') !== -1){
+        var property = p.split('/');
+      } else {
+        property = [p];
+      }
+      propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + property.join("').getProperty('") + "');");
       ++i;
     }
     var paramList = [];
@@ -1120,11 +1110,13 @@ lapi.Parameter = function( in_ctxtObject, in_parentProperty, in_params ){
       var parentPropHierarchy = [];
       var parent = this.parent;
       while(parent && parent.name !== 'PropertySet'){
-        parentPropHierarchy.push(parent.name);
+        parentPropHierarchy.unshift(parent.name);
         parent = parent.parent;
       }
-      parentPropHierarchy.reverse();
-      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, parentPropHierarchy, paramList );
+      var path = parentPropHierarchy.join('/');
+      var properties = {};
+      properties[path] = paramList;
+      lapi.setObjectParameter( _contextObject.properties.getParameter("guid").value, properties);
     },
     enumerable: true
   });
