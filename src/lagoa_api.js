@@ -510,26 +510,10 @@
   * @in_values {object} The values we are assigning.
   */
   lapi.setObjectParameter = function( in_GUID, in_property, in_values ){
-    if(!(in_property instanceof Array)){
-      in_property = [in_property];
-    }
-    var list = [];
-    for(var v in in_values){
-      var paramValue = in_values[v];
-      if(typeof paramValue !== "string" ){
-        list.push("{ parameter : prop.getParameter('" + v + "'), value : " + paramValue + "}");        
-      } else {
-        list.push("{ parameter : prop.getParameter('" + v + "'), value : '" + paramValue + "'}");        
-      }
-
-    }
-
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');" 
-      +"var prop = obj.PropertySet.getProperty('" + in_property.join("').getProperty('") + "');"
-      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
-      + ", data : {ctxt : obj, list : "
-      + "[" + list.join()+ "]}"
-      + ", mutebackend : false, forcedirty : true });");
+    console.warn('Deprecated - Please use setObjectParameters instead');
+    var properties = {};
+    properties[in_property] = in_values
+    lapi.setObjectParameters(in_GUID, properties);
   };
 
   /**
@@ -543,34 +527,50 @@
   *   TargetPosition : { x : 0, y : 1, z : 3}
   * }
   */
-  lapi.setObjectParametersBulk = function( in_GUID, in_properties){
+  lapi.setObjectParameters = function( in_GUID, in_properties){
     var i = 0;
     var propList = [];
-    for(var p in in_properties){
-      propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + p + "');");
-      ++i;
-    }
     var paramList = [];
-    i = 0;
-    for(var p in in_properties){
-      var values = in_properties[p];
-      for(var v in values ){
-        var paramValue = values[v];
-        if(typeof paramValue !== "string" ){
-          paramList.push("{ parameter : prop" + i + ".getParameter('" + v + "'), value : " + paramValue + "}");        
+    var path  = "obj.PropertySet.getProperty('";
+    var _createPropertyPath = function(prop,index){
+      // recurse through object hierarchy and create property access path.
+      // Also when we find an object whose members are values, we push them
+      // to the parameterList.
+      for(var key in prop){
+        var v = prop[key];
+        if(v instanceof Object){
+          return "').getProperty('" + key + _createPropertyPath(v,i);
         } else {
-          paramList.push("{ parameter : prop" + i + ".getParameter('" + v + "'), value : '" + paramValue + "'}");        
+          if(typeof v !== "string" ){
+            paramList.push("{ parameter : prop" + index + ".getParameter('" + key + "'), value : " + v + "}");
+          } else {
+            paramList.push("{ parameter : prop" + index + ".getParameter('" + key + "'), value : '" + v + "'}");
+          }
         }
       }
+      return "');";
+    };
+    for(var p in in_properties){
+      var property = in_properties[p];
+      propList.push("var prop" + i + " = " + path + p + _createPropertyPath(property,i));
       ++i;
     }
-
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
+    var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
       +" ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
       + "[" + paramList.join()+ "]}"
-      + ", mutebackend : false, forcedirty : true });");
+      + ", mutebackend : false, forcedirty : true });"
+
+    lapi._embedRPC(
+      command,
+      function(e){
+        if(e.error){
+          console.error("Couldn't modify object with guid :  " + in_GUID + ' with the following parameters :' );
+          console.error(in_properties);
+        }
+      }
+    );
   };
 
   /**
@@ -689,10 +689,14 @@
     in_Params.height = "height" in in_Params ? in_Params.height : resProp.parameters.height.value;
 
     // set once
-    lapi.setObjectParameter(
-      camGuid, 'Resolution',
-      { width  : in_Params.width,
-        height : in_Params.height }
+    lapi.setObjectParameters(
+      camGuid,
+      {
+        Resolution : {
+          width  : in_Params.width,
+          height : in_Params.height 
+        }
+      }
     );
   };
 
