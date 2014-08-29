@@ -520,20 +520,29 @@
   * Assign values to object various properties. This differs from
   * setObjectParameter in that you can only update a property at a time.
   * @in_GUID {string} The GUID of the object we want to modify.
-  * @in_properties {Object} This object well have the property names as keys that will map to the new values.
+  * @in_properties {Object} This object will have the property names as keys and they will map to the new values.
   * For example, to modify the camera's Position and TargetPosition, in_properties would be of the form : 
   * {
   *   Position : { x : 10, y : 15, z : 15},
   *   TargetPosition : { x : 0, y : 1, z : 3}
   * }
+  * Ex :To access camera's Watermark and modify its color property.
+  * {
+  *  Watermark : {
+  *    color : {
+  *     r : 0.25,
+  *     g : 0.15
+  *    }
+  *  }
+  * }
   */
   lapi.setObjectParameters = function( in_GUID, in_properties){
-    var i = 0;
     var propList = [];
     var paramList = [];
+    var idx = 0;
     var pset = lapi.getActiveScene().getObjectByGuid(in_GUID).properties;
 
-    var _createPropertyPath = function(property,path,pset,top){
+    var _createPropertyPath = function(property,path,pset){
       // Recurse through object hierarchy and create property access path.
       // Also when we find an object whose members are values, we push them
       // to the parameterList.
@@ -541,26 +550,23 @@
       for(var key in property){
         var v = property[key];
         if(v instanceof Object){
-          _createPropertyPath(v,path + "').getProperty('" + key,pset.properties[key],top);
+          _createPropertyPath(v,path + ".getProperty('" + key + "')",pset.properties[key]);
         } else {
           isParameterObject = true;
           if(typeof v !== "string" ){
-            paramList.push("{ parameter : prop" + i + ".getParameter('" + key + "'), value : " + v + "}");
+            paramList.push("{ parameter : prop" + idx + ".getParameter('" + key + "'), value : " + v + "}");
           } else {
-            paramList.push("{ parameter : prop" + i + ".getParameter('" + key + "'), value : '" + v + "'}");
+            paramList.push("{ parameter : prop" + idx + ".getParameter('" + key + "'), value : '" + v + "'}");
           }
           pset.parameters[key]._setValueMuted(v);
         }
       }
       if(isParameterObject){
-        propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + top + path +  "');");
-        ++i;
+        propList.push('var prop' + idx + ' = ' + path +';');
+        ++idx;
       }
     };
-    for(var p in in_properties){
-      var property = in_properties[p];
-      _createPropertyPath(property, '' ,pset.properties[p],p);
-    }
+    _createPropertyPath(in_properties, "obj.PropertySet",pset,0);
     var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
       +" ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"

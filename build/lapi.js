@@ -531,20 +531,29 @@ var lapi = {};
   * Assign values to object various properties. This differs from
   * setObjectParameter in that you can only update a property at a time.
   * @in_GUID {string} The GUID of the object we want to modify.
-  * @in_properties {Object} This object well have the property names as keys that will map to the new values.
+  * @in_properties {Object} This object will have the property names as keys and they will map to the new values.
   * For example, to modify the camera's Position and TargetPosition, in_properties would be of the form : 
   * {
   *   Position : { x : 10, y : 15, z : 15},
   *   TargetPosition : { x : 0, y : 1, z : 3}
   * }
+  * Ex :To access camera's Watermark and modify its color property.
+  * {
+  *  Watermark : {
+  *    color : {
+  *     r : 0.25,
+  *     g : 0.15
+  *    }
+  *  }
+  * }
   */
   lapi.setObjectParameters = function( in_GUID, in_properties){
-    var i = 0;
     var propList = [];
     var paramList = [];
+    var idx = 0;
     var pset = lapi.getActiveScene().getObjectByGuid(in_GUID).properties;
 
-    var _createPropertyPath = function(property,path,pset,top){
+    var _createPropertyPath = function(property,path,pset){
       // Recurse through object hierarchy and create property access path.
       // Also when we find an object whose members are values, we push them
       // to the parameterList.
@@ -552,26 +561,23 @@ var lapi = {};
       for(var key in property){
         var v = property[key];
         if(v instanceof Object){
-          _createPropertyPath(v,path + "').getProperty('" + key,pset.properties[key],top);
+          _createPropertyPath(v,path + ".getProperty('" + key + "')",pset.properties[key]);
         } else {
           isParameterObject = true;
           if(typeof v !== "string" ){
-            paramList.push("{ parameter : prop" + i + ".getParameter('" + key + "'), value : " + v + "}");
+            paramList.push("{ parameter : prop" + idx + ".getParameter('" + key + "'), value : " + v + "}");
           } else {
-            paramList.push("{ parameter : prop" + i + ".getParameter('" + key + "'), value : '" + v + "'}");
+            paramList.push("{ parameter : prop" + idx + ".getParameter('" + key + "'), value : '" + v + "'}");
           }
           pset.parameters[key]._setValueMuted(v);
         }
       }
       if(isParameterObject){
-        propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + top + path +  "');");
-        ++i;
+        propList.push('var prop' + idx + ' = ' + path +';');
+        ++idx;
       }
     };
-    for(var p in in_properties){
-      var property = in_properties[p];
-      _createPropertyPath(property, '' ,pset.properties[p],p);
-    }
+    _createPropertyPath(in_properties, "obj.PropertySet",pset,0);
     var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
       +" ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
@@ -1448,20 +1454,12 @@ lapi.SceneObject.prototype = {
    * @in_imgType {String} the ext/type of the image.
    */
   setImage : function(in_property, in_path, in_imgType){
-    var self = this;
-    lapi._embedRPC("var obj  = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');" 
-      +"var prop = obj.PropertySet.getProperty('" + in_property + "');"
-      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
-      + ", data : {ctxt : obj, list : "
-      + "[{parameter : prop.getParameter('imgType'), value : '" + in_imgType + "'}"
-      + ",{parameter : prop.getParameter('path'), value : '" + in_path + "'}]}"
-      + ", mutebackend : obj.local, forcedirty : true });", 
-      function(e){
-        var prop = self.getProperty(in_property);
-        prop.parameters.imgType._setValueMuted(in_imgType);
-        prop.parameters.path._setValueMuted(in_path);
-      }
-    );
+    var property = {};
+    property[in_property]  = {
+      imgType : in_imgType,
+      path : in_path
+    }
+    lapi.setObjectParameters(this.guid, property);
   },
 
   /**
@@ -1471,20 +1469,35 @@ lapi.SceneObject.prototype = {
    * @in_imgType {String} the ext/type of the image.
    */
   setTexture : function(in_property, in_guid, in_imgType){
-    var self = this;
-    lapi._embedRPC("var obj  = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');"
-      +"var prop = obj.PropertySet.getProperty('" + in_property + "');"
-      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
-      + ", data : {ctxt : obj, list : "
-      + "[{parameter : prop.getParameter('imgtype'), value : '" + in_imgType + "'}"
-      + ",{parameter : prop.getParameter('texture'), value : '" + in_guid + "'}]}"
-      + ", mutebackend : obj.local, forcedirty : true });", 
-      function(e){
-        var prop = self.getProperty(in_property);
-        prop.parameters.imgtype._setValueMuted(in_imgType);
-        prop.parameters.texture._setValueMuted(in_guid);
-      }
-    );
+    var property = {};
+    property[in_property]  = {
+      imgtype : in_imgType,
+      texture : in_guid
+    }
+    lapi.setObjectParameters(this.guid, property);
+  },
+
+  /**
+  * Assign values to an object's various properties.
+  * @in_properties {Object} This object will have the property names as keys and they will map to the new values.
+  * For example, to modify the camera's Position and TargetPosition, in_properties would be of the form : 
+  * {
+  *   Position : { x : 10, y : 15, z : 15},
+  *   TargetPosition : { x : 0, y : 1, z : 3}
+  * }
+  * Also, you can access nested properties.
+  * Ex :To access camera's Watermark and modify its color property.
+  * {
+  *  Watermark : {
+  *    color : {
+  *     r : 0.25,
+  *     g : 0.15
+  *    }
+  *  }
+  * }
+  */
+  setParameters : function(in_properties){
+    lapi.setObjectParameters(this.guid,in_properties);
   }
 
 };
