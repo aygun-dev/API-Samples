@@ -48,17 +48,17 @@ var hairDefs = [
 var camPresets = [
   { Position : { x : 4.3, y : -16, z: 160 },
     TargetPosition : { x : 0.9, y : 2.8, z : 0 },
-    Lens   : { zoom : 150, focallength: 78, dofradius :0, bladecnt : 5 }
+    Lens   : { zoom : 150, focallength: 78, dofradius :0, bladeCnt : 5 }
   },
 
   { Position : { x : 19, y : -2, z: 50 },
     TargetPosition : { x : 0.8, y : 2.2, z: 0.1},
-    Lens   : { zoom : 50, focallength: 36, dofradius:0, bladecnt : 5 }
+    Lens   : { zoom : 50, focallength: 36, dofradius:0, bladeCnt : 5 }
   },
 
   { Position : { x : 10, y : -2, z: 29 },
     TargetPosition : { x : -2, y : 2.8, z : 0 },
-    Lens   : { zoom : 50, focallength: 16, dofradius :0, bladecnt : 5 }
+    Lens   : { zoom : 50, focallength: 16, dofradius :0, bladeCnt : 5 }
   }
 ];
 
