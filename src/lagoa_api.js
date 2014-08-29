@@ -530,28 +530,29 @@
   lapi.setObjectParameters = function( in_GUID, in_properties){
     var i = 0;
     var propList = [];
-    for(var p in in_properties){
-      var property;
-      if(p.indexOf('/') !== -1){
-        var property = p.split('/');
-      } else {
-        property = [p];
-      }
-      propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + property.join("').getProperty('") + "');");
-      ++i;
-    }
     var paramList = [];
-    i = 0;
-    for(var p in in_properties){
-      var values = in_properties[p];
-      for(var v in values ){
-        var paramValue = values[v];
-        if(typeof paramValue !== "string" ){
-          paramList.push("{ parameter : prop" + i + ".getParameter('" + v + "'), value : " + paramValue + "}");        
+    var path  = "obj.PropertySet.getProperty('";
+    var _createPropertyPath = function(prop,index){
+      // recurse through object hierarchy and create property access path.
+      // Also when we find an object whose members are values, we push them
+      // to the parameterList.
+      for(var key in prop){
+        var v = prop[key];
+        if(v instanceof Object){
+          return "').getProperty('" + key + _createPropertyPath(v,i);
         } else {
-          paramList.push("{ parameter : prop" + i + ".getParameter('" + v + "'), value : '" + paramValue + "'}");        
+          if(typeof v !== "string" ){
+            paramList.push("{ parameter : prop" + index + ".getParameter('" + key + "'), value : " + v + "}");
+          } else {
+            paramList.push("{ parameter : prop" + index + ".getParameter('" + key + "'), value : '" + v + "'}");
+          }
         }
       }
+      return "');";
+    };
+    for(var p in in_properties){
+      var property = in_properties[p];
+      propList.push("var prop" + i + " = " + path + p + _createPropertyPath(property,i));
       ++i;
     }
     var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
@@ -565,7 +566,7 @@
       command,
       function(e){
         if(e.error){
-          console.error("Couldn't modify object with guid :  " + in_GUID + 'with the following parameters :' );
+          console.error("Couldn't modify object with guid :  " + in_GUID + ' with the following parameters :' );
           console.error(in_properties);
         }
       }
