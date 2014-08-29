@@ -298,7 +298,7 @@ lapi.SceneObject.prototype = {
 
   /**
   * Assign values to an object's various properties.
-  * @in_properties {Object} This object will have the property names as keys and they will map to the new values.
+  * @in_properties {Object} This object well have the property names as keys that will map to the new values.
   * For example, to modify the camera's Position and TargetPosition, in_properties would be of the form : 
   * {
   *   Position : { x : 10, y : 15, z : 15},
