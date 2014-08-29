@@ -520,7 +520,7 @@
   * Assign values to object various properties. This differs from
   * setObjectParameter in that you can only update a property at a time.
   * @in_GUID {string} The GUID of the object we want to modify.
-  * @in_properties {Object} This object well have the property names as keys that will map to the new values.
+  * @in_properties {Object} This object will have the property names as keys and they will map to the new values.
   * For example, to modify the camera's Position and TargetPosition, in_properties would be of the form : 
   * {
   *   Position : { x : 10, y : 15, z : 15},
