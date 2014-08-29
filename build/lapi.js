@@ -542,29 +542,35 @@ var lapi = {};
     var i = 0;
     var propList = [];
     var paramList = [];
-    var path  = "obj.PropertySet.getProperty('";
-    var _createPropertyPath = function(prop,index){
-      // recurse through object hierarchy and create property access path.
+    var pset = lapi.getActiveScene().getObjectByGuid(in_GUID).properties;
+
+    var _createPropertyPath = function(property,path,pset,top){
+      // Recurse through object hierarchy and create property access path.
       // Also when we find an object whose members are values, we push them
       // to the parameterList.
-      for(var key in prop){
-        var v = prop[key];
+      var isParameterObject = false;
+      for(var key in property){
+        var v = property[key];
         if(v instanceof Object){
-          return "').getProperty('" + key + _createPropertyPath(v,i);
+          _createPropertyPath(v,path + "').getProperty('" + key,pset.properties[key],top);
         } else {
+          isParameterObject = true;
           if(typeof v !== "string" ){
-            paramList.push("{ parameter : prop" + index + ".getParameter('" + key + "'), value : " + v + "}");
+            paramList.push("{ parameter : prop" + i + ".getParameter('" + key + "'), value : " + v + "}");
           } else {
-            paramList.push("{ parameter : prop" + index + ".getParameter('" + key + "'), value : '" + v + "'}");
+            paramList.push("{ parameter : prop" + i + ".getParameter('" + key + "'), value : '" + v + "'}");
           }
+          pset.parameters[key]._setValueMuted(v);
         }
       }
-      return "');";
+      if(isParameterObject){
+        propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + top + path +  "');");
+        ++i;
+      }
     };
     for(var p in in_properties){
       var property = in_properties[p];
-      propList.push("var prop" + i + " = " + path + p + _createPropertyPath(property,i));
-      ++i;
+      _createPropertyPath(property, '' ,pset.properties[p],p);
     }
     var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
