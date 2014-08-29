@@ -526,6 +526,15 @@
   *   Position : { x : 10, y : 15, z : 15},
   *   TargetPosition : { x : 0, y : 1, z : 3}
   * }
+  * Ex :To access camera's Watermark and modify its color property.
+  * {
+  *  Watermark : {
+  *    color : {
+  *     r : 0.25,
+  *     g : 0.15
+  *    }
+  *  }
+  * }
   */
   lapi.setObjectParameters = function( in_GUID, in_properties){
     var i = 0;
