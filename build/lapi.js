@@ -553,7 +553,7 @@ var lapi = {};
     var paramList = [];
     var pset = lapi.getActiveScene().getObjectByGuid(in_GUID).properties;
 
-    var _createPropertyPath = function(property,path,pset,top){
+    var _createPropertyPath = function(property,path,pset){
       // Recurse through object hierarchy and create property access path.
       // Also when we find an object whose members are values, we push them
       // to the parameterList.
@@ -561,7 +561,7 @@ var lapi = {};
       for(var key in property){
         var v = property[key];
         if(v instanceof Object){
-          _createPropertyPath(v,path + "').getProperty('" + key,pset.properties[key],top);
+          _createPropertyPath(v,path + "').getProperty('" + key,pset.properties[key]);
         } else {
           isParameterObject = true;
           if(typeof v !== "string" ){
@@ -573,13 +573,13 @@ var lapi = {};
         }
       }
       if(isParameterObject){
-        propList.push("var prop" + i + " = obj.PropertySet.getProperty('" + top + path +  "');");
+        propList.push("var prop" + i + " = " + path +  "');");
         ++i;
       }
     };
     for(var p in in_properties){
       var property = in_properties[p];
-      _createPropertyPath(property, '' ,pset.properties[p],p);
+      _createPropertyPath(property, "obj.PropertySet.getProperty('" + p ,pset.properties[p],p);
     }
     var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
