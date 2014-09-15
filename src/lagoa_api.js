@@ -141,6 +141,9 @@
           lapi.onFirstFrame();
         } else if(subchannel === 'checkGuid'){
           lapi.checkGuidToolCB(retval.data);
+        } else if(subchannel === 'sceneLoaded'){
+          lapi._messageIframe({channel : 'startRPC'});
+          lapi._initialize();
         }
       } else {
         if(lapi._cbmap[retval.id]){
@@ -836,20 +839,5 @@
    * @callback called when the animation has to step a frame
    */
   lapi.stepCb = function(){};
-
-  // Make sure that the whole scene is loaded! Only then can you  set the first object selection.
-  // This happens because we want the user to have a reference object to guide them.
-  $(function() {
-    function checkLoaded(){
-//      console.warn("waiting for scene to load...");
-      lapi._embedRPC("ACTIVEAPP.getSceneLoaded();", function(in_response) {
-        if (in_response.data === true){
-          clearInterval(timer);
-          lapi._initialize();
-        }
-      });
-    }
-    var timer = setInterval(checkLoaded,500);
-  });
 
 })();
