@@ -550,7 +550,7 @@
       for(var key in property){
         var v = property[key];
         if(v instanceof Object){
-          _createPropertyPath(v,path + "').getProperty('" + key,pset.properties[key]);
+          _createPropertyPath(v,path + ".getProperty('" + key + "')",pset.properties[key]);
         } else {
           isParameterObject = true;
           if(typeof v !== "string" ){
@@ -562,13 +562,17 @@
         }
       }
       if(isParameterObject){
-        propList.push("var prop" + i + " = " + path +  "');");
+        propList.push('var prop' + i + ' = ' + path +';');
         ++i;
       }
     };
     for(var p in in_properties){
       var property = in_properties[p];
-      _createPropertyPath(property, "obj.PropertySet.getProperty('" + p ,pset.properties[p],p);
+      if(property instanceof Object){
+        _createPropertyPath(property, "obj.PropertySet.getProperty('" + p + "')",pset.properties[p]);
+      } else {
+        _createPropertyPath(in_properties, "obj.PropertySet",pset);
+      }
     }
     var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
