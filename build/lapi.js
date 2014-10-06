@@ -765,7 +765,7 @@ var lapi = {};
     }
 
     // start play
-    var intervalId = setInterval(doStep, in_fps);
+    self._timeIntervalId = setInterval(doStep, in_fps);
   };
 
   lapi.nextFrame = function(){
