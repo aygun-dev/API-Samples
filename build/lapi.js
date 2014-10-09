@@ -1820,30 +1820,46 @@ lapi.Scene.prototype = {
     });
   },
 
+
+  /**
+   * Orbit scene using yaw and pitch.
+   * @param {Object} in_params pitch and yaw values.
+   * in_params.pitch {Number} The amount in degrees we will rotate the camera's pitch.
+   * in_params.yaw {Number} The amount in degrees we will rotate the camera's yaw.
+   */
+  orbit : function(in_params){
+    in_params = in_params || {};
+    in_params.pitch = in_params.pitch || 0;
+    in_params.yaw = in_params.yaw || 0;
+    var pitch = (in_params.pitch/ 360) * 2 * Math.PI;
+    var yaw = (in_params.yaw/ 360) * 2 * Math.PI;
+    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
+      +"var prop = cam.PropertySet.getProperty('Position');"
+      +'var position = Application.Math.safeOrbit({'
+      +'up: cam.up,'
+      +'center: cam.target.position,'
+      +'position: cam.position,'
+      +'yawDelta:' + yaw + ','
+      +'pitchDelta:' + pitch
+      +'});'
+      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
+      +', data : {ctxt : cam'
+      +", list : [{ parameter : prop.getParameter('x'), value : position.x.toFixed(3) }"
+      +", { parameter : prop.getParameter('y'), value : position.y.toFixed(3) }"
+      +", { parameter : prop.getParameter('z'), value : position.z.toFixed(3) }]}"
+      +', mutebackend : cam.local'
+      +', forcedirty : true });'
+    );
+  },
+
   /**
    * Orbit scene using pitch.
    * @param {Number} in_degrees  The amount in degrees we will rotate the camera.
    */
   orbitPitch : function(in_degrees){
-    var pitch = ( in_degrees/180) * Math.PI;
-    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
-      +"var prop = cam.PropertySet.getProperty('Position');"
-      +'var pitch = (' + in_degrees+'/ 180) * Math.PI;'
-      +'var position = Application.Math.safeOrbit({'
-      +'up: cam.up,'
-      +'center: cam.target.position,'
-      +'position: cam.position,'
-      +'yawDelta: 0,'
-      +'pitchDelta: ' + pitch + ','
-      +'});'
-      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
-      +', data : {ctxt : cam'
-      +", list : [{ parameter : prop.getParameter('x'), value : position.x }"
-      +", { parameter : prop.getParameter('y'), value : position.y }"
-      +", { parameter : prop.getParameter('z'), value : position.z }]}"
-      +', mutebackend : cam.local'
-      +', forcedirty : true });'
-    );
+    this.orbit({
+      pitch : in_degrees
+    });
   },
 
 
@@ -1852,24 +1868,9 @@ lapi.Scene.prototype = {
    * @param {Number} in_degrees  The amount in degrees we will rotate the camera.
    */
   orbitYaw : function(in_degrees){
-    var yaw = (in_degrees/ 360) * 2 * Math.PI;
-    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
-      +"var prop = cam.PropertySet.getProperty('Position');"
-      +'var position = Application.Math.safeOrbit({'
-      +'up: cam.up,'
-      +'center: cam.target.position,'
-      +'position: cam.position,'
-      +'yawDelta:' + yaw + ','
-      +'pitchDelta: 0'
-      +'});'
-      +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
-      +', data : {ctxt : cam'
-      +", list : [{ parameter : prop.getParameter('x'), value : position.x }"
-      +", { parameter : prop.getParameter('y'), value : position.y }"
-      +", { parameter : prop.getParameter('z'), value : position.z }]}"
-      +', mutebackend : cam.local'
-      +', forcedirty : true });'
-    );
+    this.orbit({
+      yaw : in_degrees
+    });
   }
 
 
