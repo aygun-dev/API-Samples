@@ -36,6 +36,12 @@
    * @type {Number}
    * @private
    */
+  lapi._precision = 3;
+
+  /**
+   * @type {Number}
+   * @private
+   */
   lapi._cbStack = 0;
 
   /**

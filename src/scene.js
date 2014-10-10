@@ -282,9 +282,9 @@ lapi.Scene.prototype = {
       +'});'
       +"ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       +', data : {ctxt : cam'
-      +", list : [{ parameter : prop.getParameter('x'), value : position.x.toFixed(3) }"
-      +", { parameter : prop.getParameter('y'), value : position.y.toFixed(3) }"
-      +", { parameter : prop.getParameter('z'), value : position.z.toFixed(3) }]}"
+      +", list : [{ parameter : prop.getParameter('x'), value : position.x.toFixed(" + lapi._precision + ") }"
+      +", { parameter : prop.getParameter('y'), value : position.y.toFixed(" + lapi._precision + ") }"
+      +", { parameter : prop.getParameter('z'), value : position.z.toFixed(" + lapi._precision + ") }]}"
       +', mutebackend : cam.local'
       +', forcedirty : true });'
     );
