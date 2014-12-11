@@ -462,6 +462,8 @@ var lapi = {};
       var projects = '';
       var query = '';
       var datatypes = '';
+      var created = '';
+      var updated = '';
       if(in_params.tags){
         var union = '';
         if(in_params.match){
@@ -481,7 +483,22 @@ var lapi = {};
       if(in_params.query){
         query = '&query=' + in_params.query;
       }
-      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ user + tags + projects + datatypes + query + '&sort_updated_at=true';
+
+      var _createDateRangeString = function(prefix,range){
+        var res = '';
+        for(var r in range){
+          res += ('&' + prefix + '_at_' + r + '=' + range[r]);
+        }
+        return res;
+      };
+
+      if(in_params.created){
+        created = _createDateRangeString('created',in_params.created);
+      }
+      if(in_params.updated){
+        updated = _createDateRangeString('updated',in_params.updated);
+      }
+      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ created + updated + user + tags + projects + datatypes + query + '&sort_updated_at=true';
       if(in_params.max){
         $.get(searchStr + '&per_page=' + in_params.max + '&page=1',in_cb, 'jsonp');
         return;
