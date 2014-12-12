@@ -487,7 +487,7 @@
       if(in_params.updated){
         updated = _createDateRangeString('updated',in_params.updated);
       }
-      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ created + updated + user + tags + projects + datatypes + query + '&sort_updated_at=true';
+      var searchStr = lapi._lagoaUrl + '/search/assets.json?'+ user + created + updated + tags + projects + datatypes + query + '&sort_updated_at=true';
       if(in_params.max){
         $.get(searchStr + '&per_page=' + in_params.max + '&page=1',in_cb, 'jsonp');
         return;
