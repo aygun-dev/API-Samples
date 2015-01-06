@@ -1521,6 +1521,29 @@ lapi.SceneObject.prototype = {
   */
   setParameters : function(in_properties){
     lapi.setObjectParameters(this.guid,in_properties);
+  },
+
+  /**
+  * Returns a string representation of the object's property.
+  * Suitable for pretty printing.
+  */
+  stringifyPropertySet : function(){
+    var _stringifyProperty =  function (in_prop, in_shift){
+      var params = in_prop.parameters;
+      var props = in_prop.properties;
+      var newShift = in_shift + '  ';
+      var paramStr = in_shift + in_prop.name + ' : ' + '{ \n';
+      for(var k in params){
+        paramStr += (newShift  + k + ' : ' + params[k].value +',\n');
+      }
+
+      for(var p in props){
+        paramStr += _stringifyProperty(props[p],newShift);
+      }
+      paramStr += in_shift  +'}\n';
+      return paramStr;
+    };
+    return _stringifyProperty(this.properties,'');
   }
 
 };
@@ -1652,8 +1675,11 @@ lapi.Scene.prototype = {
 
     for( var i in sceneObjs){
       o = sceneObjs[i];
-      if( in_name === o.properties.getParameter("name").value ){
-        find.push(o);
+      var param = o.properties.getParameter("name");
+      if(param){
+        if( in_name === o.properties.getParameter("name").value ){
+          find.push(o);
+        }
       }
     }
     return find;
