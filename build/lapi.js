@@ -1250,7 +1250,7 @@ lapi.SceneObject = function( in_guid,in_pset,in_cb){
     // The deep copy routine builds the embed object using the local property and parameter objects
     console.warn("Building PSet of " + in_guid );
     lapi._embedRPC("ACTIVEAPP.getScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
-      +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
+      +   "flattenType: Core.Parameter.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
       + "});",
       function(in_embedRPC_message){
         if( !(in_embedRPC_message.error === "EXECERR") ){
@@ -1522,7 +1522,7 @@ lapi.SceneObject.prototype = {
       var newShift = in_shift + '  ';
       var paramStr = in_shift + in_prop.name + ' : ' + '{ \n';
       for(var k in params){
-        paramStr += (newShift  + k + ' : ' + params[k].value +',\n');
+        paramStr += (newShift  + k + ' : ' + JSON.stringify(params[k].value) +',\n');
       }
 
       for(var p in props){
@@ -1761,7 +1761,7 @@ lapi.Scene.prototype = {
       lapi._cbmap[newGuid] = in_cb;
     }
     lapi._embedRPC("var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
-      +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
+      +   "flattenType: Core.Parameter.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
       + "pset.guid.value = '" + newGuid +"';"
       + "pset.name.value = '" + name +"';"

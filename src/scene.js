@@ -165,7 +165,7 @@ lapi.Scene.prototype = {
       lapi._cbmap[newGuid] = in_cb;
     }
     lapi._embedRPC("var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
-      +   "flattenType: Application.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
+      +   "flattenType: Core.Parameter.CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
       + "pset.guid.value = '" + newGuid +"';"
       + "pset.name.value = '" + name +"';"
