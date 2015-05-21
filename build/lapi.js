@@ -270,7 +270,7 @@ var lapi = {};
 
     // grab the things we are interested in.
     // we assume there are CameraID, MeshID, MaterialID, GroupID, TextureID, etc, kind of objects....
-    lapi._embedRPC( "var classedItems = ACTIVEAPP.GetClassedItems();" +
+    lapi._embedRPC( "var classedItems = ACTIVEAPP.getDocument().getScene().getClassedItems();" +
       "var sceneKeys = {};" +
       "for( var i in classedItems ){ " +
       " sceneKeys[i] = Object.keys( classedItems[i] );" +
@@ -604,7 +604,7 @@ var lapi = {};
       }
     };
     _createPropertyPath(in_properties, "obj.PropertySet",pset,0);
-    var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
+    var command = "var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
       +" ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "
@@ -1249,7 +1249,7 @@ lapi.SceneObject = function( in_guid,in_pset,in_cb){
     // We cache the entire PropertySet object (flattened) for local access
     // The deep copy routine builds the embed object using the local property and parameter objects
     console.warn("Building PSet of " + in_guid );
-    lapi._embedRPC("ACTIVEAPP.getScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    lapi._embedRPC("ACTIVEAPP.getDocument().getScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
       +   "flattenType: include('Core.Parameter').CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
       + "});",
       function(in_embedRPC_message){
@@ -1413,7 +1413,7 @@ lapi.SceneObject.prototype = {
       console.warn('object has no bounding box');
       return;
     }
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');"
+    lapi._embedRPC("var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('" + this.guid +"');"
       + "var bbox = ACTIVEAPP.boundingBoxForEntity(obj);"
       + "bbox.transformAndAxisAlign(obj.matrix);",function(in_response){
         in_cb(in_response.data);
@@ -1426,7 +1426,7 @@ lapi.SceneObject.prototype = {
    * @in_cb {function} function that expects an array of guids
    */
   fetchChildren : function(in_cb){
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');"
+    lapi._embedRPC("var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('" + this.guid +"');"
       + "var arr = [];"
       + "if (obj._children) { "
       + " for (var i = 0 ; i < obj._children.length; ++i) {"
@@ -1445,7 +1445,7 @@ lapi.SceneObject.prototype = {
    */
   translate : function(in_axis, in_distance){
     var axis = in_axis.toUpperCase();
-    lapi._embedRPC("var mesh  = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');" 
+    lapi._embedRPC("var mesh  = ACTIVEAPP.getDocument().getScene().GetByGUID('" + this.guid +"');" 
       +"mesh.translate"+ axis +"("+in_distance+");"
       +"var prop = mesh.PropertySet.getProperty('Position');"
       +"var newPos = {x: mesh.position.x, y : mesh.position.y , z : mesh.position.z};"
@@ -1760,7 +1760,7 @@ lapi.Scene.prototype = {
     if(in_cb){
       lapi._cbmap[newGuid] = in_cb;
     }
-    lapi._embedRPC("var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
+    lapi._embedRPC("var pset = ACTIVEAPP.getDocument().getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
       +   "flattenType: include('Core.Parameter').CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
       + "pset.guid.value = '" + newGuid +"';"
@@ -1787,7 +1787,7 @@ lapi.Scene.prototype = {
 
     var guid = in_sceneObject.properties.getParameter('guid').value;
     var self = this;
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('"+guid+"');"
+    lapi._embedRPC("var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('"+guid+"');"
       + " ACTIVEAPP.RunCommand({"
       + "   command : 'Delete',"
       + "   data : { "
@@ -1870,7 +1870,7 @@ lapi.Scene.prototype = {
     in_params.yaw = in_params.yaw || 0;
     var pitch = (in_params.pitch/ 360) * 2 * Math.PI;
     var yaw = (in_params.yaw/ 360) * 2 * Math.PI;
-    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
+    lapi._embedRPC('var cam = ACTIVEAPP.getCamera();'
       +"var prop = cam.PropertySet.getProperty('Position');"
       +'var position = Application.Math.safeOrbit({'
       +'up: cam.up,'

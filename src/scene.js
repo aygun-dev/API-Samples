@@ -164,7 +164,7 @@ lapi.Scene.prototype = {
     if(in_cb){
       lapi._cbmap[newGuid] = in_cb;
     }
-    lapi._embedRPC("var pset = ACTIVEAPP.getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
+    lapi._embedRPC("var pset = ACTIVEAPP.getDocument().getScene().GetByGUID('"+guid+"').PropertySet.flatten({"
       +   "flattenType: include('Core.Parameter').CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ONLY"
       + "});"
       + "pset.guid.value = '" + newGuid +"';"
@@ -191,7 +191,7 @@ lapi.Scene.prototype = {
 
     var guid = in_sceneObject.properties.getParameter('guid').value;
     var self = this;
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('"+guid+"');"
+    lapi._embedRPC("var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('"+guid+"');"
       + " ACTIVEAPP.RunCommand({"
       + "   command : 'Delete',"
       + "   data : { "
@@ -274,7 +274,7 @@ lapi.Scene.prototype = {
     in_params.yaw = in_params.yaw || 0;
     var pitch = (in_params.pitch/ 360) * 2 * Math.PI;
     var yaw = (in_params.yaw/ 360) * 2 * Math.PI;
-    lapi._embedRPC('var cam = ACTIVEAPP.GetCamera();'
+    lapi._embedRPC('var cam = ACTIVEAPP.getCamera();'
       +"var prop = cam.PropertySet.getProperty('Position');"
       +'var position = Application.Math.safeOrbit({'
       +'up: cam.up,'

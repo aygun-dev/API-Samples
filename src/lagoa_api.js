@@ -259,7 +259,7 @@
 
     // grab the things we are interested in.
     // we assume there are CameraID, MeshID, MaterialID, GroupID, TextureID, etc, kind of objects....
-    lapi._embedRPC( "var classedItems = ACTIVEAPP.GetClassedItems();" +
+    lapi._embedRPC( "var classedItems = ACTIVEAPP.getDocument().getScene().getClassedItems();" +
       "var sceneKeys = {};" +
       "for( var i in classedItems ){ " +
       " sceneKeys[i] = Object.keys( classedItems[i] );" +
@@ -593,7 +593,7 @@
       }
     };
     _createPropertyPath(in_properties, "obj.PropertySet",pset,0);
-    var command = "var obj = ACTIVEAPP.getScene().GetByGUID('" + in_GUID +"');"
+    var command = "var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('" + in_GUID +"');"
       + propList.join(' ')
       +" ACTIVEAPP.RunCommand({ command : 'SetParameterValues'"
       + ", data : {ctxt : obj, list : "

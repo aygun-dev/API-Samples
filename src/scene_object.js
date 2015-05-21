@@ -57,7 +57,7 @@ lapi.SceneObject = function( in_guid,in_pset,in_cb){
     // We cache the entire PropertySet object (flattened) for local access
     // The deep copy routine builds the embed object using the local property and parameter objects
     console.warn("Building PSet of " + in_guid );
-    lapi._embedRPC("ACTIVEAPP.getScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
+    lapi._embedRPC("ACTIVEAPP.getDocument().getScene().GetByGUID('"+in_guid+"').PropertySet.flatten({"
       +   "flattenType: include('Core.Parameter').CONSTANTS.FLATTEN_PARAMETER_TYPE.VALUE_ID"
       + "});",
       function(in_embedRPC_message){
@@ -221,7 +221,7 @@ lapi.SceneObject.prototype = {
       console.warn('object has no bounding box');
       return;
     }
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');"
+    lapi._embedRPC("var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('" + this.guid +"');"
       + "var bbox = ACTIVEAPP.boundingBoxForEntity(obj);"
       + "bbox.transformAndAxisAlign(obj.matrix);",function(in_response){
         in_cb(in_response.data);
@@ -234,7 +234,7 @@ lapi.SceneObject.prototype = {
    * @in_cb {function} function that expects an array of guids
    */
   fetchChildren : function(in_cb){
-    lapi._embedRPC("var obj = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');"
+    lapi._embedRPC("var obj = ACTIVEAPP.getDocument().getScene().GetByGUID('" + this.guid +"');"
       + "var arr = [];"
       + "if (obj._children) { "
       + " for (var i = 0 ; i < obj._children.length; ++i) {"
@@ -253,7 +253,7 @@ lapi.SceneObject.prototype = {
    */
   translate : function(in_axis, in_distance){
     var axis = in_axis.toUpperCase();
-    lapi._embedRPC("var mesh  = ACTIVEAPP.getScene().GetByGUID('" + this.guid +"');" 
+    lapi._embedRPC("var mesh  = ACTIVEAPP.getDocument().getScene().GetByGUID('" + this.guid +"');" 
       +"mesh.translate"+ axis +"("+in_distance+");"
       +"var prop = mesh.PropertySet.getProperty('Position');"
       +"var newPos = {x: mesh.position.x, y : mesh.position.y , z : mesh.position.z};"
