@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Sample</title>
+
+    <!-- The following are boilerplate calls to load external libraries-->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.0/jquery.js"></script>
+
+    <!-- LAGOA API  --- NOTE: It is a good idea to serve this file from your own CDN -->
+    <script src="http://home.lagoa.com/wp-content/uploads/API-Samples/build/lapi.js"></script>
+
+
+</head>
+
+<body class="ui-widget-content" style="border: 0;">
+    <iframe src="https://lagoa.com/embed_links/7772?validationHash=AZN8VM5V1NQfO1WVerLlBHBwuhxXMQ&width=500&height=330&auto_load_scene=true&asset_name=true&owner_name=true&lagoa_logo=true" id="lagoaframe" width="500" height="330" scrolling="no" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+
+
+<br>
+<button name="js_render">Render</button>
+
+<script>
+lapi.onSceneLoaded = function() {
+     scn = lapi.getActiveScene();
+     mats = scn.getMaterials();
+     // mats[0].properties.getParameter('name').value
+    // "edit_BB"
+    
+    var btn_render = $('button[name="js_render"]');
+
+    btn_render.bind("click", function() {
+        if(!lapi.isRendering()) {
+            lapi.startRender();
+            btn_render.text("Stop");
+        } else {
+            lapi.stopRender();
+            btn_render.text("Render");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
